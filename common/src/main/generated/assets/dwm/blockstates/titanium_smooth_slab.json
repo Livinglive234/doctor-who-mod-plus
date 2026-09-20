@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "dwm:block/titanium_smooth_slab"
+    },
+    "type=double": {
+      "model": "dwm:block/titanium_smooth"
+    },
+    "type=top": {
+      "model": "dwm:block/titanium_smooth_slab_top"
+    }
+  }
+}

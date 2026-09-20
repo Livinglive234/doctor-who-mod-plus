@@ -33,4 +33,5 @@ neoforge/run/
 .github
 libs/
 remappedSrc/
-generated/
+# Datagen output (common/src/main/generated) is tracked; only its hash cache is ignored
+common/src/main/generated/.cache/

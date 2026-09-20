@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "a": {
+      "item": "minecraft:amethyst_shard"
+    },
+    "e": {
+      "item": "minecraft:ender_eye"
+    },
+    "f": {
+      "item": "minecraft:flint"
+    },
+    "i": {
+      "item": "minecraft:iron_ingot"
+    },
+    "r": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    " a ",
+    "rer",
+    "ifi"
+  ],
+  "result": {
+    "count": 1,
+    "id": "dwm:tardis_system_directional_unit"
+  }
+}

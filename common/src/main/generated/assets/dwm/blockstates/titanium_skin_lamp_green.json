@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "dwm:block/titanium_skin_lamp_green",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "dwm:block/titanium_skin_lamp_green"
+    },
+    "facing=south": {
+      "model": "dwm:block/titanium_skin_lamp_green",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "dwm:block/titanium_skin_lamp_green",
+      "y": 270
+    }
+  }
+}

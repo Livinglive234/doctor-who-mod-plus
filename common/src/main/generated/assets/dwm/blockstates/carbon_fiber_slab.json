@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "dwm:block/carbon_fiber_slab"
+    },
+    "type=double": {
+      "model": "dwm:block/carbon_fiber"
+    },
+    "type=top": {
+      "model": "dwm:block/carbon_fiber_slab_top"
+    }
+  }
+}

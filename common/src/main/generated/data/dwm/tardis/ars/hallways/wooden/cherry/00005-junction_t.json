@@ -1,0 +1,17 @@
+{
+  "structure": "dwm:tardis/ars/hallways/_/junction_t",
+  "substitutes": {
+    "minecraft:andesite_stairs": "minecraft:cherry_stairs",
+    "minecraft:black_concrete": "minecraft:cherry_wood",
+    "minecraft:blue_concrete": "minecraft:stripped_spruce_wood",
+    "minecraft:brown_concrete": "minecraft:cherry_planks",
+    "minecraft:diorite_stairs": "minecraft:cherry_stairs",
+    "minecraft:glass_pane": "minecraft:light_blue_stained_glass_pane",
+    "minecraft:gray_concrete": "minecraft:cherry_planks",
+    "minecraft:light_gray_concrete": "minecraft:cherry_log",
+    "minecraft:stone_slab": "minecraft:cherry_slab",
+    "minecraft:stone_stairs": "minecraft:cherry_stairs",
+    "minecraft:white_concrete": "minecraft:stripped_cherry_wood"
+  },
+  "title": "title.dwm.ars.structure.hallway_wooden_cherry_junction_t"
+}

@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "#": {
+      "item": "dwm:titanium_ingot"
+    },
+    "0": {
+      "item": "minecraft:stick"
+    }
+  },
+  "pattern": [
+    "###",
+    " 0 ",
+    " 0 "
+  ],
+  "result": {
+    "count": 1,
+    "id": "dwm:titanium_pickaxe"
+  }
+}

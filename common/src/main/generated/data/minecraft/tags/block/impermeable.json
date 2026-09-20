@@ -1,0 +1,25 @@
+{
+  "values": [
+    "dwm:tardis_doors_capsule",
+    "dwm:tardis_doors_police_box",
+    "dwm:tardis_doors_phone_box",
+    "dwm:titanium_glass",
+    "dwm:titanium_door_base",
+    "dwm:titanium_door_black",
+    "dwm:titanium_door_blue",
+    "dwm:titanium_door_brown",
+    "dwm:titanium_door_cyan",
+    "dwm:titanium_door_gray",
+    "dwm:titanium_door_green",
+    "dwm:titanium_door_light_blue",
+    "dwm:titanium_door_lime",
+    "dwm:titanium_door_magenta",
+    "dwm:titanium_door_orange",
+    "dwm:titanium_door_pink",
+    "dwm:titanium_door_purple",
+    "dwm:titanium_door_red",
+    "dwm:titanium_door_light_gray",
+    "dwm:titanium_door_white",
+    "dwm:titanium_door_yellow"
+  ]
+}

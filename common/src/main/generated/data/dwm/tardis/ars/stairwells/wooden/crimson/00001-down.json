@@ -1,0 +1,18 @@
+{
+  "structure": "dwm:tardis/ars/stairwells/_/down",
+  "substitutes": {
+    "minecraft:andesite_stairs": "minecraft:crimson_stairs",
+    "minecraft:black_concrete": "minecraft:crimson_hyphae",
+    "minecraft:blue_concrete": "minecraft:nether_wart_block",
+    "minecraft:brown_concrete": "minecraft:crimson_planks",
+    "minecraft:glass_pane": "minecraft:light_blue_stained_glass_pane",
+    "minecraft:gray_concrete": "minecraft:crimson_planks",
+    "minecraft:light_gray_concrete": "minecraft:crimson_stem",
+    "minecraft:redstone_block": "minecraft:crimson_planks",
+    "minecraft:redstone_lamp": "minecraft:shroomlight",
+    "minecraft:stone_slab": "minecraft:crimson_slab",
+    "minecraft:stone_stairs": "minecraft:crimson_stairs",
+    "minecraft:white_concrete": "minecraft:stripped_crimson_hyphae"
+  },
+  "title": "title.dwm.ars.structure.stairwell_wooden_crimson_down"
+}

@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": {
+      "item": "dwm:titanium_striped_skin_black"
+    },
+    "0": {
+      "item": "minecraft:glass"
+    },
+    "1": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    "0",
+    "1",
+    "#"
+  ],
+  "result": {
+    "count": 1,
+    "id": "dwm:titanium_skin_lamp_black"
+  }
+}

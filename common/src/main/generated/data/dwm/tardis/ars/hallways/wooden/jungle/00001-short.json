@@ -1,0 +1,17 @@
+{
+  "structure": "dwm:tardis/ars/hallways/_/short",
+  "substitutes": {
+    "minecraft:andesite_stairs": "minecraft:jungle_stairs",
+    "minecraft:black_concrete": "minecraft:jungle_wood",
+    "minecraft:blue_concrete": "minecraft:stripped_dark_oak_wood",
+    "minecraft:brown_concrete": "minecraft:jungle_planks",
+    "minecraft:diorite_stairs": "minecraft:jungle_stairs",
+    "minecraft:glass_pane": "minecraft:light_blue_stained_glass_pane",
+    "minecraft:gray_concrete": "minecraft:jungle_planks",
+    "minecraft:light_gray_concrete": "minecraft:jungle_log",
+    "minecraft:stone_slab": "minecraft:jungle_slab",
+    "minecraft:stone_stairs": "minecraft:jungle_stairs",
+    "minecraft:white_concrete": "minecraft:stripped_jungle_wood"
+  },
+  "title": "title.dwm.ars.structure.hallway_wooden_jungle_short"
+}

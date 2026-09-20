@@ -1,0 +1,16 @@
+{
+  "structure": "dwm:tardis/ars/stairwells/_/down",
+  "substitutes": {
+    "minecraft:andesite_stairs": "minecraft:spruce_stairs",
+    "minecraft:black_concrete": "minecraft:diorite",
+    "minecraft:blue_concrete": "minecraft:diorite",
+    "minecraft:brown_concrete": "minecraft:polished_diorite",
+    "minecraft:glass_pane": "minecraft:pink_stained_glass_pane",
+    "minecraft:gray_concrete": "minecraft:polished_diorite",
+    "minecraft:light_gray_concrete": "minecraft:polished_diorite",
+    "minecraft:stone_slab": "minecraft:polished_diorite_slab",
+    "minecraft:stone_stairs": "minecraft:polished_diorite_stairs",
+    "minecraft:white_concrete": "minecraft:spruce_planks"
+  },
+  "title": "title.dwm.ars.structure.stairwell_rock_diorite_down"
+}

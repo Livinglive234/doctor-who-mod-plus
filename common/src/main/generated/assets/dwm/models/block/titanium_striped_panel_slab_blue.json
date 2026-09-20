@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "dwm:block/decorative/titanium_panel",
+    "side": "dwm:block/decorative/titanium_striped_panel_slab_blue",
+    "top": "dwm:block/decorative/titanium_panel"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "dwm:block/decorative/titanium_smooth",
+    "side": "dwm:block/decorative/titanium_smooth_slab",
+    "top": "dwm:block/decorative/titanium_smooth"
+  }
+}

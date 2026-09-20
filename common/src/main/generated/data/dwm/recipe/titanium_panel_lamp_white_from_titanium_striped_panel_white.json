@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": {
+      "item": "dwm:titanium_striped_panel_white"
+    },
+    "0": {
+      "item": "minecraft:diamond"
+    },
+    "1": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    "0",
+    "1",
+    "#"
+  ],
+  "result": {
+    "count": 1,
+    "id": "dwm:titanium_panel_lamp_white"
+  }
+}

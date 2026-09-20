@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "dwm:sonic_screwdriver_13"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "dwm:sonic_screwdriver_13"
+  }
+}

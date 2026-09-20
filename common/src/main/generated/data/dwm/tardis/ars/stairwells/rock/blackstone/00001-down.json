@@ -1,0 +1,16 @@
+{
+  "structure": "dwm:tardis/ars/stairwells/_/down",
+  "substitutes": {
+    "minecraft:andesite_stairs": "minecraft:dark_oak_stairs",
+    "minecraft:black_concrete": "minecraft:polished_blackstone",
+    "minecraft:blue_concrete": "minecraft:chiseled_polished_blackstone",
+    "minecraft:brown_concrete": "minecraft:polished_blackstone",
+    "minecraft:glass_pane": "minecraft:orange_stained_glass_pane",
+    "minecraft:gray_concrete": "minecraft:polished_blackstone_bricks",
+    "minecraft:light_gray_concrete": "minecraft:polished_blackstone_bricks",
+    "minecraft:stone_slab": "minecraft:polished_blackstone_brick_slab",
+    "minecraft:stone_stairs": "minecraft:polished_blackstone_brick_stairs",
+    "minecraft:white_concrete": "minecraft:dark_oak_planks"
+  },
+  "title": "title.dwm.ars.structure.stairwell_rock_blackstone_down"
+}

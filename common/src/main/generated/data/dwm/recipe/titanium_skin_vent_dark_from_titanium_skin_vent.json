@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": {
+      "item": "dwm:titanium_skin_vent"
+    },
+    "0": {
+      "item": "minecraft:coal"
+    }
+  },
+  "pattern": [
+    " # ",
+    "#0#",
+    " # "
+  ],
+  "result": {
+    "count": 4,
+    "id": "dwm:titanium_skin_vent_dark"
+  }
+}

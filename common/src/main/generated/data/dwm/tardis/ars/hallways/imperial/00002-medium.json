@@ -1,0 +1,18 @@
+{
+  "structure": "dwm:tardis/ars/hallways/_/medium",
+  "substitutes": {
+    "minecraft:andesite_stairs": "minecraft:quartz_stairs",
+    "minecraft:black_concrete": "minecraft:white_concrete",
+    "minecraft:blue_concrete": "minecraft:chiseled_quartz_block",
+    "minecraft:brown_concrete": "minecraft:quartz_block",
+    "minecraft:diorite_stairs": "minecraft:quartz_stairs",
+    "minecraft:glass_pane": "minecraft:light_gray_stained_glass_pane",
+    "minecraft:gray_concrete": "minecraft:quartz_block",
+    "minecraft:light_gray_concrete": "minecraft:quartz_block",
+    "minecraft:redstone_block": "minecraft:air",
+    "minecraft:redstone_lamp": "minecraft:pearlescent_froglight",
+    "minecraft:stone_slab": "minecraft:quartz_slab",
+    "minecraft:stone_stairs": "minecraft:quartz_stairs"
+  },
+  "title": "title.dwm.ars.structure.hallway_imperial_medium"
+}

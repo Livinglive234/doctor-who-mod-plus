@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "dwm:block/titanium_skin_coil_slab"
+    },
+    "type=double": {
+      "model": "dwm:block/titanium_skin_coil"
+    },
+    "type=top": {
+      "model": "dwm:block/titanium_skin_coil_slab_top"
+    }
+  }
+}

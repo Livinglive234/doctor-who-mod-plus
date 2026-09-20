@@ -1,0 +1,17 @@
+{
+  "structure": "dwm:tardis/ars/hallways/_/junction_t",
+  "substitutes": {
+    "minecraft:andesite_stairs": "minecraft:polished_granite_stairs",
+    "minecraft:black_concrete": "minecraft:granite",
+    "minecraft:blue_concrete": "minecraft:granite",
+    "minecraft:brown_concrete": "minecraft:polished_granite",
+    "minecraft:diorite_stairs": "minecraft:granite_stairs",
+    "minecraft:glass_pane": "minecraft:red_stained_glass_pane",
+    "minecraft:gray_concrete": "minecraft:polished_granite",
+    "minecraft:light_gray_concrete": "minecraft:polished_granite",
+    "minecraft:stone_slab": "minecraft:polished_granite_slab",
+    "minecraft:stone_stairs": "minecraft:polished_granite_stairs",
+    "minecraft:white_concrete": "minecraft:spruce_planks"
+  },
+  "title": "title.dwm.ars.structure.hallway_rock_granite_junction_t"
+}

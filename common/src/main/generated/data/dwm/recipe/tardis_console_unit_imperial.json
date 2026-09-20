@@ -1,0 +1,33 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "a": {
+      "item": "minecraft:amethyst_shard"
+    },
+    "c": {
+      "item": "minecraft:comparator"
+    },
+    "d": {
+      "item": "minecraft:diamond"
+    },
+    "g": {
+      "item": "minecraft:gold_ingot"
+    },
+    "n": {
+      "item": "minecraft:netherite_ingot"
+    },
+    "q": {
+      "item": "minecraft:quartz"
+    }
+  },
+  "pattern": [
+    "gdg",
+    "qnq",
+    "aca"
+  ],
+  "result": {
+    "count": 1,
+    "id": "dwm:tardis_console_unit_imperial"
+  }
+}

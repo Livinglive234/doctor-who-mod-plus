@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "dwm:titanium_skin_lamp_magenta_from_titanium_striped_skin_magenta"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "has_titanium_striped_skin": {
+      "conditions": {
+        "items": [
+          {
+            "items": "dwm:titanium_striped_skin_magenta"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_titanium_striped_skin"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "dwm:titanium_skin_lamp_magenta_from_titanium_striped_skin_magenta"
+    ]
+  }
+}

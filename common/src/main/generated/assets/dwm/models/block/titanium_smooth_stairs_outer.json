@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/outer_stairs",
+  "textures": {
+    "bottom": "dwm:block/decorative/titanium_smooth",
+    "side": "dwm:block/decorative/titanium_smooth",
+    "top": "dwm:block/decorative/titanium_smooth"
+  }
+}

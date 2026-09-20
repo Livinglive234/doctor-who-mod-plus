@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "dwm:block/common/titanium_ore_deepslate"
+  }
+}

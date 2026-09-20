@@ -1,0 +1,16 @@
+{
+  "structure": "dwm:tardis/ars/stairwells/_/up",
+  "substitutes": {
+    "minecraft:andesite_stairs": "minecraft:bamboo_mosaic_stairs",
+    "minecraft:black_concrete": "minecraft:bamboo_block",
+    "minecraft:blue_concrete": "minecraft:stripped_dark_oak_wood",
+    "minecraft:brown_concrete": "minecraft:bamboo_block",
+    "minecraft:glass_pane": "minecraft:light_blue_stained_glass_pane",
+    "minecraft:gray_concrete": "minecraft:bamboo_block",
+    "minecraft:light_gray_concrete": "minecraft:bamboo_block",
+    "minecraft:stone_slab": "minecraft:bamboo_slab",
+    "minecraft:stone_stairs": "minecraft:bamboo_stairs",
+    "minecraft:white_concrete": "minecraft:bamboo_mosaic"
+  },
+  "title": "title.dwm.ars.structure.stairwell_wooden_bamboo_up"
+}

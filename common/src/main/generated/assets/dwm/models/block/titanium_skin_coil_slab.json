@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "dwm:block/decorative/titanium_skin_coil",
+    "side": "dwm:block/decorative/titanium_skin",
+    "top": "dwm:block/decorative/titanium_skin_coil"
+  }
+}

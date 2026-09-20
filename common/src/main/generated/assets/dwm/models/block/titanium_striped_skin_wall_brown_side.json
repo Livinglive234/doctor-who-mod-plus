@@ -1,0 +1,7 @@
+{
+  "parent": "dwm:block/templates/template_wall_xy_side",
+  "textures": {
+    "wall_x": "dwm:block/decorative/titanium_striped_skin_brown",
+    "wall_y": "dwm:block/decorative/titanium_skin"
+  }
+}

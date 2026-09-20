@@ -1,0 +1,21 @@
+{
+  "structure": "dwm:tardis/ars/rooms/_/tall/x_large",
+  "substitutes": {
+    "minecraft:andesite_stairs": "minecraft:smooth_sandstone_stairs",
+    "minecraft:andesite_wall": "minecraft:sandstone_wall",
+    "minecraft:black_concrete": "minecraft:sandstone",
+    "minecraft:blue_concrete": "minecraft:chiseled_sandstone",
+    "minecraft:brown_concrete": "minecraft:sandstone",
+    "minecraft:diorite_stairs": "minecraft:smooth_sandstone_stairs",
+    "minecraft:diorite_wall": "minecraft:sandstone_wall",
+    "minecraft:glass_pane": "minecraft:yellow_stained_glass_pane",
+    "minecraft:granite_stairs": "minecraft:sandstone_stairs",
+    "minecraft:gray_concrete": "minecraft:cut_sandstone",
+    "minecraft:light_gray_concrete": "minecraft:cut_sandstone",
+    "minecraft:stone_slab": "minecraft:smooth_sandstone_slab",
+    "minecraft:stone_stairs": "minecraft:smooth_sandstone_stairs",
+    "minecraft:tuff_stairs": "minecraft:sandstone_stairs",
+    "minecraft:white_concrete": "minecraft:jungle_planks"
+  },
+  "title": "title.dwm.ars.structure.room_rock_sandstone_tall_x_large"
+}

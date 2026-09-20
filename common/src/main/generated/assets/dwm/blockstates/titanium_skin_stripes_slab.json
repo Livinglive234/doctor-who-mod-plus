@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "dwm:block/titanium_skin_stripes_slab"
+    },
+    "type=double": {
+      "model": "dwm:block/titanium_skin_stripes"
+    },
+    "type=top": {
+      "model": "dwm:block/titanium_skin_stripes_slab_top"
+    }
+  }
+}

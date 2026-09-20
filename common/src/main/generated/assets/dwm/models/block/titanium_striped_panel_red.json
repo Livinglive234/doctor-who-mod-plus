@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "all": "dwm:block/decorative/titanium_striped_panel_red",
+    "front": "dwm:block/decorative/titanium_striped_panel_red",
+    "side": "dwm:block/decorative/titanium_striped_panel_red",
+    "top": "dwm:block/decorative/titanium_panel"
+  }
+}

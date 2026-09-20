@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "dwm:item/decorative/titanium_door_gray"
+  }
+}

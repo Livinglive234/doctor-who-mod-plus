@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "dwm:tardis_key_1"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "dwm:tardis_key_1"
+  }
+}

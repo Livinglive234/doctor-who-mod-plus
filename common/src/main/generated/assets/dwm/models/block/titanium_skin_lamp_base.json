@@ -1,0 +1,10 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "bottom": "dwm:block/decorative/titanium_skin_lamp",
+    "front": "dwm:block/decorative/titanium_skin_lamp_base",
+    "side": "dwm:block/decorative/titanium_skin",
+    "south": "dwm:block/decorative/titanium_skin_lamp_base",
+    "top": "dwm:block/decorative/titanium_skin"
+  }
+}

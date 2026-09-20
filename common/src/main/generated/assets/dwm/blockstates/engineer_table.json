@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "dwm:block/engineer_table",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "dwm:block/engineer_table"
+    },
+    "facing=south": {
+      "model": "dwm:block/engineer_table",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "dwm:block/engineer_table",
+      "y": 270
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "structure": "dwm:tardis/ars/hallways/_/short",
+  "substitutes": {
+    "minecraft:andesite_stairs": "minecraft:stone_brick_stairs",
+    "minecraft:black_concrete": "minecraft:stone_bricks",
+    "minecraft:blue_concrete": "minecraft:chiseled_stone_bricks",
+    "minecraft:brown_concrete": "minecraft:chiseled_stone_bricks",
+    "minecraft:diorite_stairs": "minecraft:stone_brick_stairs",
+    "minecraft:glass_pane": "minecraft:gray_stained_glass_pane",
+    "minecraft:gray_concrete": "minecraft:stone_bricks",
+    "minecraft:light_gray_concrete": "minecraft:stone_bricks",
+    "minecraft:stone_slab": "minecraft:stone_brick_slab",
+    "minecraft:stone_stairs": "minecraft:stone_brick_stairs",
+    "minecraft:white_concrete": "minecraft:spruce_planks"
+  },
+  "title": "title.dwm.ars.structure.hallway_rock_stone_short"
+}

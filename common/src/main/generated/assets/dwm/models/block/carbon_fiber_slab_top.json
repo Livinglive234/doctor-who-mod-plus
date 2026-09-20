@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "dwm:block/decorative/carbon_fiber",
+    "side": "dwm:block/decorative/carbon_fiber_slab",
+    "top": "dwm:block/decorative/carbon_fiber"
+  }
+}

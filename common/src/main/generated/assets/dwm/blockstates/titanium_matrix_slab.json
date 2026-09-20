@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "dwm:block/titanium_matrix_slab"
+    },
+    "type=double": {
+      "model": "dwm:block/titanium_matrix"
+    },
+    "type=top": {
+      "model": "dwm:block/titanium_matrix_slab_top"
+    }
+  }
+}

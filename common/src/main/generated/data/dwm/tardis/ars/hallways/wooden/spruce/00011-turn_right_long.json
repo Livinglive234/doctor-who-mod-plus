@@ -1,0 +1,17 @@
+{
+  "structure": "dwm:tardis/ars/hallways/_/turn_right_long",
+  "substitutes": {
+    "minecraft:andesite_stairs": "minecraft:spruce_stairs",
+    "minecraft:black_concrete": "minecraft:spruce_wood",
+    "minecraft:blue_concrete": "minecraft:stripped_dark_oak_wood",
+    "minecraft:brown_concrete": "minecraft:spruce_planks",
+    "minecraft:diorite_stairs": "minecraft:spruce_stairs",
+    "minecraft:glass_pane": "minecraft:light_blue_stained_glass_pane",
+    "minecraft:gray_concrete": "minecraft:spruce_planks",
+    "minecraft:light_gray_concrete": "minecraft:spruce_log",
+    "minecraft:stone_slab": "minecraft:spruce_slab",
+    "minecraft:stone_stairs": "minecraft:spruce_stairs",
+    "minecraft:white_concrete": "minecraft:stripped_spruce_wood"
+  },
+  "title": "title.dwm.ars.structure.hallway_wooden_spruce_turn_right_long"
+}

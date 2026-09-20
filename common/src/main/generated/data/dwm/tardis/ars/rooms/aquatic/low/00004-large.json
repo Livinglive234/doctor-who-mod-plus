@@ -1,0 +1,21 @@
+{
+  "structure": "dwm:tardis/ars/rooms/_/low/large",
+  "substitutes": {
+    "minecraft:andesite_stairs": "minecraft:prismarine_stairs",
+    "minecraft:andesite_wall": "minecraft:prismarine_wall",
+    "minecraft:black_concrete": "minecraft:dark_prismarine",
+    "minecraft:blue_concrete": "minecraft:dark_prismarine",
+    "minecraft:brown_concrete": "minecraft:prismarine_bricks",
+    "minecraft:diorite_stairs": "minecraft:prismarine_brick_stairs",
+    "minecraft:diorite_wall": "minecraft:prismarine_wall",
+    "minecraft:glass_pane": "minecraft:cyan_stained_glass_pane",
+    "minecraft:gray_concrete": "minecraft:prismarine",
+    "minecraft:light_gray_concrete": "minecraft:prismarine",
+    "minecraft:redstone_block": "minecraft:prismarine_bricks",
+    "minecraft:redstone_lamp": "minecraft:sea_lantern",
+    "minecraft:stone_slab": "minecraft:dark_prismarine_slab",
+    "minecraft:stone_stairs": "minecraft:dark_prismarine_stairs",
+    "minecraft:white_concrete": "minecraft:spruce_planks"
+  },
+  "title": "title.dwm.ars.structure.room_aquatic_low_large"
+}

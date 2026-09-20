@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "dwm:block/titanium_panel_lamp_yellow",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "dwm:block/titanium_panel_lamp_yellow"
+    },
+    "facing=south": {
+      "model": "dwm:block/titanium_panel_lamp_yellow",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "dwm:block/titanium_panel_lamp_yellow",
+      "y": 270
+    }
+  }
+}

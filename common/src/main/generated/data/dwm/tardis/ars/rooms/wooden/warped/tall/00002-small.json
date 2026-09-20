@@ -1,0 +1,23 @@
+{
+  "structure": "dwm:tardis/ars/rooms/_/tall/small",
+  "substitutes": {
+    "minecraft:andesite_stairs": "minecraft:warped_stairs",
+    "minecraft:andesite_wall": "minecraft:warped_fence",
+    "minecraft:black_concrete": "minecraft:warped_hyphae",
+    "minecraft:blue_concrete": "minecraft:warped_wart_block",
+    "minecraft:brown_concrete": "minecraft:warped_planks",
+    "minecraft:diorite_stairs": "minecraft:warped_stairs",
+    "minecraft:diorite_wall": "minecraft:warped_fence",
+    "minecraft:glass_pane": "minecraft:light_blue_stained_glass_pane",
+    "minecraft:granite_stairs": "minecraft:warped_stairs",
+    "minecraft:gray_concrete": "minecraft:warped_planks",
+    "minecraft:light_gray_concrete": "minecraft:warped_stem",
+    "minecraft:redstone_block": "minecraft:warped_planks",
+    "minecraft:redstone_lamp": "minecraft:shroomlight",
+    "minecraft:stone_slab": "minecraft:warped_slab",
+    "minecraft:stone_stairs": "minecraft:warped_stairs",
+    "minecraft:tuff_stairs": "minecraft:warped_stairs",
+    "minecraft:white_concrete": "minecraft:stripped_warped_hyphae"
+  },
+  "title": "title.dwm.ars.structure.room_wooden_warped_tall_small"
+}

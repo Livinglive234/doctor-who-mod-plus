@@ -1,0 +1,16 @@
+{
+  "structure": "dwm:tardis/ars/stairwells/_/down",
+  "substitutes": {
+    "minecraft:andesite_stairs": "dwm:carbon_fiber_stairs",
+    "minecraft:black_concrete": "dwm:titanium_panel",
+    "minecraft:blue_concrete": "dwm:titanium_skin",
+    "minecraft:brown_concrete": "dwm:titanium_panel",
+    "minecraft:glass_pane": "minecraft:light_blue_stained_glass_pane",
+    "minecraft:gray_concrete": "dwm:titanium_panel",
+    "minecraft:light_gray_concrete": "dwm:titanium_striped_panel_blue",
+    "minecraft:stone_slab": "dwm:titanium_panel_slab",
+    "minecraft:stone_stairs": "dwm:titanium_panel_stairs",
+    "minecraft:white_concrete": "dwm:carbon_fiber"
+  },
+  "title": "title.dwm.ars.structure.stairwell_titanium_blue_down"
+}

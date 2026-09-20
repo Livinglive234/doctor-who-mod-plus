@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/stairs",
+  "textures": {
+    "bottom": "dwm:block/decorative/titanium_skin",
+    "side": "dwm:block/decorative/titanium_striped_skin_gray",
+    "top": "dwm:block/decorative/titanium_skin"
+  }
+}

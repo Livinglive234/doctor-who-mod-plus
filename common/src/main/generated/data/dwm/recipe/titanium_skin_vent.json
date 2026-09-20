@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": {
+      "item": "dwm:titanium_plate"
+    },
+    "0": {
+      "item": "dwm:titanium_ingot"
+    }
+  },
+  "pattern": [
+    "###",
+    "0 0",
+    "###"
+  ],
+  "result": {
+    "count": 4,
+    "id": "dwm:titanium_skin_vent"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "dwm:block/titanium_skin_vent_dark_slab"
+    },
+    "type=double": {
+      "model": "dwm:block/titanium_skin_vent_dark"
+    },
+    "type=top": {
+      "model": "dwm:block/titanium_skin_vent_dark_slab_top"
+    }
+  }
+}
