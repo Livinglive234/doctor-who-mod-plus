@@ -26,6 +26,10 @@ public class DWM {
         public static final int REMAT_DURATION = 170;
         public static final int PULSE_LOOP = 48;
         public static final int FLIGHT_LOOP = 32;
+        public static final int FLIGHT_DURATION_BASE = FLIGHT_LOOP * 2; // 64 ticks (3.2s) - minimum flight duration for very short hops
+        public static final int FLIGHT_DURATION_MAX = 900; // 45 seconds - cap for the distance-scaled portion of a flight (dimension crossing bonus is added on top of this)
+        public static final int FLIGHT_DISTANCE_FOR_MAX_DURATION = 10000; // blocks of Manhattan distance at which the distance-scaled duration reaches FLIGHT_DURATION_MAX
+        public static final int FLIGHT_DIMENSION_CROSSING_BONUS = 300; // 15 seconds - flat extra time added whenever the flight crosses dimensions
         public static final int RECONSTRUCTION_LOOP = 48;
         public static final int RECONSTRUCTION_DURATION = 200;
         public static final int RECONSTRUCTION_NOTIFICATION = 40;

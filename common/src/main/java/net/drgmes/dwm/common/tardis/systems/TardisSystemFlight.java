@@ -240,7 +240,12 @@ public class TardisSystemFlight extends TardisBaseSystem {
     }
 
     public int getFlightDuration() {
-        return DWM.TIMINGS.FLIGHT_LOOP;
+        int distance = this.tardis.getCurrentExteriorPosition().getManhattanDistance(this.tardis.getDestinationExteriorPosition());
+        float distanceProgress = Math.min(1F, (float) distance / DWM.TIMINGS.FLIGHT_DISTANCE_FOR_MAX_DURATION);
+        int distanceDuration = DWM.TIMINGS.FLIGHT_DURATION_BASE + Math.round(distanceProgress * (DWM.TIMINGS.FLIGHT_DURATION_MAX - DWM.TIMINGS.FLIGHT_DURATION_BASE));
+
+        boolean crossesDimensions = !this.tardis.getCurrentExteriorDimension().equals(this.tardis.getDestinationExteriorDimension());
+        return distanceDuration + (crossesDimensions ? DWM.TIMINGS.FLIGHT_DIMENSION_CROSSING_BONUS : 0);
     }
 
     // ////////////////////// //
@@ -307,7 +312,9 @@ public class TardisSystemFlight extends TardisBaseSystem {
         }
         else if (this.soundTick == 0) {
             this.soundTick = DWM.TIMINGS.FLIGHT_LOOP;
-            ModSounds.playTardisFlightSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition());
+            // Same reasoning as the takeoff/landing sounds: this is heard right next to the console
+            // on every loop, so it's toned down from the default full volume.
+            ModSounds.playTardisFlightSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition(), 0.6F);
         }
     }
 }

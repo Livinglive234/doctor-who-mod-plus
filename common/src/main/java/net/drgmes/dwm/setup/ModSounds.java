@@ -101,15 +101,27 @@ public class ModSounds {
     }
 
     public static void playTardisTakeoffSound(World world, BlockPos blockPos) {
-        playSound(world, blockPos, TARDIS_TAKEOFF.get(), 1.0F, 1.0F);
+        playTardisTakeoffSound(world, blockPos, 1.0F);
+    }
+
+    public static void playTardisTakeoffSound(World world, BlockPos blockPos, float volume) {
+        playSound(world, blockPos, TARDIS_TAKEOFF.get(), volume, 1.0F);
     }
 
     public static void playTardisLandingSound(World world, BlockPos blockPos) {
-        playSound(world, blockPos, TARDIS_LAND.get(), 1.0F, 1.0F);
+        playTardisLandingSound(world, blockPos, 1.0F);
+    }
+
+    public static void playTardisLandingSound(World world, BlockPos blockPos, float volume) {
+        playSound(world, blockPos, TARDIS_LAND.get(), volume, 1.0F);
     }
 
     public static void playTardisFlightSound(World world, BlockPos blockPos) {
-        playSound(world, blockPos, TARDIS_FLIGHT.get(), 1.0F, 1.0F);
+        playTardisFlightSound(world, blockPos, 1.0F);
+    }
+
+    public static void playTardisFlightSound(World world, BlockPos blockPos, float volume) {
+        playSound(world, blockPos, TARDIS_FLIGHT.get(), volume, 1.0F);
     }
 
     public static void playTardisFailSound(World world, BlockPos blockPos) {

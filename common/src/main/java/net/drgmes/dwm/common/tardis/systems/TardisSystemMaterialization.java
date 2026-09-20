@@ -156,7 +156,11 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
         this.tardis.markConsoleTilesUpdated();
 
         this.sendExteriorUpdatePacket(TardisExteriorAction.DEMAT);
-        ModSounds.playTardisTakeoffSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition());
+        // Quieter than the exterior takeoff sound (BaseTardisExteriorBlockEntity.demat(), triggered
+        // by sendExteriorUpdatePacket below, plays that one at full volume) - this is the same
+        // effect heard right next to the console, so it doesn't need to be as loud as it is for
+        // someone watching the box dematerialize from outside.
+        ModSounds.playTardisTakeoffSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition(), 0.6F);
         return true;
     }
 
@@ -208,7 +212,8 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
 
             this.tardis.markConsoleTilesUpdated();
             this.sendExteriorUpdatePacket(TardisExteriorAction.REMAT);
-            ModSounds.playTardisLandingSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition());
+            // Same deal as the takeoff sound above: quieter in-room than the exterior landing sound.
+            ModSounds.playTardisLandingSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition(), 0.6F);
         }
         else {
             this.playFailSound();
@@ -223,6 +228,10 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
 
         ServerWorld exteriorWorld = this.tardis.getExteriorWorld();
         if (exteriorWorld == null) return false;
+
+        // Mirrors initDemat()'s setLightState(false) on takeoff: the exterior light comes back
+        // on automatically once the TARDIS has finished landing.
+        this.tardis.setLightState(true);
 
         BlockPos exteriorBlockPos = this.tardis.getCurrentExteriorPosition();
         Box box = Box.of(Vec3d.ofBottomCenter(exteriorBlockPos), 0.5D, 1, 0.5D);
