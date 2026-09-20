@@ -27,6 +27,7 @@ import net.drgmes.dwm.blocks.tardis.misc.tardisroundel.models.TardisRoundelModel
 import net.drgmes.dwm.blocks.tardis.misc.tardistoyotaspinner.TardisToyotaSpinnerBlockRenderer;
 import net.drgmes.dwm.blocks.tardis.misc.tardistoyotaspinner.models.TardisToyotaSpinnerModel;
 import net.drgmes.dwm.entities.tardis.consoleunit.controls.TardisConsoleControlEntityRenderer;
+import net.drgmes.dwm.entities.tardis.exteriors.TardisFlyoverEntityRenderer;
 import net.drgmes.dwm.items.tardis.systems.dematerializationcircuit.models.TardisSystemDematerializationCircuitModel;
 import net.drgmes.dwm.utils.builders.BlockBuilder;
 
@@ -69,6 +70,7 @@ public class ModRenderers {
         EntityRendererRegistry.register(ModEntities.TARDIS_CONSOLE_UNIT_CONTROL_SMALL.entityType, TardisConsoleControlEntityRenderer::new);
         EntityRendererRegistry.register(ModEntities.TARDIS_CONSOLE_UNIT_CONTROL_MEDIUM.entityType, TardisConsoleControlEntityRenderer::new);
         EntityRendererRegistry.register(ModEntities.TARDIS_CONSOLE_UNIT_CONTROL_LARGE.entityType, TardisConsoleControlEntityRenderer::new);
+        EntityRendererRegistry.register(ModEntities.TARDIS_FLYOVER.entityType, TardisFlyoverEntityRenderer::new);
     }
 
     public static void setupBlockEntityRenderers() {

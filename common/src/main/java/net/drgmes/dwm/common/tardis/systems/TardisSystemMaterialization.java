@@ -46,6 +46,9 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
         REMAT,
     }
 
+    public record LandingSpot(BlockPos pos, Direction facing) {
+    }
+
     private final List<Consumer<Boolean>> callbacks = new ArrayList<>();
 
     private TardisVerticalScanning verticalScanning = TardisVerticalScanning.TOP;
@@ -54,6 +57,9 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
 
     private UUID initiatorId;
     private boolean isMaterialized = true;
+
+    // Set by the flight system for a flyover takeoff or landing: almost no fade. Only true for the operation in progress.
+    private boolean instant = false;
 
     private int tick = -1;
 
@@ -73,6 +79,7 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
         if (tag.contains("mode")) this.mode = EMode.valueOf(tag.getString("mode"));
         if (tag.contains("initiatorId")) this.initiatorId = tag.getUuid("initiatorId");
         if (tag.contains("isMaterialized")) this.isMaterialized = tag.getBoolean("isMaterialized");
+        if (tag.contains("instant")) this.instant = tag.getBoolean("instant");
         if (tag.contains("tick")) this.tick = tag.getInt("tick");
     }
 
@@ -84,6 +91,7 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
         tag.putString("step", this.step.name());
         tag.putString("mode", this.mode.name());
         tag.putBoolean("isMaterialized", this.isMaterialized);
+        tag.putBoolean("instant", this.instant);
         tag.putInt("tick", this.tick);
 
         return tag;
@@ -130,9 +138,14 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
     }
 
     public boolean init(boolean flag, UUID initiatorId) {
+        return this.init(flag, initiatorId, false);
+    }
+
+    public boolean init(boolean flag, UUID initiatorId, boolean instant) {
         if (!this.isEnabled() || this.inProgress() || this.isMaterialized == flag) return false;
         if (this.tardis.getSystem(TardisSystemFlight.class).isInFlight()) return false;
 
+        this.instant = instant;
         this.step = EStep.INITED;
         this.mode = flag ? EMode.REMAT : EMode.DEMAT;
         this.initiatorId = initiatorId;
@@ -148,18 +161,15 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
 
         this.step = EStep.PROCESSING;
         this.mode = EMode.DEMAT;
-        this.tick = DWM.TIMINGS.DEMAT_DURATION;
+        this.tick = this.getDematDuration();
 
         this.tardis.setDoorsOpenState(false);
         this.tardis.setLightState(false);
         this.tardis.setShieldsState(false);
         this.tardis.markConsoleTilesUpdated();
 
-        this.sendExteriorUpdatePacket(TardisExteriorAction.DEMAT);
-        // Quieter than the exterior takeoff sound (BaseTardisExteriorBlockEntity.demat(), triggered
-        // by sendExteriorUpdatePacket below, plays that one at full volume) - this is the same
-        // effect heard right next to the console, so it doesn't need to be as loud as it is for
-        // someone watching the box dematerialize from outside.
+        this.sendExteriorUpdatePacket(this.instant ? TardisExteriorAction.DEMAT_INSTANT : TardisExteriorAction.DEMAT);
+        // Quieter than the exterior's takeoff sound, which the update packet above plays at full volume
         ModSounds.playTardisTakeoffSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition(), 0.6F);
         return true;
     }
@@ -208,12 +218,13 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
             this.isMaterialized = true;
             this.step = EStep.PROCESSING;
             this.mode = EMode.REMAT;
-            this.tick = DWM.TIMINGS.REMAT_DURATION;
+            this.tick = this.getRematDuration();
 
             this.tardis.markConsoleTilesUpdated();
-            this.sendExteriorUpdatePacket(TardisExteriorAction.REMAT);
-            // Same deal as the takeoff sound above: quieter in-room than the exterior landing sound.
-            ModSounds.playTardisLandingSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition(), 0.6F);
+            this.sendExteriorUpdatePacket(this.instant ? TardisExteriorAction.REMAT_INSTANT : TardisExteriorAction.REMAT);
+            // A slam is heard inside as the same thud as outside, at full volume; the fade's landing noise stays quiet
+            if (this.instant) ModSounds.playTardisGroundLandingSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition());
+            else ModSounds.playTardisLandingSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition(), 0.6F);
         }
         else {
             this.playFailSound();
@@ -229,9 +240,7 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
         ServerWorld exteriorWorld = this.tardis.getExteriorWorld();
         if (exteriorWorld == null) return false;
 
-        // Mirrors initDemat()'s setLightState(false) on takeoff: the exterior light comes back
-        // on automatically once the TARDIS has finished landing.
-        this.tardis.setLightState(true);
+        this.tardis.setLightState(true); // the light goes off on takeoff and comes back on when it has landed
 
         BlockPos exteriorBlockPos = this.tardis.getCurrentExteriorPosition();
         Box box = Box.of(Vec3d.ofBottomCenter(exteriorBlockPos), 0.5D, 1, 0.5D);
@@ -252,6 +261,7 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
         this.step = EStep.NONE;
         this.mode = EMode.NONE;
         this.initiatorId = null;
+        this.instant = false;
         this.tick = -1;
     }
 
@@ -278,10 +288,18 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
 
     public int getProgressPercent() {
         return switch (this.mode) {
-            case DEMAT -> (int) Math.ceil((float) this.tick / DWM.TIMINGS.DEMAT_DURATION * 100);
-            case REMAT -> 100 - (int) Math.ceil((float) this.tick / DWM.TIMINGS.REMAT_DURATION * 100);
+            case DEMAT -> (int) Math.ceil((float) this.tick / this.getDematDuration() * 100);
+            case REMAT -> 100 - (int) Math.ceil((float) this.tick / this.getRematDuration() * 100);
             default -> this.isMaterialized ? 100 : 0;
         };
+    }
+
+    private int getDematDuration() {
+        return this.instant ? DWM.TIMINGS.INSTANT_MATERIALIZATION_DURATION : DWM.TIMINGS.DEMAT_DURATION;
+    }
+
+    private int getRematDuration() {
+        return this.instant ? DWM.TIMINGS.INSTANT_MATERIALIZATION_DURATION : DWM.TIMINGS.REMAT_DURATION;
     }
 
     public TardisVerticalScanning getVerticalScanning() {
@@ -364,24 +382,16 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
         if (exteriorWorld == null) return false;
 
         Direction exteriorFacing = this.tardis.getCurrentExteriorFacing();
-        BlockPos exteriorBlockPos = this.tardis.getCurrentExteriorPosition();
-        BlockPos safePosition = null;
+        LandingSpot safeSpot = this.findLandingSpot(exteriorWorld, this.tardis.getCurrentExteriorPosition(), exteriorFacing);
 
-        if (this.verticalScanning == TardisVerticalScanning.TOP) {
-            safePosition = this.getSafePosition(exteriorWorld, exteriorBlockPos, exteriorFacing, TardisVerticalScanning.TOP);
-            if (safePosition == null) safePosition = this.getSafePosition(exteriorWorld, exteriorBlockPos, exteriorFacing, TardisVerticalScanning.BOTTOM);
-        }
-        else if (this.verticalScanning == TardisVerticalScanning.BOTTOM) {
-            safePosition = this.getSafePosition(exteriorWorld, exteriorBlockPos, exteriorFacing, TardisVerticalScanning.BOTTOM);
-            if (safePosition == null) safePosition = this.getSafePosition(exteriorWorld, exteriorBlockPos, exteriorFacing, TardisVerticalScanning.TOP);
-        }
-        else {
-            safePosition = this.getSafePosition(exteriorWorld, exteriorBlockPos, exteriorFacing, this.verticalScanning);
-        }
+        if (safeSpot != null) {
+            if (safeSpot.facing() != exteriorFacing) {
+                this.tardis.setFacing(safeSpot.facing(), false);
+                this.tardis.setDestinationFacing(safeSpot.facing());
+            }
 
-        if (safePosition != null) {
-            this.tardis.setPosition(safePosition, false);
-            this.tardis.setDestinationPosition(safePosition);
+            this.tardis.setPosition(safeSpot.pos(), false);
+            this.tardis.setDestinationPosition(safeSpot.pos());
             return true;
         }
 
@@ -389,11 +399,38 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
         return false;
     }
 
-    private BlockPos getSafePosition(ServerWorld exteriorWorld, BlockPos exteriorBlockPos, Direction exteriorFacing, TardisVerticalScanning verticalScanning) {
+    /**
+     * Where a landing at {@code exteriorBlockPos} would end up, with the current vertical scanning mode. Only reads
+     * the world - the same search a real landing uses, so the flight system can know the spot ahead of time.
+     *
+     * @return the spot, or null if there is no safe one
+     */
+    public LandingSpot findLandingSpot(ServerWorld exteriorWorld, BlockPos exteriorBlockPos, Direction exteriorFacing) {
+        LandingSpot safeSpot;
+
+        if (this.verticalScanning == TardisVerticalScanning.TOP) {
+            safeSpot = this.getSafeSpot(exteriorWorld, exteriorBlockPos, exteriorFacing, TardisVerticalScanning.TOP);
+            if (safeSpot == null) safeSpot = this.getSafeSpot(exteriorWorld, exteriorBlockPos, exteriorFacing, TardisVerticalScanning.BOTTOM);
+        }
+        else if (this.verticalScanning == TardisVerticalScanning.BOTTOM) {
+            safeSpot = this.getSafeSpot(exteriorWorld, exteriorBlockPos, exteriorFacing, TardisVerticalScanning.BOTTOM);
+            if (safeSpot == null) safeSpot = this.getSafeSpot(exteriorWorld, exteriorBlockPos, exteriorFacing, TardisVerticalScanning.TOP);
+        }
+        else {
+            safeSpot = this.getSafeSpot(exteriorWorld, exteriorBlockPos, exteriorFacing, this.verticalScanning);
+        }
+
+        return safeSpot;
+    }
+
+    // Pure search: reads the world, changes nothing. If the requested facing doesn't fit but another
+    // horizontal one does, the returned spot carries that facing.
+    private LandingSpot getSafeSpot(ServerWorld exteriorWorld, BlockPos exteriorBlockPos, Direction exteriorFacing, TardisVerticalScanning verticalScanning) {
         if (verticalScanning == TardisVerticalScanning.TOP) exteriorBlockPos = exteriorBlockPos.down();
         else if (verticalScanning == TardisVerticalScanning.BOTTOM) exteriorBlockPos = exteriorBlockPos.up();
 
         boolean checkBottom = verticalScanning != TardisVerticalScanning.NONE;
+        Direction foundFacing;
         boolean freeSpaceFound;
         boolean isBuildLimitValid;
 
@@ -404,6 +441,7 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
                     ? exteriorBlockPos.down()
                     : exteriorBlockPos);
 
+            foundFacing = exteriorFacing;
             freeSpaceFound = this.checkBlockIsSafe(exteriorWorld, exteriorBlockPos, exteriorFacing, checkBottom);
             if (!freeSpaceFound) {
                 for (Direction direction : Direction.Type.HORIZONTAL) {
@@ -412,8 +450,7 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
                     freeSpaceFound = this.checkBlockIsSafe(exteriorWorld, exteriorBlockPos, direction, checkBottom);
 
                     if (freeSpaceFound) {
-                        this.tardis.setFacing(direction, false);
-                        this.tardis.setDestinationFacing(direction);
+                        foundFacing = direction;
                         break;
                     }
                 }
@@ -423,7 +460,7 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
             if (verticalScanning == TardisVerticalScanning.DIRECT || verticalScanning == TardisVerticalScanning.NONE) break;
         } while (!freeSpaceFound && isBuildLimitValid);
 
-        return freeSpaceFound && isBuildLimitValid ? exteriorBlockPos : null;
+        return freeSpaceFound && isBuildLimitValid ? new LandingSpot(exteriorBlockPos, foundFacing) : null;
     }
 
     private boolean checkBlockIsSafe(World world, BlockPos blockPos, Direction direction, boolean checkBottom) {
@@ -449,6 +486,8 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
             switch (exteriorAction) {
                 case DEMAT -> tardisExteriorBlockEntity.demat();
                 case REMAT -> tardisExteriorBlockEntity.remat();
+                case DEMAT_INSTANT -> tardisExteriorBlockEntity.dematInstant();
+                case REMAT_INSTANT -> tardisExteriorBlockEntity.rematInstant();
                 default -> tardisExteriorBlockEntity.reset();
             }
         }

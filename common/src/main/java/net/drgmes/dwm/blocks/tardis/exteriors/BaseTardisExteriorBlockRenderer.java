@@ -78,29 +78,16 @@ public abstract class BaseTardisExteriorBlockRenderer<C extends BaseTardisExteri
         VertexConsumer vertexConsumer = buffer.getBuffer(renderLayer);
         int color = CommonHelper.getColorWithAlpha(0x00FFFFFF, alpha);
 
-        // Some Iris shader packs drive screen-space effects (outlines, reflections, etc.) off
-        // whatever geometry gets submitted to the GPU, regardless of its blended alpha - so an
-        // alpha-0 (meant to be fully invisible) TARDIS shell could still get drawn as a solid,
-        // fully-lit shape by the shader. That isn't a temporal/reprojection effect, which is why
-        // disabling TAA alone doesn't fix it. The fix is to simply not submit the geometry at all
-        // when it should be invisible, instead of relying on alpha blending to hide it - a no-op
-        // change for vanilla rendering (alpha 0 already draws nothing), and it leaves the flicker
-        // curve itself completely untouched everywhere alpha is actually above zero.
+        // Some Iris shader packs draw screen-space effects off any submitted geometry, whatever its blended alpha, so an
+        // alpha-0 shell would still show as a solid shape. Don't submit it at all (a no-op for vanilla rendering).
         boolean isVisible = hasEnabledIrisShaders ? alpha > 0.02F : alpha > 0F;
 
         if (isVisible) {
             model.render(matrixStack, vertexConsumer, light, overlay, color);
             if (!hasImmersivePortals || !isOpen) model.renderDoors(matrixStack, vertexConsumer, light, overlay, color);
 
-            // During a demat/remat, the lamp rides the same flickering alpha as the rest of the
-            // shell instead of just following the on/off LIT block state - so it visibly brightens
-            // and dims in step with the materialization animation rather than snapping on/off the
-            // instant the process starts/finishes. Outside those two states it behaves as before,
-            // purely following whether the light is actually switched on.
-            boolean lampGlows = switch (exteriorState) {
-                case PROCESS_DEMAT, PROCESS_REMAT -> true;
-                default -> isLit;
-            };
+            // The lamp rides the same flickering alpha as the shell during a demat/remat, instead of snapping with the LIT state.
+            boolean lampGlows = isLit || exteriorState == TardisExteriorState.PROCESS_DEMAT || exteriorState == TardisExteriorState.PROCESS_REMAT;
             model.renderLamp(matrixStack, lampGlows && !hasEnabledIrisShaders ? buffer.getBuffer(RenderLayer.getEntityAlpha(this.modelLayer.getId())) : vertexConsumer, light, overlay, color);
             if (isOpen && !hasImmersivePortals) model.renderBoti(matrixStack, !hasEnabledIrisShaders ? buffer.getBuffer(RenderLayer.getEndPortal()) : vertexConsumer, light, overlay, color);
         }

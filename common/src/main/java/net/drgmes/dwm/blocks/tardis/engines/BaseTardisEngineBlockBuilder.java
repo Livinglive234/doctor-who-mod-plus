@@ -15,9 +15,7 @@ public abstract class BaseTardisEngineBlockBuilder extends BlockBuilder {
     }
 
     public static AbstractBlock.Settings getBlockSettings() {
-        // -1.0F hardness makes it unbreakable by survival players (mining progress never completes, same trick vanilla uses for bedrock/command blocks);
-        // it can still be broken instantly in creative mode, and the huge resistance also makes it immune to explosions.
-        return BlockBuilder.getBlockSettings().nonOpaque().strength(-1.0F, 3600000.0F);
+        return BlockBuilder.getUnbreakableBlockSettings();
     }
 
     @Override

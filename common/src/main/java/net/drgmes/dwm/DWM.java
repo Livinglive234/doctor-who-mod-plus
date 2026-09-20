@@ -30,11 +30,72 @@ public class DWM {
         public static final int FLIGHT_DURATION_MAX = 900; // 45 seconds - cap for the distance-scaled portion of a flight (dimension crossing bonus is added on top of this)
         public static final int FLIGHT_DISTANCE_FOR_MAX_DURATION = 10000; // blocks of Manhattan distance at which the distance-scaled duration reaches FLIGHT_DURATION_MAX
         public static final int FLIGHT_DIMENSION_CROSSING_BONUS = 300; // 15 seconds - flat extra time added whenever the flight crosses dimensions
+        public static final int INSTANT_MATERIALIZATION_DURATION = 2; // demat / remat with the flyover lever on and open sky (see FLYOVER)
+
         public static final int RECONSTRUCTION_LOOP = 48;
         public static final int RECONSTRUCTION_DURATION = 200;
         public static final int RECONSTRUCTION_NOTIFICATION = 40;
 
         public static final int SONIC_DEVICE_TIMEOUT = 4;
+    }
+
+    // The flying TARDIS shown while the flyover lever is on - the design is in CHANGELOG.md.
+    // Durations are in ticks, distances in blocks, speeds in blocks per tick.
+    public static class FLYOVER {
+        // Short hops are one continuous flight
+        public static final int FULL_ROUTE_MAX_DISTANCE = 256; // anything longer is a long hop
+        public static final int FLIGHT_MIN_DURATION = 145;
+        public static final int FLIGHT_LEAD = 85;
+        public static final float COMFORT_SPEED = 4.0F;
+
+        // Take-off and landing
+        public static final int LIFTOFF_DURATION = 40; // heavy: it hardly moves at first
+        public static final float LIFTOFF_SHAKE = 0.05F;
+        public static final int SKY_DESCENT_DURATION = 25; // after a take-off from underground
+        public static final int SLAM_DURATION = 24;
+        public static final int SLAM_LEAD = 3; // the plunge ends this long before the exterior appears, since clients see entities late
+        public static final int SLAM_HOLD = 2; // and it rests on the spot this long after
+        public static final float SLAM_HEIGHT = 48.0F;
+        public static final int ASCENT_DURATION = 30; // shoot-up before a landing underground
+        public static final int DEPARTURE_ASCENT_DURATION = 75; // straight-up departure of an interdimensional hop
+        public static final int DROP_DURATION = 50; // straight-down arrival from another dimension
+        public static final float DROP_HEIGHT = 128.0F;
+        public static final int CLOUD_LEVEL = 192;
+        public static final int ASCENT_CLOUD_CLEARANCE = 64;
+        public static final float TERRAIN_CLEARANCE = 24.0F;
+
+        // Long hops: fast, since most of the route is unwatched
+        public static final float LONG_HOP_SPEED = 12.0F;
+        public static final int LONG_HOP_LEAD = 60;
+        public static final int LONG_HOP_MIN_DURATION = 130;
+        public static final int LONG_HOP_PADDING = 100; // idle time so a flight with nobody around isn't near-instant; fly-bys use it up first
+        public static final int STREAK_DURATION = 70;
+        public static final float STREAK_DISTANCE = 160.0F;
+        public static final float STREAK_CLIMB = 48.0F;
+        public static final int ARRIVAL_DURATION = 100;
+        public static final float ARRIVAL_DISTANCE = 144.0F;
+
+        // Trip caps (demat + flight + remat); only fly-bys may go past them
+        public static final int TRIP_CAP = 900; // 45 seconds
+        public static final int TRIP_CAP_LONG_INTERDIMENSIONAL = 1200; // 60 seconds, for a trip that is both interdimensional and long distance
+
+        // Fly-bys
+        public static final int FLYBY_DURATION = ARRIVAL_DURATION + 20; // always longer than an arrival, so it is seen for at least as long
+        public static final float FLYBY_HALF_LENGTH = 120.0F;
+        public static final float FLYBY_MIN_HALF_LENGTH = 30.0F;
+        public static final float FLYBY_SLOW_BIAS = 0.35F; // 0..1, lower is slower right in front of the bystander
+        public static final float FLYBY_MAX_OFFSET = 80.0F; // furthest a player can be off the route and still get one
+        public static final int FLYBY_CHECK_INTERVAL = 10;
+
+        // Who sees what
+        public static final float ARRIVAL_PLAYER_RADIUS = (float) Math.ceil(Math.hypot(ARRIVAL_DISTANCE + FLYBY_MIN_HALF_LENGTH, FLYBY_MAX_OFFSET)); // reaches every player a fly-by doesn't
+        public static final float DROP_PLAYER_RADIUS = 128.0F;
+        public static final float RENDER_DISTANCE = 256.0F; // vanilla would cull an entity this small at about 96
+
+        // Spin, only while flying horizontally
+        public static final float SPIN_DEGREES_PER_TICK = 9.0F;
+        public static final int SPIN_RAMP = 20;
+        public static final int SPIN_SETTLE_DURATION = 30;
     }
 
     public static class TEXTS {

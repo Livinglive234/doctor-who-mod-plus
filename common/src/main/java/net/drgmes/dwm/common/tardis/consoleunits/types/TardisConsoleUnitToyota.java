@@ -40,6 +40,7 @@ public class TardisConsoleUnitToyota extends TardisConsoleUnitEntry {
         this.addControlEntry(TardisConsoleUnitControlRole.SHIELDS, TardisConsoleUnitControlType.LEVER, new Vec3d(-0.895F, 0.565F, -0.3255F), "controls/control_levers/control_lever_6$_handle");
         this.addControlEntry(TardisConsoleUnitControlRole.DOORS, TardisConsoleUnitControlType.LEVER, new Vec3d(-0.895F, 0.565F, 0.3255F), "controls/control_levers/control_lever_7$_handle");
         this.addControlEntry(TardisConsoleUnitControlRole.LIGHT, TardisConsoleUnitControlType.LEVER, new Vec3d(-0.725F, 0.605F, -0.175F), "controls/control_levers/control_lever_1$_handle", ModEntities.TARDIS_CONSOLE_UNIT_CONTROL_SMALL);
+        this.addControlEntry(TardisConsoleUnitControlRole.FLYOVER, TardisConsoleUnitControlType.LEVER, new Vec3d(-0.725F, 0.605F, -0.0875F), "controls/control_levers/control_lever_2$_handle", ModEntities.TARDIS_CONSOLE_UNIT_CONTROL_SMALL);
         this.addControlEntry(TardisConsoleUnitControlRole.VERTICAL_SCANNING, TardisConsoleUnitControlType.LEVER, new Vec3d(0.725F, 0.605F, -0.175F), "controls/control_levers/control_lever_15$_handle", ModEntities.TARDIS_CONSOLE_UNIT_CONTROL_SMALL);
 
         this.addControlEntry(TardisConsoleUnitControlRole.RANDOMIZER, TardisConsoleUnitControlType.ROTATOR, new Vec3d(-0.1565F, 0.45F, -1.1695F), "controls/control_rotators/control_rotator_6$_handle");

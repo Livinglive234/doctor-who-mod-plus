@@ -75,7 +75,7 @@ public class TardisKeyItem extends Item {
                             tardis.setDestinationPosition(player.getBlockPos());
 
                             if (flightSystem.init(true, player.getUuid())) {
-                                float duration = DWM.TIMINGS.DEMAT_DURATION + DWM.TIMINGS.REMAT_DURATION + flightSystem.getFlightDuration();
+                                float duration = flightSystem.getEstimatedTripDuration();
                                 player.sendMessage(DWM.TEXTS.TARDIS_ARRIVE_TIMER.apply((float) Math.ceil(duration / 20)), true);
                                 player.getItemCooldownManager().set(itemStack.getItem(), (int) duration);
 

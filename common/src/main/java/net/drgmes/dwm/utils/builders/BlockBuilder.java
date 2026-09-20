@@ -59,6 +59,11 @@ public class BlockBuilder {
         return AbstractBlock.Settings.create().sounds(BlockSoundGroup.METAL).strength(2.0f);
     }
 
+    // Hardness -1 makes it unbreakable in survival (as bedrock is; creative can still break it), and the huge resistance makes it explosion-proof.
+    public static AbstractBlock.Settings getUnbreakableBlockSettings() {
+        return getBlockSettings().nonOpaque().strength(-1.0F, 3600000.0F);
+    }
+
     public Identifier getId() {
         return DWM.getIdentifier("block/" + this.getName());
     }

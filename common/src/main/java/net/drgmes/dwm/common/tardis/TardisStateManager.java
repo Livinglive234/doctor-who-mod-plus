@@ -96,6 +96,7 @@ public class TardisStateManager extends PersistentState {
     private boolean handbrakeLocked = false;
     private boolean fuelHarvesting = false;
     private boolean energyHarvesting = false;
+    private boolean flyoverEnabled = false;
 
     private int xyzStep = 1;
     private int fuelCapacity = 100;
@@ -178,6 +179,7 @@ public class TardisStateManager extends PersistentState {
         tag.putBoolean("handbrakeLocked", this.handbrakeLocked);
         tag.putBoolean("fuelHarvesting", this.fuelHarvesting);
         tag.putBoolean("energyHarvesting", this.energyHarvesting);
+        tag.putBoolean("flyoverEnabled", this.flyoverEnabled);
 
         tag.putInt("xyzStep", this.xyzStep);
         tag.putInt("fuelCapacity", this.fuelCapacity);
@@ -243,6 +245,7 @@ public class TardisStateManager extends PersistentState {
         this.handbrakeLocked = tag.getBoolean("handbrakeLocked");
         this.fuelHarvesting = tag.getBoolean("fuelHarvesting");
         this.energyHarvesting = tag.getBoolean("energyHarvesting");
+        this.flyoverEnabled = tag.getBoolean("flyoverEnabled");
 
         this.xyzStep = tag.getInt("xyzStep");
         this.fuelCapacity = tag.getInt("fuelCapacity");
@@ -298,6 +301,10 @@ public class TardisStateManager extends PersistentState {
 
     public ServerWorld getExteriorWorld() {
         return DimensionHelper.getWorld(this.getCurrentExteriorDimension(), this.world.getServer());
+    }
+
+    public ServerWorld getDestinationExteriorWorld() {
+        return DimensionHelper.getWorld(this.getDestinationExteriorDimension(), this.world.getServer());
     }
 
     public UUID getOwner() {
@@ -645,6 +652,15 @@ public class TardisStateManager extends PersistentState {
 
     public void setEnergyHarvesting(boolean flag) {
         this.energyHarvesting = flag;
+        this.markDirty();
+    }
+
+    public boolean isFlyoverEnabled() {
+        return this.flyoverEnabled;
+    }
+
+    public void setFlyoverEnabled(boolean flag) {
+        this.flyoverEnabled = flag;
         this.markDirty();
     }
 

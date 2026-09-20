@@ -5,5 +5,7 @@ public enum TardisExteriorAction {
     NORMALIZE,
     DEMAT,
     REMAT,
+    DEMAT_INSTANT,
+    REMAT_INSTANT,
     PULSE,
 }

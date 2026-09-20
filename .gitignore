@@ -35,3 +35,5 @@ libs/
 remappedSrc/
 # Datagen output (common/src/main/generated) is tracked; only its hash cache is ignored
 common/src/main/generated/.cache/
+# Local copy of the upstream mod, kept for reference only
+original-mod/

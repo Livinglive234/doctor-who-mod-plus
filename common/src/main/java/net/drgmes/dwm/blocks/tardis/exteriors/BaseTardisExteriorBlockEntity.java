@@ -9,13 +9,17 @@ import net.drgmes.dwm.setup.ModSounds;
 import net.drgmes.dwm.utils.helpers.DimensionHelper;
 import net.drgmes.dwm.utils.helpers.TardisHelper;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.particle.BlockStateParticleEffect;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 
 import java.util.UUID;
 
@@ -138,6 +142,32 @@ public abstract class BaseTardisExteriorBlockEntity extends BlockEntity {
         this.exteriorState = TardisExteriorState.PROCESS_REMAT;
         ModSounds.playTardisLandingSound(this.world, this.getPos());
         this.markDirty();
+    }
+
+    // Flyover takeoff: no fade. The shell stays as it is until the block is removed a couple of ticks later, and
+    // the flying copy appears in that very tick, so the handover is a single swap.
+    public void dematInstant() {
+        this.tick = -1;
+        ModSounds.playTardisTakeoffSound(this.world, this.getPos());
+        this.markDirty();
+    }
+
+    // Flyover landing: no fade either - the shell is just there, with a heavy thud and a puff of ground debris.
+    public void rematInstant() {
+        this.normalize();
+        ModSounds.playTardisGroundLandingSound(this.world, this.getPos());
+        this.spawnLandingDust();
+    }
+
+    // Server-side only; clients get the state from the packet.
+    private void spawnLandingDust() {
+        if (!(this.world instanceof ServerWorld serverWorld)) return;
+
+        BlockState ground = serverWorld.getBlockState(this.getPos().down());
+        if (ground.isAir() || !ground.getFluidState().isEmpty()) ground = Blocks.DIRT.getDefaultState();
+
+        Vec3d origin = Vec3d.ofBottomCenter(this.getPos()).add(0, 0.1, 0);
+        serverWorld.spawnParticles(new BlockStateParticleEffect(ParticleTypes.BLOCK, ground), origin.x, origin.y, origin.z, 60, 0.6, 0.1, 0.6, 0.15);
     }
 
     public void pulse() {

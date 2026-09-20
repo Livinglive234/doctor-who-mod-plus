@@ -109,6 +109,7 @@ public class TardisConsoleControlsStorage {
         this.values.put(TardisConsoleUnitControlRole.FUEL_HARVESTING, tardis.isFuelHarvesting());
         this.values.put(TardisConsoleUnitControlRole.ENERGY_HARVESTING, tardis.isEnergyHarvesting());
         this.values.put(TardisConsoleUnitControlRole.LIGHT, tardis.isLightEnabled());
+        this.values.put(TardisConsoleUnitControlRole.FLYOVER, tardis.isFlyoverEnabled());
         this.values.put(TardisConsoleUnitControlRole.DOORS, tardis.isDoorsOpened());
         this.values.put(TardisConsoleUnitControlRole.HANDBRAKE, tardis.isHandbrakeLocked());
         this.values.put(TardisConsoleUnitControlRole.FACING, switch (tardis.getDestinationExteriorFacing()) {
@@ -329,6 +330,16 @@ public class TardisConsoleControlsStorage {
                 yield true;
             }
 
+            case FLYOVER -> {
+                if (!materializationSystem.isMaterialized()) {
+                    this.values.put(TardisConsoleUnitControlRole.FLYOVER, tardis.isFlyoverEnabled());
+                    yield false;
+                }
+
+                tardis.setFlyoverEnabled((boolean) value);
+                yield true;
+            }
+
             case SHIELDS -> {
                 if (!materializationSystem.isMaterialized() || !tardis.setShieldsState((boolean) value)) {
                     this.values.put(TardisConsoleUnitControlRole.FUEL_HARVESTING, tardis.isFuelHarvesting());
@@ -457,7 +468,7 @@ public class TardisConsoleControlsStorage {
         }
 
         Text component = switch (controlRole) {
-            case DOORS, LIGHT, SHIELDS, SHIELDS_OXYGEN, SHIELDS_FIRE_PROOF, SHIELDS_MEDICAL, SHIELDS_MINING, SHIELDS_GRAVITATION, SHIELDS_SPECIAL, FUEL_HARVESTING, ENERGY_HARVESTING, HANDBRAKE -> Text.translatable(message + ((boolean) value ? ".active" : ".inactive"));
+            case DOORS, LIGHT, FLYOVER, SHIELDS, SHIELDS_OXYGEN, SHIELDS_FIRE_PROOF, SHIELDS_MEDICAL, SHIELDS_MINING, SHIELDS_GRAVITATION, SHIELDS_SPECIAL, FUEL_HARVESTING, ENERGY_HARVESTING, HANDBRAKE -> Text.translatable(message + ((boolean) value ? ".active" : ".inactive"));
             case DIM_PREV, DIM_NEXT -> Text.translatable(message, "§e" + tardis.getDestinationExteriorDimension().getValue().getPath().replace("_", " ").toUpperCase());
             case FACING -> Text.translatable(message, Text.translatable(message + "." + (tardis.getDestinationExteriorFacing().ordinal() - 2)));
             case XSET -> Text.translatable(message, "§e" + tardis.getDestinationExteriorPosition().getX());

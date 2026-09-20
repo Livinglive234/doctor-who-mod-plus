@@ -204,6 +204,8 @@ public final class ClientPackets {
                     case NORMALIZE -> tardisExteriorBlockEntity.normalize();
                     case DEMAT -> tardisExteriorBlockEntity.demat();
                     case REMAT -> tardisExteriorBlockEntity.remat();
+                    case DEMAT_INSTANT -> tardisExteriorBlockEntity.dematInstant();
+                    case REMAT_INSTANT -> tardisExteriorBlockEntity.rematInstant();
                     case PULSE -> tardisExteriorBlockEntity.pulse();
                 }
             }

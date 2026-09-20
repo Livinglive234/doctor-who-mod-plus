@@ -17,6 +17,7 @@ import net.minecraft.structure.StructureStart;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.*;
 import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.world.Heightmap;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.structure.Structure;
@@ -57,6 +58,17 @@ public class WorldHelper {
             case NORTH -> BlockRotation.CLOCKWISE_180;
             default -> BlockRotation.NONE;
         };
+    }
+
+    /**
+     * Whether there's open sky above a position, ignoring leaves. Anything else that stops motion counts as cover.
+     *
+     * @param ignoredHeight blocks directly above {@code pos} to disregard - 2 when the TARDIS itself stands there
+     * @return false for unloaded chunks: this never loads one, and unloaded terrain can't be judged
+     */
+    public static boolean isOpenToSky(World world, BlockPos pos, int ignoredHeight) {
+        if (!world.isChunkLoaded(pos)) return false;
+        return world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos.getX(), pos.getZ()) <= pos.getY() + ignoredHeight;
     }
 
     public static boolean checkBlockIsEmpty(BlockState blockState, boolean ignoreFluids) {

@@ -75,6 +75,10 @@
     "subtitle": "message.dwm.sound.tardis.land",
     "sounds": ["dwm:tardis/land"]
   },
+  "tardis_land_ground": {
+    "subtitle": "message.dwm.sound.tardis.land_ground",
+    "sounds": ["dwm:tardis/land_ground"]
+  },
   "tardis_takeoff": {
     "subtitle": "message.dwm.sound.tardis.takeoff",
     "sounds": ["dwm:tardis/takeoff"]

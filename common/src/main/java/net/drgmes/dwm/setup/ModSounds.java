@@ -23,6 +23,7 @@ public class ModSounds {
     public static final Supplier<SoundEvent> TARDIS_BELL = Registration.registerSoundEvent("tardis_bell");
     public static final Supplier<SoundEvent> TARDIS_FLIGHT = Registration.registerSoundEvent("tardis_flight");
     public static final Supplier<SoundEvent> TARDIS_LAND = Registration.registerSoundEvent("tardis_land");
+    public static final Supplier<SoundEvent> TARDIS_LAND_GROUND = Registration.registerSoundEvent("tardis_land_ground");
     public static final Supplier<SoundEvent> TARDIS_TAKEOFF = Registration.registerSoundEvent("tardis_takeoff");
 
     public static final Supplier<SoundEvent> TARDIS_CONTROL_1 = Registration.registerSoundEvent("tardis_control_1");
@@ -114,6 +115,15 @@ public class ModSounds {
 
     public static void playTardisLandingSound(World world, BlockPos blockPos, float volume) {
         playSound(world, blockPos, TARDIS_LAND.get(), volume, 1.0F);
+    }
+
+    // The heavy thud of a flyover slam landing. Mono on purpose: Minecraft only positions and fades mono sounds in 3D.
+    public static void playTardisGroundLandingSound(World world, BlockPos blockPos) {
+        playTardisGroundLandingSound(world, blockPos, 1.0F);
+    }
+
+    public static void playTardisGroundLandingSound(World world, BlockPos blockPos, float volume) {
+        playSound(world, blockPos, TARDIS_LAND_GROUND.get(), volume, 1.0F);
     }
 
     public static void playTardisFlightSound(World world, BlockPos blockPos) {
