@@ -222,6 +222,8 @@ public class TardisSystemFlight extends TardisBaseSystem {
         this.tardis.setFacing(this.tardis.getDestinationExteriorFacing(), true);
 
         materializationSystem.putCallback((flag) -> {
+            if (flag) this.tardis.raiseLandingShields();
+
             this.reset();
             this.applyCallbacks(flag);
 

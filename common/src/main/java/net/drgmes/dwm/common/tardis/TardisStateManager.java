@@ -47,6 +47,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class TardisStateManager extends PersistentState {
     private static final ChunkTicketType<ChunkPos> CHUNK_TICKET_TYPE = ChunkTicketType.create("dwm:tardis_loaded_chunks", Comparator.comparingLong(ChunkPos::toLong));
 
+    private static final int SHIELD_OXYGEN = 1;
+    private static final int SHIELD_FIRE_PROOF = 2;
+    private static final int SHIELD_MEDICAL = 4;
+    private static final int SHIELD_MINING = 8;
+    private static final int SHIELD_GRAVITATION = 16;
+    private static final int SHIELD_SPECIAL = 32;
+
     public static final int SYSTEM_COMPONENTS_CONTAINER_SIZE = 14;
     public static final int BATTERY_COMPONENTS_CONTAINER_SIZE = 0;
     public static final int UPGRADE_COMPONENTS_CONTAINER_SIZE = 0;
@@ -97,7 +104,9 @@ public class TardisStateManager extends PersistentState {
     private boolean fuelHarvesting = false;
     private boolean energyHarvesting = false;
     private boolean flyoverEnabled = false;
+    private boolean landingShieldsEnabled = false;
 
+    private int shieldsBeforeTakeoff = 0; // the special shields that were up when it last took off, as SHIELD_* bits
     private int xyzStep = 1;
     private int fuelCapacity = 100;
     private int fuelAmount = 0;
@@ -180,6 +189,8 @@ public class TardisStateManager extends PersistentState {
         tag.putBoolean("fuelHarvesting", this.fuelHarvesting);
         tag.putBoolean("energyHarvesting", this.energyHarvesting);
         tag.putBoolean("flyoverEnabled", this.flyoverEnabled);
+        tag.putBoolean("landingShieldsEnabled", this.landingShieldsEnabled);
+        tag.putInt("shieldsBeforeTakeoff", this.shieldsBeforeTakeoff);
 
         tag.putInt("xyzStep", this.xyzStep);
         tag.putInt("fuelCapacity", this.fuelCapacity);
@@ -246,6 +257,8 @@ public class TardisStateManager extends PersistentState {
         this.fuelHarvesting = tag.getBoolean("fuelHarvesting");
         this.energyHarvesting = tag.getBoolean("energyHarvesting");
         this.flyoverEnabled = tag.getBoolean("flyoverEnabled");
+        this.landingShieldsEnabled = tag.getBoolean("landingShieldsEnabled");
+        this.shieldsBeforeTakeoff = tag.getInt("shieldsBeforeTakeoff");
 
         this.xyzStep = tag.getInt("xyzStep");
         this.fuelCapacity = tag.getInt("fuelCapacity");
@@ -522,6 +535,43 @@ public class TardisStateManager extends PersistentState {
 
         this.markDirty();
         return true;
+    }
+
+    public boolean isLandingShieldsEnabled() {
+        return this.landingShieldsEnabled;
+    }
+
+    public void setLandingShieldsEnabled(boolean flag) {
+        this.landingShieldsEnabled = flag;
+        this.markDirty();
+    }
+
+    // Takeoff drops every shield, so which special ones were up is noted first, for the landing shields to raise again.
+    public void rememberSpecialShields() {
+        this.shieldsBeforeTakeoff = (this.shieldsOxygenEnabled ? SHIELD_OXYGEN : 0)
+            | (this.shieldsFireProofEnabled ? SHIELD_FIRE_PROOF : 0)
+            | (this.shieldsMedicalEnabled ? SHIELD_MEDICAL : 0)
+            | (this.shieldsMiningEnabled ? SHIELD_MINING : 0)
+            | (this.shieldsGravitationEnabled ? SHIELD_GRAVITATION : 0)
+            | (this.shieldsSpecialEnabled ? SHIELD_SPECIAL : 0);
+
+        this.markDirty();
+    }
+
+    // With the landing shields switch on, the shields come up once a flight has landed, and so do the special ones that were up before takeoff.
+    public void raiseLandingShields() {
+        if (!this.landingShieldsEnabled || this.shieldsEnabled || !this.getSystem(TardisSystemShields.class).isEnabled()) return;
+
+        this.shieldsEnabled = true;
+        this.shieldsOxygenEnabled = (this.shieldsBeforeTakeoff & SHIELD_OXYGEN) != 0;
+        this.shieldsFireProofEnabled = (this.shieldsBeforeTakeoff & SHIELD_FIRE_PROOF) != 0;
+        this.shieldsMedicalEnabled = (this.shieldsBeforeTakeoff & SHIELD_MEDICAL) != 0;
+        this.shieldsMiningEnabled = (this.shieldsBeforeTakeoff & SHIELD_MINING) != 0;
+        this.shieldsGravitationEnabled = (this.shieldsBeforeTakeoff & SHIELD_GRAVITATION) != 0;
+        this.shieldsSpecialEnabled = (this.shieldsBeforeTakeoff & SHIELD_SPECIAL) != 0;
+
+        ModSounds.playTardisShieldsOnSound(this.world, this.getMainConsolePosition());
+        this.markDirty();
     }
 
     public boolean isShieldsOxygenEnabled() {

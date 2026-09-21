@@ -2,6 +2,7 @@ package net.drgmes.dwm.entities.tardis.exteriors;
 
 import net.drgmes.dwm.DWM;
 import net.drgmes.dwm.common.tardis.exteriors.TardisExteriors;
+import net.drgmes.dwm.utils.sounds.FlyoverSounds;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.data.DataTracker;
@@ -19,9 +20,9 @@ import net.minecraft.world.World;
  *
  * <p>A timeline, driven by ticksElapsed, is up to three phases:
  * <ul>
- *   <li>departure - a heavy lift-off from the ground, or a descent from the sky when the takeoff was underground;</li>
+ *   <li>departure - a heavy lift-off from the ground, or a fade-in at flying height when the takeoff was underground;</li>
  *   <li>travel - a route, a streak, an approach or a fly-by (see {@link Kind});</li>
- *   <li>tail - how a route or drop ends over its target: a slam or a shoot-up.</li>
+ *   <li>tail - how a route or drop ends over its target: a slam, or a fade-out.</li>
  * </ul>
  * Speed is shaped to be slow wherever someone can see it well and fast out of sight.
  *
@@ -31,15 +32,15 @@ import net.minecraft.world.World;
 public class TardisFlyoverEntity extends Entity {
     /**
      * How a flyover begins: GROUND lifts off from the exterior's spot, matching its facing;
-     * SKY appears high above the spot and descends (the takeoff was underground).
+     * FADE_IN fades in at flying height above the spot (the takeoff was underground).
      */
-    public enum Departure { GROUND, SKY }
+    public enum Departure { GROUND, FADE_IN }
 
     /**
      * How a flyover ends over its target: SLAM plunges onto the landing spot, coming to rest facing the way the
-     * exterior will; SHOOT_UP rockets above the cloud layer before a normal materialization.
+     * exterior will; FADE_OUT fades away over the spot before a normal materialization.
      */
-    public enum Arrival { SLAM, SHOOT_UP }
+    public enum Arrival { SLAM, FADE_OUT }
 
     /**
      * ROUTE: glide from the takeoff spot to the target. STREAK: accelerate away toward the destination and vanish.
@@ -48,6 +49,9 @@ public class TardisFlyoverEntity extends Entity {
      * ASCENT: lift off straight up, out of sight (leaving for another dimension).
      */
     private enum Kind { ROUTE, STREAK, APPROACH, FLYBY, DROP, ASCENT }
+
+    /** What clients near it hear it make, following it around until it is gone: TAKEOFF for a takeoff, FLIGHT (a loop) for a fly-by. */
+    public enum Sound { NONE, TAKEOFF, FLIGHT }
 
     private static final TrackedData<String> EXTERIOR_TYPE = DataTracker.registerData(
         TardisFlyoverEntity.class,
@@ -61,9 +65,20 @@ public class TardisFlyoverEntity extends Entity {
         TrackedDataHandlerRegistry.FLOAT
     );
 
+    private static final TrackedData<Integer> SOUND = DataTracker.registerData(
+        TardisFlyoverEntity.class,
+        TrackedDataHandlerRegistry.INTEGER
+    );
+
+    // 0 is invisible, 1 fully opaque: how far along a fade-in or fade-out it is.
+    private static final TrackedData<Float> ALPHA = DataTracker.registerData(
+        TardisFlyoverEntity.class,
+        TrackedDataHandlerRegistry.FLOAT
+    );
+
     // ---- server-side timeline ----
     private Kind kind = Kind.ROUTE;
-    private Departure departure = Departure.SKY;
+    private Departure departure = Departure.FADE_IN;
     private Arrival arrival = null;
 
     private Vec3d startPos = Vec3d.ZERO;
@@ -71,8 +86,7 @@ public class TardisFlyoverEntity extends Entity {
     private Vec3d direction = Vec3d.ZERO;
     private double flybyHalf = 0;
     private double cruiseY = 0;
-    private double skyY = 0;
-    private double shootUpTopY = 0;
+    private double ascentTopY = 0;
 
     private int descentTicks = 0;
     private int travelTicks = 0;
@@ -123,6 +137,8 @@ public class TardisFlyoverEntity extends Entity {
     public void initDataTracker(DataTracker.Builder builder) {
         builder.add(EXTERIOR_TYPE, TardisExteriors.CAPSULE.name);
         builder.add(SPIN_ANGLE, 0F);
+        builder.add(ALPHA, 1F);
+        builder.add(SOUND, Sound.NONE.ordinal());
     }
 
     // Cosmetic and short-lived: not worth persisting across a chunk unload or restart mid-flight.
@@ -139,7 +155,7 @@ public class TardisFlyoverEntity extends Entity {
     // ////////////// //
 
     /**
-     * A flight that is one continuous flyover: [sky descent], glide to the target, then slam or shoot up.
+     * A flight that is one continuous flyover: [fade-in], glide to the target, then slam or fade out.
      * The timeline is sized to end when the real flight does.
      *
      * @param start       where the TARDIS took off (bottom-centre of its block)
@@ -155,10 +171,10 @@ public class TardisFlyoverEntity extends Entity {
 
         this.landingSpin = landingYaw;
         this.planEndOverTarget(flightTicks);
-        this.planSpin(departure == Departure.SKY);
+        this.planSpin(departure == Departure.FADE_IN);
     }
 
-    /** The start of a long hop: [sky descent], then accelerate away toward the destination and vanish. */
+    /** The start of a long hop: [fade-in], then accelerate away toward the destination and vanish. */
     public void configureDepartureStreak(Vec3d start, Vec3d destination, String exteriorTypeName, Departure departure, float startYaw) {
         this.kind = Kind.STREAK;
         this.configureDeparture(start, destination, exteriorTypeName, departure, startYaw);
@@ -170,7 +186,7 @@ public class TardisFlyoverEntity extends Entity {
 
     /**
      * The far end of a long hop: it starts out in the distance, streaks in and eases to a hover over the target,
-     * then slams down or shoots up.
+     * then slams down or fades out.
      *
      * @param origin where the TARDIS is flying in from - only used for the approach direction
      */
@@ -205,7 +221,7 @@ public class TardisFlyoverEntity extends Entity {
 
         this.dataTracker.set(EXTERIOR_TYPE, exteriorTypeName);
         this.startPos = start;
-        this.shootUpTopY = this.cloudTop(start.y);
+        this.ascentTopY = this.cloudTop(start.y);
         this.launch(start, startYaw);
     }
 
@@ -224,6 +240,7 @@ public class TardisFlyoverEntity extends Entity {
         this.totalTicks = this.travelTicks;
 
         this.dataTracker.set(EXTERIOR_TYPE, exteriorTypeName);
+        this.setSound(Sound.FLIGHT);
         this.startPos = pass;
         this.direction = horizontalDirection(direction);
         this.cruiseY = Math.max(pass.y, this.surfaceY(pass)) + DWM.FLYOVER.TERRAIN_CLEARANCE;
@@ -254,23 +271,23 @@ public class TardisFlyoverEntity extends Entity {
     // What the takeoff-shaped launches (routes and streaks) have in common.
     private void configureDeparture(Vec3d start, Vec3d target, String exteriorTypeName, Departure departure, float startYaw) {
         this.departure = departure;
-        this.descentTicks = departure == Departure.GROUND ? DWM.FLYOVER.LIFTOFF_DURATION : DWM.FLYOVER.SKY_DESCENT_DURATION;
+        this.descentTicks = departure == Departure.GROUND ? DWM.FLYOVER.LIFTOFF_DURATION : DWM.FLYOVER.FADE_IN_DURATION;
         this.spinRampTicks = DWM.FLYOVER.SPIN_RAMP;
 
         this.dataTracker.set(EXTERIOR_TYPE, exteriorTypeName);
         this.startPos = start;
         this.targetPos = target;
         this.cruiseY = this.cruiseAltitude(start, target);
-        this.skyY = this.cloudTop(this.surfaceY(start));
 
-        this.launch(departure == Departure.SKY ? new Vec3d(start.x, this.skyY, start.z) : start, startYaw);
+        if (departure == Departure.FADE_IN) this.setAlpha(0F);
+        this.launch(departure == Departure.FADE_IN ? new Vec3d(start.x, this.cruiseY, start.z) : start, startYaw);
     }
 
-    // Sizes the timeline of a route or an arrival, which end over the target: travel, then a slam or shoot-up.
+    // Sizes the timeline of a route or an arrival, which end over the target: travel, then a slam or a fade-out.
     private void planEndOverTarget(int flightTicks) {
         // A slam lingers on the landing spot for a moment after the flight ends, to overlap the exterior appearing.
         int slamHold = this.arrival == Arrival.SLAM ? DWM.FLYOVER.SLAM_HOLD : 0;
-        int fullTail = this.arrival == Arrival.SLAM ? DWM.FLYOVER.SLAM_DURATION + DWM.FLYOVER.SLAM_HOLD : DWM.FLYOVER.ASCENT_DURATION;
+        int fullTail = this.arrival == Arrival.SLAM ? DWM.FLYOVER.SLAM_DURATION + DWM.FLYOVER.SLAM_HOLD : DWM.FLYOVER.FADE_OUT_DURATION;
 
         this.totalTicks = Math.max(2, flightTicks) + slamHold;
         this.tailTicks = Math.min(fullTail, Math.max(1, this.totalTicks - this.descentTicks - 1));
@@ -311,15 +328,34 @@ public class TardisFlyoverEntity extends Entity {
         return this.dataTracker.get(SPIN_ANGLE);
     }
 
+    private void setAlpha(float alpha) {
+        this.dataTracker.set(ALPHA, alpha);
+    }
+
+    public void setSound(Sound sound) {
+        this.dataTracker.set(SOUND, sound.ordinal());
+    }
+
+    public Sound getSound() {
+        return Sound.values()[this.dataTracker.get(SOUND)];
+    }
+
+    // Clients start the sound when they learn what it is, which is when it comes into view.
+    @Override
+    public void onTrackedDataSet(TrackedData<?> data) {
+        super.onTrackedDataSet(data);
+        if (SOUND.equals(data) && this.getWorld().isClient && this.getSound() != Sound.NONE) FlyoverSounds.play(this);
+    }
+
+    /** How opaque to draw it: below 1 while it fades in or out. */
+    public float getAlpha() {
+        return this.dataTracker.get(ALPHA);
+    }
+
     /** The spin to render with, smoothed between ticks. Only meaningful on the client. */
     public float getSpinAngle(float tickDelta) {
         if (!this.clientSpinInited) return this.getSpinAngle();
         return MathHelper.lerp(tickDelta, this.clientPrevSpin, this.clientSpin);
-    }
-
-    /** How many ticks the flyover lasts. */
-    public int getLifetime() {
-        return this.totalTicks;
     }
 
     /** A slam that keeps resting on its spot after the flight ends, to overlap the exterior appearing. */
@@ -355,14 +391,12 @@ public class TardisFlyoverEntity extends Entity {
         else this.tickTail(t - this.descentTicks - this.travelTicks);
     }
 
-    // The vertical phase before travel - no rotation, it holds the facing it started with.
+    // The phase before travel - no rotation, it holds the facing it started with.
     private void tickDescent(int i) {
         float progress = (float) i / (float) this.descentTicks;
 
-        if (this.departure == Departure.SKY) {
-            // Straight down out of the sky.
-            float eased = 1F - (1F - progress) * (1F - progress);
-            this.setPosition(this.startPos.x, MathHelper.lerp(eased, this.skyY, this.cruiseY), this.startPos.z);
+        if (this.departure == Departure.FADE_IN) {
+            this.setAlpha(progress);
             return;
         }
 
@@ -377,7 +411,7 @@ public class TardisFlyoverEntity extends Entity {
     // about 0.6 seconds).
     private void tickAscent(int i) {
         float progress = (float) i / (float) this.totalTicks;
-        this.setPositionStraining(MathHelper.lerp(progress * progress * progress, this.startPos.y, this.shootUpTopY), progress, 0.4F);
+        this.setPositionStraining(MathHelper.lerp(progress * progress * progress, this.startPos.y, this.ascentTopY), progress, 0.4F);
     }
 
     // Puts it at the given height over its start, with a little strain-shake that dies away by `shakeUntil` progress.
@@ -434,7 +468,6 @@ public class TardisFlyoverEntity extends Entity {
         if (!this.tailStarted) {
             this.tailStarted = true;
             this.tailStartY = this.getY();
-            this.shootUpTopY = this.cloudTop(this.tailStartY);
         }
 
         if (this.arrival == Arrival.SLAM) {
@@ -446,9 +479,9 @@ public class TardisFlyoverEntity extends Entity {
             this.setPosition(this.targetPos.x, MathHelper.lerp(progress * progress, this.tailStartY, this.targetPos.y), this.targetPos.z);
         }
         else {
-            // Hold over the target and accelerate straight up, above the cloud layer well before the flight ends.
-            float progress = (float) j / (float) this.tailTicks;
-            this.setPosition(this.targetPos.x, MathHelper.lerp(progress * progress, this.tailStartY, this.shootUpTopY), this.targetPos.z);
+            // Hold over the target and fade away, gone before the exterior fades in below.
+            this.setAlpha(1F - (float) j / (float) this.tailTicks);
+            this.setPosition(this.targetPos.x, this.tailStartY, this.targetPos.z);
         }
     }
 

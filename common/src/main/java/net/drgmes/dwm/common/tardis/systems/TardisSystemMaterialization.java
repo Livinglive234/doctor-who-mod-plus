@@ -153,8 +153,15 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
         return true;
     }
 
+    // An instant demat or remat is only asked for through init(), by a flight. Called directly (a change of exterior),
+    // they always take the full fade.
+    private void clearInstantUnlessInited() {
+        if (this.step != EStep.INITED) this.instant = false;
+    }
+
     public boolean initDemat() {
         if (!this.isEnabled() || !this.isMaterialized || this.tick > 0) return false;
+        this.clearInstantUnlessInited();
 
         ServerWorld exteriorWorld = this.tardis.getExteriorWorld();
         if (exteriorWorld == null) return false;
@@ -165,6 +172,7 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
 
         this.tardis.setDoorsOpenState(false);
         this.tardis.setLightState(false);
+        this.tardis.rememberSpecialShields();
         this.tardis.setShieldsState(false);
         this.tardis.markConsoleTilesUpdated();
 
@@ -195,6 +203,7 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
 
     public boolean initRemat() {
         if (!this.isEnabled() || this.isMaterialized || this.tick > 0) return false;
+        this.clearInstantUnlessInited();
 
         ServerWorld exteriorWorld = this.tardis.getExteriorWorld();
         if (exteriorWorld == null) return false;

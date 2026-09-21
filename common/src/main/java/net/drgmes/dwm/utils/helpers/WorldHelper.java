@@ -61,14 +61,29 @@ public class WorldHelper {
     }
 
     /**
-     * Whether there's open sky above a position, ignoring leaves. Anything else that stops motion counts as cover.
+     * Whether there's open sky above a position, ignoring leaves and water (a TARDIS can drop into the sea). Anything
+     * else that stops motion counts as cover.
      *
      * @param ignoredHeight blocks directly above {@code pos} to disregard - 2 when the TARDIS itself stands there
      * @return false for unloaded chunks: this never loads one, and unloaded terrain can't be judged
      */
     public static boolean isOpenToSky(World world, BlockPos pos, int ignoredHeight) {
         if (!world.isChunkLoaded(pos)) return false;
-        return world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos.getX(), pos.getZ()) <= pos.getY() + ignoredHeight;
+
+        // The heightmap counts water as cover, so step down through it: what is left is the real cover, if any.
+        int limit = pos.getY() + ignoredHeight;
+        int coverTop = world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos.getX(), pos.getZ());
+        BlockPos.Mutable checked = new BlockPos.Mutable(pos.getX(), coverTop - 1, pos.getZ());
+
+        while (coverTop > limit) {
+            BlockState blockState = world.getBlockState(checked);
+            if (blockState.blocksMovement() || !blockState.getFluidState().isIn(FluidTags.WATER)) break;
+
+            coverTop--;
+            checked.move(Direction.DOWN);
+        }
+
+        return coverTop <= limit;
     }
 
     public static boolean checkBlockIsEmpty(BlockState blockState, boolean ignoreFluids) {

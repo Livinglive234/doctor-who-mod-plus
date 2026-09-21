@@ -7,6 +7,7 @@ import net.drgmes.dwm.blocks.tardis.exteriors.tardisexteriorpolicebox.models.Tar
 import net.drgmes.dwm.common.tardis.exteriors.TardisExteriors;
 import net.drgmes.dwm.compat.iris.Iris;
 import net.drgmes.dwm.setup.ModCompats;
+import net.drgmes.dwm.utils.helpers.CommonHelper;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
@@ -73,13 +74,18 @@ public class TardisFlyoverEntityRenderer extends EntityRenderer<TardisFlyoverEnt
         matrixStack.translate(0, visual.scale() * visual.yOffset(), 0);
         matrixStack.scale(visual.scale(), visual.scale() + visual.yScale(), visual.scale());
 
-        model.render(matrixStack, vertexConsumer, light, OverlayTexture.DEFAULT_UV, -1);
-        model.renderDoors(matrixStack, vertexConsumer, light, OverlayTexture.DEFAULT_UV, -1);
-
-        // The lamp always glows at full brightness. Under a shader pack the glow layer is skipped, as on the landed exterior.
+        // Shader packs ignore alpha, so under one a fade is the shell simply being there or not, switching halfway.
         boolean hasEnabledIrisShaders = ModCompats.iris() && Iris.isShaderPackInUse();
-        VertexConsumer lampConsumer = hasEnabledIrisShaders ? vertexConsumer : vertexConsumers.getBuffer(RenderLayer.getEntityAlpha(visual.layer().getId()));
-        model.renderLamp(matrixStack, lampConsumer, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, -1);
+        float alpha = entity.getAlpha();
+        if (hasEnabledIrisShaders ? alpha >= 0.5F : alpha > 0F) {
+            int color = CommonHelper.getColorWithAlpha(0x00FFFFFF, alpha);
+            model.render(matrixStack, vertexConsumer, light, OverlayTexture.DEFAULT_UV, color);
+            model.renderDoors(matrixStack, vertexConsumer, light, OverlayTexture.DEFAULT_UV, color);
+
+            // The lamp always glows at full brightness. Under a shader pack the glow layer is skipped, as on the landed exterior.
+            VertexConsumer lampConsumer = hasEnabledIrisShaders ? vertexConsumer : vertexConsumers.getBuffer(RenderLayer.getEntityAlpha(visual.layer().getId()));
+            model.renderLamp(matrixStack, lampConsumer, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, color);
+        }
 
         matrixStack.pop();
 

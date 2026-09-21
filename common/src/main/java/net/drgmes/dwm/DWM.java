@@ -51,13 +51,13 @@ public class DWM {
         // Take-off and landing
         public static final int LIFTOFF_DURATION = 40; // heavy: it hardly moves at first
         public static final float LIFTOFF_SHAKE = 0.05F;
-        public static final int SKY_DESCENT_DURATION = 25; // after a take-off from underground
+        public static final int FADE_IN_DURATION = 30; // after a take-off from underground
         public static final int SLAM_DURATION = 24;
         public static final int SLAM_LEAD = 3; // the plunge ends this long before the exterior appears, since clients see entities late
         public static final int SLAM_HOLD = 2; // and it rests on the spot this long after
         public static final int SLAM_THUD_LEAD = 5; // the thud is played this long before the exterior appears: its file opens with about a fifth of a second of near-silence
         public static final float SLAM_HEIGHT = 48.0F;
-        public static final int ASCENT_DURATION = 30; // shoot-up before a landing underground
+        public static final int FADE_OUT_DURATION = 30; // before a landing underground
         public static final int DEPARTURE_ASCENT_DURATION = 75; // straight-up departure of an interdimensional hop
         public static final int DROP_DURATION = 50; // straight-down arrival from another dimension
         public static final float DROP_HEIGHT = 128.0F;
@@ -96,7 +96,8 @@ public class DWM {
         // Takeoff sound of an instant takeoff: it can't outlast the flyover, or drown out the landing
         public static final int TAKEOFF_SOUND_FADE = 30; // inside, the fade at the end (1.5 seconds)
         public static final int TAKEOFF_SOUND_LANDING_MARGIN = 10; // inside, it is gone this long before the flight ends
-        public static final int TAKEOFF_SOUND_LIFTOFF_FADE = 100; // outside, it fades from liftoff over this long (5 seconds), or the flyover if that is shorter
+        public static final float TAKEOFF_SOUND_VOLUME = 3.0F; // outside it follows the flyover; a sound carries 16 blocks per 1.0 of volume
+        public static final float FLYBY_SOUND_VOLUME = 2.5F; // 40 blocks: it passes 24 up, so it is heard from about 30 to the side, loudest right overhead
 
         // Spin, only while flying horizontally
         public static final float SPIN_DEGREES_PER_TICK = 9.0F;

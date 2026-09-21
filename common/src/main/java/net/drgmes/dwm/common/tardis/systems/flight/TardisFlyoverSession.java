@@ -77,7 +77,13 @@ public class TardisFlyoverSession {
     /** Once demat is done: the flyover that carries the TARDIS away. */
     public void spawnDeparture(int flightTicks, boolean takeoffWasInstant) {
         TardisFlyoverEntity flyover = this.spawnDepartureFlyover(flightTicks, takeoffWasInstant);
-        if (takeoffWasInstant) this.playTakeoffSounds(flightTicks, flyover != null ? Math.min(flyover.getLifetime(), flightTicks) : flightTicks);
+
+        // An instant takeoff has no demat to carry the takeoff sound, so the flyover makes it, outside, following it
+        // away; inside it fades out before the flight ends, or it would drown out the landing.
+        if (takeoffWasInstant) {
+            if (flyover != null) flyover.setSound(TardisFlyoverEntity.Sound.TAKEOFF);
+            this.playInteriorTakeoffSound(flightTicks);
+        }
     }
 
     private TardisFlyoverEntity spawnDepartureFlyover(int flightTicks, boolean takeoffWasInstant) {
@@ -96,8 +102,8 @@ public class TardisFlyoverSession {
 
         if (interdimensional) return this.spawn(world, (entity) -> entity.configureAscent(start, exteriorType, startYaw));
 
-        // After a normal demat (underground) there is nothing to lift off from, so it comes down from the sky.
-        TardisFlyoverEntity.Departure departure = takeoffWasInstant ? TardisFlyoverEntity.Departure.GROUND : TardisFlyoverEntity.Departure.SKY;
+        // After a normal demat (underground) there is nothing to lift off from, so it fades in at flying height.
+        TardisFlyoverEntity.Departure departure = takeoffWasInstant ? TardisFlyoverEntity.Departure.GROUND : TardisFlyoverEntity.Departure.FADE_IN;
 
         if (mode == TardisFlyoverPlanner.Mode.FULL_ROUTE) {
             LandingPlan plan = this.planLanding();
@@ -109,17 +115,10 @@ public class TardisFlyoverSession {
         return this.spawn(world, (entity) -> entity.configureDepartureStreak(start, destination, exteriorType, departure, startYaw));
     }
 
-    // An instant takeoff has no demat to carry the takeoff sound, so it is played here: outside it fades out from
-    // liftoff, since the TARDIS is soon in the air and gone, and inside before the flight ends, or it would drown
-    // out the landing.
-    private void playTakeoffSounds(int flightTicks, int flyoverTicks) {
+    private void playInteriorTakeoffSound(int flightTicks) {
         int fade = DWM.FLYOVER.TAKEOFF_SOUND_FADE;
-
-        ServerWorld exteriorWorld = this.tardis.getExteriorWorld();
-        if (exteriorWorld != null) ModSounds.playTardisTakeoffSound(exteriorWorld, this.tardis.getCurrentExteriorPosition(), 1.0F, 0, Math.min(flyoverTicks, DWM.FLYOVER.TAKEOFF_SOUND_LIFTOFF_FADE));
-
-        int interiorEnd = flightTicks - DWM.FLYOVER.TAKEOFF_SOUND_LANDING_MARGIN;
-        ModSounds.playTardisTakeoffSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition(), 0.6F, Math.max(0, interiorEnd - fade), fade); // quieter in-room
+        int end = flightTicks - DWM.FLYOVER.TAKEOFF_SOUND_LANDING_MARGIN;
+        ModSounds.playTardisTakeoffSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition(), 0.6F, Math.max(0, end - fade), fade); // quieter in-room
     }
 
     /**
@@ -172,13 +171,13 @@ public class TardisFlyoverSession {
         this.plannedInstantLanding = true;
     }
 
-    // Slam onto the landing spot if it has open sky, otherwise shoot up above the clouds before a normal remat.
+    // Slam onto the landing spot if it has open sky, otherwise fade out over the spot before a normal remat.
     private LandingPlan planLanding() {
         TardisSystemMaterialization.LandingSpot spot = this.planner.findInstantLandingSpot(false);
         this.plannedInstantLanding = spot != null;
 
         if (spot != null) return new LandingPlan(TardisFlyoverEntity.Arrival.SLAM, Vec3d.ofBottomCenter(spot.pos()), spot.facing().asRotation());
-        return new LandingPlan(TardisFlyoverEntity.Arrival.SHOOT_UP, Vec3d.ofBottomCenter(this.tardis.getDestinationExteriorPosition()), this.tardis.getDestinationExteriorFacing().asRotation());
+        return new LandingPlan(TardisFlyoverEntity.Arrival.FADE_OUT, Vec3d.ofBottomCenter(this.tardis.getDestinationExteriorPosition()), this.tardis.getDestinationExteriorFacing().asRotation());
     }
 
     // ///////// //

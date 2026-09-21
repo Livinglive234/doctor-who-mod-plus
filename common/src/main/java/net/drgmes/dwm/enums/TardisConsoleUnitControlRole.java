@@ -24,6 +24,7 @@ public enum TardisConsoleUnitControlRole {
     SHIELDS_SPECIAL(TardisConsoleUnitControlValueType.BOOLEAN, "shields_special", "shields_special", 0, ModSounds.TARDIS_CONTROL_2, Set.of(TardisConsoleUnitControlFlags.REQUIRED_SHIELDS_SYSTEM, TardisConsoleUnitControlFlags.MUST_BE_MATERIALIZED, TardisConsoleUnitControlFlags.DEPENDS_ON_SHIELDS_ON)),
     LIGHT(TardisConsoleUnitControlValueType.BOOLEAN, "light", "light", 0, ModSounds.TARDIS_CONTROL_3, Set.of(TardisConsoleUnitControlFlags.MUST_BE_MATERIALIZED)),
     FLYOVER(TardisConsoleUnitControlValueType.BOOLEAN, "flyover", "flyover", 0, ModSounds.TARDIS_CONTROL_3, Set.of(TardisConsoleUnitControlFlags.MUST_BE_MATERIALIZED)),
+    LANDING_SHIELDS(TardisConsoleUnitControlValueType.BOOLEAN, "landing_shields", "landing_shields", 0, ModSounds.TARDIS_CONTROL_3, Set.of(TardisConsoleUnitControlFlags.REQUIRED_SHIELDS_SYSTEM)),
     FUEL_HARVESTING(TardisConsoleUnitControlValueType.BOOLEAN, "fuel", "fuel", 0, ModSounds.TARDIS_CONTROL_2, Set.of(TardisConsoleUnitControlFlags.MUST_BE_LANDED)),
     ENERGY_HARVESTING(TardisConsoleUnitControlValueType.BOOLEAN, "energy", "energy", 0, ModSounds.TARDIS_CONTROL_2, Set.of(TardisConsoleUnitControlFlags.MUST_BE_LANDED)),
     HANDBRAKE(TardisConsoleUnitControlValueType.BOOLEAN_DIRECT, "handbrake", "handbrake", 0, Set.of(TardisConsoleUnitControlFlags.DEPENDS_ON_OWNER)),
