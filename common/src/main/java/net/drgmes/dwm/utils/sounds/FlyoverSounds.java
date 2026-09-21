@@ -14,14 +14,15 @@ public final class FlyoverSounds {
     }
 
     public static void play(TardisFlyoverEntity entity) {
-        boolean flight = entity.getSound() == TardisFlyoverEntity.Sound.FLIGHT;
+        TardisFlyoverEntity.Sound sound = entity.getSound();
+        boolean takeoff = sound == TardisFlyoverEntity.Sound.TAKEOFF;
 
         MinecraftClient.getInstance().getSoundManager().play(new FlyoverSoundInstance(
-            flight ? ModSounds.TARDIS_FLIGHT.get() : ModSounds.TARDIS_TAKEOFF.get(),
+            takeoff ? ModSounds.TARDIS_TAKEOFF.get() : ModSounds.TARDIS_FLIGHT.get(),
             entity,
-            flight ? DWM.FLYOVER.FLYBY_SOUND_VOLUME : DWM.FLYOVER.TAKEOFF_SOUND_VOLUME,
-            flight ? DWM.FLYOVER.FLYBY_SOUND_RANGE : DWM.FLYOVER.TAKEOFF_SOUND_RANGE,
-            flight
+            takeoff ? DWM.FLYOVER.TAKEOFF_SOUND_VOLUME : DWM.FLYOVER.FLIGHT_SOUND_VOLUME,
+            takeoff ? DWM.FLYOVER.TAKEOFF_SOUND_RANGE : DWM.FLYOVER.FLIGHT_SOUND_RANGE,
+            sound == TardisFlyoverEntity.Sound.FLIGHT
         ));
     }
 }

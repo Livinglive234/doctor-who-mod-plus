@@ -81,7 +81,7 @@ public class TardisFlyoverSession {
         // An instant takeoff has no demat to carry the takeoff sound, so the flyover makes it, outside, following it
         // away; inside it fades out before the flight ends, or it would drown out the landing.
         if (takeoffWasInstant && !this.tardis.isSilentTravelEnabled()) {
-            if (flyover != null) flyover.setSound(TardisFlyoverEntity.Sound.TAKEOFF);
+            if (flyover != null) flyover.startTakeoffSound();
             this.playInteriorTakeoffSound(flightTicks);
         }
     }
@@ -268,7 +268,7 @@ public class TardisFlyoverSession {
             if (player == null || this.flybyServed.contains(flyby.player())) continue;
 
             Vec3d pass = new Vec3d(line.originX() + line.dirX() * flyby.along(), player.getY(), line.originZ() + line.dirZ() * flyby.along());
-            if (this.spawn(world, (entity) -> this.configureFlyby(entity, pass, direction, exteriorType, flyby.half())) == null) continue;
+            if (this.spawn(world, (entity) -> entity.configureFlyby(pass, direction, exteriorType, DWM.FLYOVER.FLYBY_DURATION, flyby.half())) == null) continue;
 
             this.flybyZones.add(flyby);
             extraTicks += (int) Math.ceil(TardisFlyoverPlanner.flybyExtraTicks(flyby.half(), normalSpeed));
@@ -294,16 +294,11 @@ public class TardisFlyoverSession {
         if (entity == null) return null;
 
         configure.accept(entity);
+        if (!this.tardis.isSilentTravelEnabled()) entity.startFlightSound();
         entity.keepChunkLoaded();
         world.spawnEntity(entity);
         this.entities.add(entity);
         return entity;
-    }
-
-    // A fly-by is heard as it passes, unless the TARDIS is travelling silently.
-    private void configureFlyby(TardisFlyoverEntity entity, Vec3d pass, Vec3d direction, String exteriorType, double half) {
-        entity.configureFlyby(pass, direction, exteriorType, DWM.FLYOVER.FLYBY_DURATION, half);
-        if (!this.tardis.isSilentTravelEnabled()) entity.setSound(TardisFlyoverEntity.Sound.FLIGHT);
     }
 
     private String exteriorTypeName() {

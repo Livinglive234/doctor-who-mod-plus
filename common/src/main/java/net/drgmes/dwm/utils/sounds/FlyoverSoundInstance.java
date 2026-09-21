@@ -22,6 +22,7 @@ public class FlyoverSoundInstance extends MovingSoundInstance {
     private final float maxVolume;
     private final float range;
     private int age = 0;
+    private int duration = 0; // the entity's SOUND_TICKS, read on the first tick: the entity changes it when it changes sound
 
     /**
      * @param maxVolume the volume right next to the entity
@@ -48,8 +49,10 @@ public class FlyoverSoundInstance extends MovingSoundInstance {
     public void tick() {
         this.age++;
 
-        int duration = this.entity.getSoundTicks();
-        if (this.entity.isRemoved() || (duration > 0 && this.age >= duration)) this.setDone();
+        // Not in the constructor: the entity's sound and its time arrive together, but not in that order.
+        if (this.age == 1) this.duration = this.entity.getSoundTicks();
+
+        if (this.entity.isRemoved() || (this.duration > 0 && this.age >= this.duration)) this.setDone();
         else this.follow();
     }
 
@@ -62,8 +65,7 @@ public class FlyoverSoundInstance extends MovingSoundInstance {
         double distance = MinecraftClient.getInstance().gameRenderer.getCamera().getPos().distanceTo(this.entity.getPos());
         float volume = this.maxVolume * MathHelper.clamp(1F - (float) (distance / this.range), 0F, 1F);
 
-        int duration = this.entity.getSoundTicks();
-        if (duration > 0) volume *= MathHelper.clamp((float) (duration - this.age) / DWM.FLYOVER.TAKEOFF_SOUND_END_FADE, 0F, 1F);
+        if (this.duration > 0) volume *= MathHelper.clamp((float) (this.duration - this.age) / DWM.FLYOVER.SOUND_END_FADE, 0F, 1F);
 
         this.volume = volume;
     }

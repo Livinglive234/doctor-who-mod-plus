@@ -55,8 +55,13 @@ public class TardisFlyoverEntity extends Entity {
      */
     private enum Kind { ROUTE, STREAK, APPROACH, FLYBY, DROP, ASCENT }
 
-    /** What clients near it hear it make, following it around until it is gone: TAKEOFF for a takeoff, FLIGHT (a loop) for a fly-by. */
-    public enum Sound { NONE, TAKEOFF, FLIGHT }
+    /**
+     * What clients near it hear it make, following it around: TAKEOFF for a takeoff, FLIGHT (a loop) for a fly-by,
+     * FLIGHT_ONCE for the single whoosh of coming in or going out. (A short hop loops FLIGHT for as long as it moves
+     * sideways.) It changes sound as it goes, so a new one is
+     * started each time it changes.
+     */
+    public enum Sound { NONE, TAKEOFF, FLIGHT, FLIGHT_ONCE }
 
     // Keeps the chunk it is over loaded and ticking, as an ender pearl does; without it a flyover over ground nobody is
     // near freezes there, and the flight goes on without it.
@@ -108,6 +113,8 @@ public class TardisFlyoverEntity extends Entity {
     private int tailTicks = 0;
     private int totalTicks = 1;
     private int ticksElapsed = 0;
+    private int whooshTick = -1; // when it starts its flight sound, if it is to make one
+    private int whooshTicks = 0; // and for how long, at most
 
     private boolean tailStarted = false;
     private double tailStartY = 0;
@@ -344,15 +351,73 @@ public class TardisFlyoverEntity extends Entity {
     }
 
     /**
-     * Makes the entity carry a sound. Call it once the timeline is set up: a takeoff sound lasts through the departure
+     * Has the entity make its takeoff sound. Call it once the timeline is set up: it lasts through the departure
      * (the whole ascent, if it is going straight up) and no longer, so it stays at the takeoff and can't ride along
-     * to a landing; a fly-by's lasts as long as the fly-by.
+     * to a landing.
      */
-    public void setSound(Sound sound) {
-        int ticks = sound != Sound.TAKEOFF ? 0 : (this.kind == Kind.ASCENT ? this.totalTicks : this.departureTicks);
+    public void startTakeoffSound() {
+        this.setSound(Sound.TAKEOFF, this.kind == Kind.ASCENT ? this.totalTicks : this.departureTicks);
+    }
 
+    /**
+     * Has the entity make its flight sound as it flies. A fly-by's loops for as long as it is there, and so does a
+     * short hop's (a route), which is in sight the whole way, for as long as it moves sideways. The others make one
+     * whoosh, timed to end as they slam down or disappear: by the time a landing has come to rest above its target,
+     * before the thud of a drop, at the moment it vanishes when it is going away.
+     * <p>
+     * Apart from a drop, which falls, it is only heard while the flyover moves sideways: not while it fades in or
+     * lifts off, and not at all for a straight-up ascent. Call it once the timeline is set up.
+     */
+    public void startFlightSound() {
+        switch (this.kind) {
+            case ASCENT -> { }
+            case FLYBY -> this.setSound(Sound.FLIGHT, 0);
+            default -> this.scheduleFlightSound();
+        }
+    }
+
+    // SOUND_TICKS is set first, but a client can't count on getting them in that order: see FlyoverSoundInstance.
+    private void setSound(Sound sound, int ticks) {
         this.dataTracker.set(SOUND_TICKS, ticks);
         this.dataTracker.set(SOUND, sound.ordinal());
+    }
+
+    private void scheduleFlightSound() {
+        int end = switch (this.kind) {
+            case ROUTE, APPROACH -> this.departureTicks + this.movingTick(true);
+            case DROP -> this.totalTicks - DWM.FLYOVER.SLAM_HOLD - DWM.FLYOVER.SLAM_THUD_LEAD;
+            default -> this.totalTicks; // a departure streak vanishes at the end of its timeline
+        };
+
+        int start = this.kind == Kind.ROUTE
+            ? this.departureTicks + this.movingTick(false)
+            : Math.max(this.kind == Kind.DROP ? 1 : this.departureTicks + 1, end - DWM.TIMINGS.FLIGHT_LOOP); // the sound is one FLIGHT_LOOP long
+        if (end <= start) return;
+
+        this.whooshTick = start;
+        this.whooshTicks = this.kind == Kind.ROUTE ? end - start : Math.min(DWM.TIMINGS.FLIGHT_LOOP, end - start);
+    }
+
+    // The flight sound starts, when the entity has got that far. It is cut short only if the moving part is shorter than the sound.
+    private void tickFlightSound() {
+        if (this.ticksElapsed != this.whooshTick) return;
+
+        if (this.kind == Kind.ROUTE) this.setSound(Sound.FLIGHT, this.whooshTicks);
+        else this.setSound(Sound.FLIGHT_ONCE, this.whooshTicks < DWM.TIMINGS.FLIGHT_LOOP ? this.whooshTicks : 0);
+    }
+
+    // The first (or last) tick of travel it moves at any real pace. It eases in over the start of a route and out over
+    // its target, creeping at each end, and the sound is only heard for the movement in between.
+    private int movingTick(boolean last) {
+        double distance = Math.hypot(this.targetPos.x - this.startPos.x, this.targetPos.z - this.startPos.z);
+
+        for (int n = 1; n <= this.travelTicks; n++) {
+            int i = last ? this.travelTicks - n + 1 : n;
+            double step = distance * (this.travelEase((float) i / this.travelTicks) - this.travelEase((float) (i - 1) / this.travelTicks));
+            if (step >= DWM.FLYOVER.WHOOSH_STOP_SPEED) return i;
+        }
+
+        return last ? 1 : this.travelTicks;
     }
 
     public int getSoundTicks() {
@@ -406,6 +471,8 @@ public class TardisFlyoverEntity extends Entity {
             this.discard();
             return;
         }
+
+        this.tickFlightSound();
 
         int t = this.ticksElapsed;
         if (this.kind == Kind.ASCENT) this.tickAscent(t);
@@ -480,9 +547,7 @@ public class TardisFlyoverEntity extends Entity {
             default -> {
                 // A route eases in and out. An approach is already at speed, so it only eases out - cubically,
                 // spending most of its time slow and close to the landing spot, where it can be seen.
-                float eased = this.kind == Kind.APPROACH
-                    ? 1F - (1F - progress) * (1F - progress) * (1F - progress)
-                    : MathHelper.clamp(progress * progress * (3F - 2F * progress), 0F, 1F);
+                float eased = this.travelEase(progress);
 
                 double x = MathHelper.lerp(eased, this.startPos.x, this.targetPos.x);
                 double z = MathHelper.lerp(eased, this.startPos.z, this.targetPos.z);
@@ -495,6 +560,13 @@ public class TardisFlyoverEntity extends Entity {
 
         // Rotating is what horizontal flight looks like, so this is the only phase that spins.
         this.spinDuringTravel(i);
+    }
+
+    // How far along its way to the target it is, 0 to 1, for how far through the travel phase.
+    private float travelEase(float progress) {
+        return this.kind == Kind.APPROACH
+            ? 1F - (1F - progress) * (1F - progress) * (1F - progress)
+            : MathHelper.clamp(progress * progress * (3F - 2F * progress), 0F, 1F);
     }
 
     // The tail is all vertical movement: the model is already at rest facing its landing direction.

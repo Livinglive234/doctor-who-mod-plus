@@ -587,7 +587,13 @@ public class TardisStateManager extends PersistentState {
     }
 
     // With the landing shields switch on, the shields come up once a flight has landed, and so do the special ones that were up before takeoff.
-    public void raiseLandingShields() {
+    /** What every landing after a flight does: raise the shields, if it is to, and stand the emergency return down - it is for one trip. */
+    public void onFlightLanded() {
+        this.raiseLandingShields();
+        this.setEmergencyReturnEnabled(false);
+    }
+
+    private void raiseLandingShields() {
         if (!this.landingShieldsEnabled || this.shieldsEnabled || !this.getSystem(TardisSystemShields.class).isEnabled()) return;
 
         this.shieldsEnabled = true;
@@ -1011,10 +1017,14 @@ public class TardisStateManager extends PersistentState {
         chunkManager.removeTicket(CHUNK_TICKET_TYPE, pos, 3, pos);
     }
 
+    /** Whether it is taking off, flying or landing. */
+    public boolean isTravelInProgress() {
+        return this.getSystem(TardisSystemMaterialization.class).inProgress() || this.getSystem(TardisSystemFlight.class).inProgress();
+    }
+
     // Silent travel leaves and arrives without the exterior being heard, so the doors closing for takeoff make no sound.
     private boolean isTravellingSilently() {
-        return this.isSilentTravelEnabled()
-            && (this.getSystem(TardisSystemMaterialization.class).inProgress() || this.getSystem(TardisSystemFlight.class).inProgress());
+        return this.isSilentTravelEnabled() && this.isTravelInProgress();
     }
 
     private void updateExterior() {

@@ -223,10 +223,7 @@ public class TardisSystemFlight extends TardisBaseSystem {
 
         materializationSystem.putCallback((flag) -> {
             if (flag) {
-                this.tardis.raiseLandingShields();
-
-                // It is for one trip: the lever has to be thrown again for the next
-                this.tardis.setEmergencyReturnEnabled(false);
+                this.tardis.onFlightLanded();
 
                 // Silent travel makes no sound at all but this: the thud of arriving, inside, whatever the landing.
                 if (this.tardis.isSilentTravelEnabled()) ModSounds.playTardisGroundLandingSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition());
