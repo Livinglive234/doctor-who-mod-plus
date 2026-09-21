@@ -59,6 +59,7 @@ public class TardisStateManager extends PersistentState {
     public static final int UPGRADE_COMPONENTS_CONTAINER_SIZE = 0;
 
     private final Map<Class<? extends TardisBaseSystem>, TardisBaseSystem> systems = new LinkedHashMap<>();
+    private final TardisEmergencyReturn emergencyReturn = new TardisEmergencyReturn(this);
     private final Map<BlockPos, BaseTardisConsoleUnitBlockEntity> consoleTiles = new LinkedHashMap<>();
     private final Map<BlockPos, BaseTardisDoorsBlockEntity> doorsTiles = new LinkedHashMap<>();
 
@@ -106,6 +107,7 @@ public class TardisStateManager extends PersistentState {
     private boolean flyoverEnabled = false;
     private boolean landingShieldsEnabled = false;
     private boolean silentTravelEnabled = false;
+    private boolean emergencyReturnEnabled = false;
 
     private int shieldsBeforeTakeoff = 0; // the special shields that were up when it last took off, as SHIELD_* bits
     private int xyzStep = 1;
@@ -192,6 +194,7 @@ public class TardisStateManager extends PersistentState {
         tag.putBoolean("flyoverEnabled", this.flyoverEnabled);
         tag.putBoolean("landingShieldsEnabled", this.landingShieldsEnabled);
         tag.putBoolean("silentTravelEnabled", this.silentTravelEnabled);
+        tag.putBoolean("emergencyReturnEnabled", this.emergencyReturnEnabled);
         tag.putInt("shieldsBeforeTakeoff", this.shieldsBeforeTakeoff);
 
         tag.putInt("xyzStep", this.xyzStep);
@@ -261,6 +264,7 @@ public class TardisStateManager extends PersistentState {
         this.flyoverEnabled = tag.getBoolean("flyoverEnabled");
         this.landingShieldsEnabled = tag.getBoolean("landingShieldsEnabled");
         this.silentTravelEnabled = tag.getBoolean("silentTravelEnabled");
+        this.emergencyReturnEnabled = tag.getBoolean("emergencyReturnEnabled");
         this.shieldsBeforeTakeoff = tag.getInt("shieldsBeforeTakeoff");
 
         this.xyzStep = tag.getInt("xyzStep");
@@ -549,12 +553,24 @@ public class TardisStateManager extends PersistentState {
         this.markDirty();
     }
 
+    // The levers below need the part they are linked to: taking it out turns them off, and putting it back finds them as they were left.
     public boolean isSilentTravelEnabled() {
-        return this.silentTravelEnabled;
+        return this.silentTravelEnabled && this.getSystem(TardisSystemMaterialization.class).isEnabled();
     }
 
     public void setSilentTravelEnabled(boolean flag) {
         this.silentTravelEnabled = flag;
+        this.markDirty();
+    }
+
+    public boolean isEmergencyReturnEnabled() {
+        return this.emergencyReturnEnabled
+            && this.getSystem(TardisSystemMaterialization.class).isEnabled()
+            && this.getSystem(TardisSystemFlight.class).isEnabled();
+    }
+
+    public void setEmergencyReturnEnabled(boolean flag) {
+        this.emergencyReturnEnabled = flag;
         this.markDirty();
     }
 
@@ -715,7 +731,7 @@ public class TardisStateManager extends PersistentState {
     }
 
     public boolean isFlyoverEnabled() {
-        return this.flyoverEnabled;
+        return this.flyoverEnabled && this.getSystem(TardisSystemFlight.class).isEnabled();
     }
 
     public void setFlyoverEnabled(boolean flag) {
@@ -947,6 +963,7 @@ public class TardisStateManager extends PersistentState {
     @SuppressWarnings("UnstableApiUsage")
     public void tick() {
         this.systems.values().forEach(TardisBaseSystem::tick);
+        this.emergencyReturn.tick();
 
         if (this.updatedExterior) this.updateExterior();
         if (this.updatedDoorsTiles) this.updateDoorsTiles();
@@ -996,7 +1013,7 @@ public class TardisStateManager extends PersistentState {
 
     // Silent travel leaves and arrives without the exterior being heard, so the doors closing for takeoff make no sound.
     private boolean isTravellingSilently() {
-        return this.silentTravelEnabled
+        return this.isSilentTravelEnabled()
             && (this.getSystem(TardisSystemMaterialization.class).inProgress() || this.getSystem(TardisSystemFlight.class).inProgress());
     }
 

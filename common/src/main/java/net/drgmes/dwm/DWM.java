@@ -37,6 +37,10 @@ public class DWM {
         public static final int RECONSTRUCTION_NOTIFICATION = 40;
 
         public static final int SONIC_DEVICE_TIMEOUT = 4;
+
+        // The emergency return: one toll of the cloister bell, and how long it is until the next
+        public static final int EMERGENCY_CHIME_INTERVAL = 65; // 3.25s, the length of the toll's sound
+        public static final int EMERGENCY_HOME_RADIUS = 20; // how far from the owner's bed it may land
     }
 
     // The flying TARDIS shown while the flyover lever is on - the design is in CHANGELOG.md.

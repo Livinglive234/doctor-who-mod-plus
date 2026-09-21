@@ -419,18 +419,26 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
      * @return the spot, or null if there is no safe one
      */
     public LandingSpot findLandingSpot(ServerWorld exteriorWorld, BlockPos exteriorBlockPos, Direction exteriorFacing) {
+        return this.findLandingSpot(exteriorWorld, exteriorBlockPos, exteriorFacing, this.verticalScanning);
+    }
+
+    /**
+     * The same search with another scanning mode, for a trip that must not depend on how the console is set. A spot
+     * found this way is safe in every mode, since each of them checks the requested position first.
+     */
+    public LandingSpot findLandingSpot(ServerWorld exteriorWorld, BlockPos exteriorBlockPos, Direction exteriorFacing, TardisVerticalScanning verticalScanning) {
         LandingSpot safeSpot;
 
-        if (this.verticalScanning == TardisVerticalScanning.TOP) {
+        if (verticalScanning == TardisVerticalScanning.TOP) {
             safeSpot = this.getSafeSpot(exteriorWorld, exteriorBlockPos, exteriorFacing, TardisVerticalScanning.TOP);
             if (safeSpot == null) safeSpot = this.getSafeSpot(exteriorWorld, exteriorBlockPos, exteriorFacing, TardisVerticalScanning.BOTTOM);
         }
-        else if (this.verticalScanning == TardisVerticalScanning.BOTTOM) {
+        else if (verticalScanning == TardisVerticalScanning.BOTTOM) {
             safeSpot = this.getSafeSpot(exteriorWorld, exteriorBlockPos, exteriorFacing, TardisVerticalScanning.BOTTOM);
             if (safeSpot == null) safeSpot = this.getSafeSpot(exteriorWorld, exteriorBlockPos, exteriorFacing, TardisVerticalScanning.TOP);
         }
         else {
-            safeSpot = this.getSafeSpot(exteriorWorld, exteriorBlockPos, exteriorFacing, this.verticalScanning);
+            safeSpot = this.getSafeSpot(exteriorWorld, exteriorBlockPos, exteriorFacing, verticalScanning);
         }
 
         return safeSpot;

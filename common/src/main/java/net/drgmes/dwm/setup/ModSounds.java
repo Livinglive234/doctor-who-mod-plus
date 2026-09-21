@@ -26,6 +26,7 @@ public class ModSounds {
     public static final Supplier<SoundEvent> TARDIS_BROKEN_FLARING = Registration.registerSoundEvent("tardis_broken_flaring");
     public static final Supplier<SoundEvent> TARDIS_ERROR = Registration.registerSoundEvent("tardis_error");
     public static final Supplier<SoundEvent> TARDIS_BELL = Registration.registerSoundEvent("tardis_bell");
+    public static final Supplier<SoundEvent> TARDIS_CLOISTER_BELL = Registration.registerSoundEvent("tardis_cloister_bell");
     public static final Supplier<SoundEvent> TARDIS_FLIGHT = Registration.registerSoundEvent("tardis_flight");
     public static final Supplier<SoundEvent> TARDIS_LAND = Registration.registerSoundEvent("tardis_land");
     public static final Supplier<SoundEvent> TARDIS_LAND_GROUND = Registration.registerSoundEvent("tardis_land_ground");
@@ -147,6 +148,11 @@ public class ModSounds {
 
     public static void playTardisBellSound(World world, BlockPos blockPos) {
         playSound(world, blockPos, TARDIS_BELL.get(), 1.0F, 1.0F);
+    }
+
+    // One toll of the cloister bell, mono so that it is heard from where it is. It lasts DWM.TIMINGS.EMERGENCY_CHIME_INTERVAL.
+    public static void playTardisCloisterBellSound(World world, BlockPos blockPos) {
+        playSound(world, blockPos, TARDIS_CLOISTER_BELL.get(), 1.0F, 1.0F);
     }
 
     public static void playSonicSunglassesMainSound(World world, BlockPos blockPos) {
