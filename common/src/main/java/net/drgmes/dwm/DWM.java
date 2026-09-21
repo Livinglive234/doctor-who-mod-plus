@@ -93,11 +93,14 @@ public class DWM {
         public static final float DROP_PLAYER_RADIUS = 128.0F;
         public static final float RENDER_DISTANCE = 256.0F; // vanilla would cull an entity this small at about 96
 
-        // Takeoff sound of an instant takeoff: it can't outlast the flyover, or drown out the landing
+        // Sounds of the flyover: the takeoff's, which inside can't drown out the landing, and a fly-by's
         public static final int TAKEOFF_SOUND_FADE = 30; // inside, the fade at the end (1.5 seconds)
         public static final int TAKEOFF_SOUND_LANDING_MARGIN = 10; // inside, it is gone this long before the flight ends
-        public static final float TAKEOFF_SOUND_VOLUME = 3.0F; // outside it follows the flyover; a sound carries 16 blocks per 1.0 of volume
-        public static final float FLYBY_SOUND_VOLUME = 2.5F; // 40 blocks: it passes 24 up, so it is heard from about 30 to the side, loudest right overhead
+        // Outside they follow the flyover, quieter the further it is (range in blocks, down to nothing)
+        public static final float TAKEOFF_SOUND_VOLUME = 1.0F;
+        public static final float TAKEOFF_SOUND_RANGE = TERRAIN_CLEARANCE; // gone by the time it has risen to flying height
+        public static final float FLYBY_SOUND_VOLUME = 0.6F;
+        public static final float FLYBY_SOUND_RANGE = 40.0F; // it passes 24 up, so it is heard from about 30 to the side, loudest right overhead
 
         // Spin, only while flying horizontally
         public static final float SPIN_DEGREES_PER_TICK = 9.0F;

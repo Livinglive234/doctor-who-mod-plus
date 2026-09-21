@@ -88,7 +88,7 @@ public class TardisFlyoverEntity extends Entity {
     private double cruiseY = 0;
     private double ascentTopY = 0;
 
-    private int descentTicks = 0;
+    private int departureTicks = 0;
     private int travelTicks = 0;
     private int tailTicks = 0;
     private int totalTicks = 1;
@@ -181,7 +181,7 @@ public class TardisFlyoverEntity extends Entity {
 
         this.direction = horizontalDirection(destination.subtract(start));
         this.travelTicks = DWM.FLYOVER.STREAK_DURATION;
-        this.totalTicks = this.descentTicks + this.travelTicks;
+        this.totalTicks = this.departureTicks + this.travelTicks;
     }
 
     /**
@@ -221,7 +221,7 @@ public class TardisFlyoverEntity extends Entity {
 
         this.dataTracker.set(EXTERIOR_TYPE, exteriorTypeName);
         this.startPos = start;
-        this.ascentTopY = this.cloudTop(start.y);
+        this.ascentTopY = Math.max(DWM.FLYOVER.CLOUD_LEVEL, start.y) + DWM.FLYOVER.ASCENT_CLOUD_CLEARANCE;
         this.launch(start, startYaw);
     }
 
@@ -271,7 +271,7 @@ public class TardisFlyoverEntity extends Entity {
     // What the takeoff-shaped launches (routes and streaks) have in common.
     private void configureDeparture(Vec3d start, Vec3d target, String exteriorTypeName, Departure departure, float startYaw) {
         this.departure = departure;
-        this.descentTicks = departure == Departure.GROUND ? DWM.FLYOVER.LIFTOFF_DURATION : DWM.FLYOVER.FADE_IN_DURATION;
+        this.departureTicks = departure == Departure.GROUND ? DWM.FLYOVER.LIFTOFF_DURATION : DWM.FLYOVER.FADE_IN_DURATION;
         this.spinRampTicks = DWM.FLYOVER.SPIN_RAMP;
 
         this.dataTracker.set(EXTERIOR_TYPE, exteriorTypeName);
@@ -290,8 +290,8 @@ public class TardisFlyoverEntity extends Entity {
         int fullTail = this.arrival == Arrival.SLAM ? DWM.FLYOVER.SLAM_DURATION + DWM.FLYOVER.SLAM_HOLD : DWM.FLYOVER.FADE_OUT_DURATION;
 
         this.totalTicks = Math.max(2, flightTicks) + slamHold;
-        this.tailTicks = Math.min(fullTail, Math.max(1, this.totalTicks - this.descentTicks - 1));
-        this.travelTicks = Math.max(1, this.totalTicks - this.descentTicks - this.tailTicks);
+        this.tailTicks = Math.min(fullTail, Math.max(1, this.totalTicks - this.departureTicks - 1));
+        this.travelTicks = Math.max(1, this.totalTicks - this.departureTicks - this.tailTicks);
         this.settleTicks = Math.min(DWM.FLYOVER.SPIN_SETTLE_DURATION, Math.max(1, this.travelTicks / 2));
     }
 
@@ -306,10 +306,6 @@ public class TardisFlyoverEntity extends Entity {
 
     private double cruiseAltitude(Vec3d start, Vec3d target) {
         return Math.max(Math.max(start.y, this.surfaceY(start)), target.y) + DWM.FLYOVER.TERRAIN_CLEARANCE;
-    }
-
-    private double cloudTop(double y) {
-        return Math.max(DWM.FLYOVER.CLOUD_LEVEL, y) + DWM.FLYOVER.ASCENT_CLOUD_CLEARANCE;
     }
 
     // ///////// //
@@ -386,14 +382,14 @@ public class TardisFlyoverEntity extends Entity {
 
         int t = this.ticksElapsed;
         if (this.kind == Kind.ASCENT) this.tickAscent(t);
-        else if (t <= this.descentTicks) this.tickDescent(t);
-        else if (t <= this.descentTicks + this.travelTicks) this.tickTravel(t - this.descentTicks);
-        else this.tickTail(t - this.descentTicks - this.travelTicks);
+        else if (t <= this.departureTicks) this.tickDeparture(t);
+        else if (t <= this.departureTicks + this.travelTicks) this.tickTravel(t - this.departureTicks);
+        else this.tickTail(t - this.departureTicks - this.travelTicks);
     }
 
     // The phase before travel - no rotation, it holds the facing it started with.
-    private void tickDescent(int i) {
-        float progress = (float) i / (float) this.descentTicks;
+    private void tickDeparture(int i) {
+        float progress = (float) i / (float) this.departureTicks;
 
         if (this.departure == Departure.FADE_IN) {
             this.setAlpha(progress);

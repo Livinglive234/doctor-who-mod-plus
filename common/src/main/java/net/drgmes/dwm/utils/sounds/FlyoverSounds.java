@@ -20,6 +20,7 @@ public final class FlyoverSounds {
             flight ? ModSounds.TARDIS_FLIGHT.get() : ModSounds.TARDIS_TAKEOFF.get(),
             entity,
             flight ? DWM.FLYOVER.FLYBY_SOUND_VOLUME : DWM.FLYOVER.TAKEOFF_SOUND_VOLUME,
+            flight ? DWM.FLYOVER.FLYBY_SOUND_RANGE : DWM.FLYOVER.TAKEOFF_SOUND_RANGE,
             flight
         ));
     }
