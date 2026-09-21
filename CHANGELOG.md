@@ -4,6 +4,10 @@ Fork changes on top of DrGmes' Doctor Who Mod (Architectury multi-loader mod: `c
 
 Build: there is no Gradle wrapper. Use Gradle 8.14 with JDK 21, e.g. `gradle build`. Datagen is `gradle :fabric:runDatagen`; its output (`common/src/main/generated`) is tracked in git, so re-run it and commit the result whenever recipes, blocks or worldgen builders change.
 
+## 1.0.35 — (in progress)
+
+- **Silent Travel lever** (`SILENT_TRAVEL`), next to Landing Shields (`control_lever_4`, hotspot `(-0.725, 0.605, 0.0875)`): with it on, the TARDIS travels without a sound. Nothing plays for a demat or remat inside or outside (including the interior takeoff, landing and in-flight loop sounds), and a flyover makes none either: no takeoff sound, no fly-by sound, no early exterior thud. The exterior light no longer comes back on by itself when it lands (it still goes off for takeoff), so a lit lamp doesn't give it away; the lever turns it on. The exterior doors closing for takeoff make no sound either. Interior sounds that aren't travel (lever flips, shields, doors) are unaffected. The one exception is the interior thud, played when a flight ends whether it was a flyover or an ordinary landing. Flippable any time, no system needed, saved with the TARDIS. Manual demat/remat from the console is silent too, but plays no thud (it isn't a flight). New in English, Russian and Ukrainian (the last two unchecked by a native speaker).
+
 ## 1.0.30 — TARDIS flyover
 
 A cosmetic flying TARDIS that plays during flights, toggled by a lever on the console. The lever is `control_lever_2`, next to the outer light lever, in both the Imperial and Toyota consoles. It is saved with the TARDIS, so a key summon uses it too. With the lever off, everything behaves exactly as in 1.0.20.

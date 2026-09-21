@@ -133,15 +133,20 @@ public abstract class BaseTardisExteriorBlockEntity extends BlockEntity {
     public void demat() {
         this.tick = DWM.TIMINGS.DEMAT_DURATION;
         this.exteriorState = TardisExteriorState.PROCESS_DEMAT;
-        ModSounds.playTardisTakeoffSound(this.world, this.getPos());
+        if (!this.isSilent()) ModSounds.playTardisTakeoffSound(this.world, this.getPos());
         this.markDirty();
     }
 
     public void remat() {
         this.tick = DWM.TIMINGS.REMAT_DURATION;
         this.exteriorState = TardisExteriorState.PROCESS_REMAT;
-        ModSounds.playTardisLandingSound(this.world, this.getPos());
+        if (!this.isSilent()) ModSounds.playTardisLandingSound(this.world, this.getPos());
         this.markDirty();
+    }
+
+    // Whether its TARDIS is set to silent travel. Only the server plays sounds, and only it can look that up.
+    private boolean isSilent() {
+        return TardisStateManager.get(this.getTardisWorld()).map(TardisStateManager::isSilentTravelEnabled).orElse(false);
     }
 
     // Flyover takeoff: no fade. The shell stays as it is until the block is removed a couple of ticks later, and

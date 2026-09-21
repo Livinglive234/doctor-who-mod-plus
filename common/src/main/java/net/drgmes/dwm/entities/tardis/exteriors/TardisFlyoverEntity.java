@@ -256,7 +256,6 @@ public class TardisFlyoverEntity extends Entity {
         this.totalTicks = this.travelTicks;
 
         this.dataTracker.set(EXTERIOR_TYPE, exteriorTypeName);
-        this.setSound(Sound.FLIGHT);
         this.startPos = pass;
         this.direction = horizontalDirection(direction);
         this.cruiseY = Math.max(pass.y, this.surfaceY(pass)) + DWM.FLYOVER.TERRAIN_CLEARANCE;

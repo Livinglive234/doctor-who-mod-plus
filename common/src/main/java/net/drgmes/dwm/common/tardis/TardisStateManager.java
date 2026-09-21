@@ -105,6 +105,7 @@ public class TardisStateManager extends PersistentState {
     private boolean energyHarvesting = false;
     private boolean flyoverEnabled = false;
     private boolean landingShieldsEnabled = false;
+    private boolean silentTravelEnabled = false;
 
     private int shieldsBeforeTakeoff = 0; // the special shields that were up when it last took off, as SHIELD_* bits
     private int xyzStep = 1;
@@ -190,6 +191,7 @@ public class TardisStateManager extends PersistentState {
         tag.putBoolean("energyHarvesting", this.energyHarvesting);
         tag.putBoolean("flyoverEnabled", this.flyoverEnabled);
         tag.putBoolean("landingShieldsEnabled", this.landingShieldsEnabled);
+        tag.putBoolean("silentTravelEnabled", this.silentTravelEnabled);
         tag.putInt("shieldsBeforeTakeoff", this.shieldsBeforeTakeoff);
 
         tag.putInt("xyzStep", this.xyzStep);
@@ -258,6 +260,7 @@ public class TardisStateManager extends PersistentState {
         this.energyHarvesting = tag.getBoolean("energyHarvesting");
         this.flyoverEnabled = tag.getBoolean("flyoverEnabled");
         this.landingShieldsEnabled = tag.getBoolean("landingShieldsEnabled");
+        this.silentTravelEnabled = tag.getBoolean("silentTravelEnabled");
         this.shieldsBeforeTakeoff = tag.getInt("shieldsBeforeTakeoff");
 
         this.xyzStep = tag.getInt("xyzStep");
@@ -543,6 +546,15 @@ public class TardisStateManager extends PersistentState {
 
     public void setLandingShieldsEnabled(boolean flag) {
         this.landingShieldsEnabled = flag;
+        this.markDirty();
+    }
+
+    public boolean isSilentTravelEnabled() {
+        return this.silentTravelEnabled;
+    }
+
+    public void setSilentTravelEnabled(boolean flag) {
+        this.silentTravelEnabled = flag;
         this.markDirty();
     }
 
@@ -982,6 +994,12 @@ public class TardisStateManager extends PersistentState {
         chunkManager.removeTicket(CHUNK_TICKET_TYPE, pos, 3, pos);
     }
 
+    // Silent travel leaves and arrives without the exterior being heard, so the doors closing for takeoff make no sound.
+    private boolean isTravellingSilently() {
+        return this.silentTravelEnabled
+            && (this.getSystem(TardisSystemMaterialization.class).inProgress() || this.getSystem(TardisSystemFlight.class).inProgress());
+    }
+
     private void updateExterior() {
         this.updatedExterior = false;
 
@@ -992,7 +1010,7 @@ public class TardisStateManager extends PersistentState {
         BlockState exteriorBlockState = exteriorWorld.getBlockState(exteriorBlockPos);
 
         if (exteriorBlockState.getBlock() instanceof BaseTardisExteriorBlock<?> tardisExteriorBlock) {
-            if (exteriorBlockState.get(BaseTardisExteriorBlock.OPEN) != this.isDoorsOpened()) {
+            if (exteriorBlockState.get(BaseTardisExteriorBlock.OPEN) != this.isDoorsOpened() && !this.isTravellingSilently()) {
                 if (this.isDoorsOpened()) ModSounds.playTardisDoorsOpenSound(exteriorWorld, exteriorBlockPos, tardisExteriorBlock.isWooden());
                 else ModSounds.playTardisDoorsCloseSound(exteriorWorld, exteriorBlockPos, tardisExteriorBlock.isWooden());
             }

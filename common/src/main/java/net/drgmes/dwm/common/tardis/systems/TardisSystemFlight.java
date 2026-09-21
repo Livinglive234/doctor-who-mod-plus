@@ -222,7 +222,12 @@ public class TardisSystemFlight extends TardisBaseSystem {
         this.tardis.setFacing(this.tardis.getDestinationExteriorFacing(), true);
 
         materializationSystem.putCallback((flag) -> {
-            if (flag) this.tardis.raiseLandingShields();
+            if (flag) {
+                this.tardis.raiseLandingShields();
+
+                // Silent travel makes no sound at all but this: the thud of arriving, inside, whatever the landing.
+                if (this.tardis.isSilentTravelEnabled()) ModSounds.playTardisGroundLandingSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition());
+            }
 
             this.reset();
             this.applyCallbacks(flag);
@@ -398,7 +403,7 @@ public class TardisSystemFlight extends TardisBaseSystem {
             this.soundTick = DWM.TIMINGS.FLIGHT_LOOP;
 
             // A loop that would run past the end of the flight would play over the landing.
-            if (this.tick >= DWM.TIMINGS.FLIGHT_LOOP) ModSounds.playTardisFlightSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition(), 0.6F); // quieter in-room, like the takeoff and landing sounds
+            if (this.tick >= DWM.TIMINGS.FLIGHT_LOOP && !this.tardis.isSilentTravelEnabled()) ModSounds.playTardisFlightSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition(), 0.6F); // quieter in-room, like the takeoff and landing sounds
         }
     }
 }

@@ -178,7 +178,7 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
 
         this.sendExteriorUpdatePacket(this.instant ? TardisExteriorAction.DEMAT_INSTANT : TardisExteriorAction.DEMAT);
         // Quieter than the exterior's takeoff sound, which the update packet above plays at full volume. An instant takeoff's is timed to the flyover.
-        if (!this.instant) ModSounds.playTardisTakeoffSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition(), 0.6F);
+        if (!this.instant && !this.tardis.isSilentTravelEnabled()) ModSounds.playTardisTakeoffSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition(), 0.6F);
         return true;
     }
 
@@ -231,9 +231,12 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
 
             this.tardis.markConsoleTilesUpdated();
             this.sendExteriorUpdatePacket(this.instant ? TardisExteriorAction.REMAT_INSTANT : TardisExteriorAction.REMAT);
-            // A slam is heard inside as the same thud as outside, at full volume; the fade's landing noise stays quiet
-            if (this.instant) ModSounds.playTardisGroundLandingSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition());
-            else ModSounds.playTardisLandingSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition(), 0.6F);
+            // A slam is heard inside as the same thud as outside, at full volume; the fade's landing noise stays quiet.
+            // Silent travel plays neither: its one thud comes with the end of the flight.
+            if (!this.tardis.isSilentTravelEnabled()) {
+                if (this.instant) ModSounds.playTardisGroundLandingSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition());
+                else ModSounds.playTardisLandingSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition(), 0.6F);
+            }
         }
         else {
             this.playFailSound();
@@ -249,7 +252,8 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
         ServerWorld exteriorWorld = this.tardis.getExteriorWorld();
         if (exteriorWorld == null) return false;
 
-        this.tardis.setLightState(true); // the light goes off on takeoff and comes back on when it has landed
+        // The light goes off on takeoff and comes back on when it has landed - unless it is travelling silently, and a lit lamp would be noticed.
+        if (!this.tardis.isSilentTravelEnabled()) this.tardis.setLightState(true);
 
         BlockPos exteriorBlockPos = this.tardis.getCurrentExteriorPosition();
         Box box = Box.of(Vec3d.ofBottomCenter(exteriorBlockPos), 0.5D, 1, 0.5D);

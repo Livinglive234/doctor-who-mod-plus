@@ -25,6 +25,7 @@ public enum TardisConsoleUnitControlRole {
     LIGHT(TardisConsoleUnitControlValueType.BOOLEAN, "light", "light", 0, ModSounds.TARDIS_CONTROL_3, Set.of(TardisConsoleUnitControlFlags.MUST_BE_MATERIALIZED)),
     FLYOVER(TardisConsoleUnitControlValueType.BOOLEAN, "flyover", "flyover", 0, ModSounds.TARDIS_CONTROL_3, Set.of(TardisConsoleUnitControlFlags.MUST_BE_MATERIALIZED)),
     LANDING_SHIELDS(TardisConsoleUnitControlValueType.BOOLEAN, "landing_shields", "landing_shields", 0, ModSounds.TARDIS_CONTROL_3, Set.of(TardisConsoleUnitControlFlags.REQUIRED_SHIELDS_SYSTEM)),
+    SILENT_TRAVEL(TardisConsoleUnitControlValueType.BOOLEAN, "silent_travel", "silent_travel", 0, ModSounds.TARDIS_CONTROL_3, Set.of()),
     FUEL_HARVESTING(TardisConsoleUnitControlValueType.BOOLEAN, "fuel", "fuel", 0, ModSounds.TARDIS_CONTROL_2, Set.of(TardisConsoleUnitControlFlags.MUST_BE_LANDED)),
     ENERGY_HARVESTING(TardisConsoleUnitControlValueType.BOOLEAN, "energy", "energy", 0, ModSounds.TARDIS_CONTROL_2, Set.of(TardisConsoleUnitControlFlags.MUST_BE_LANDED)),
     HANDBRAKE(TardisConsoleUnitControlValueType.BOOLEAN_DIRECT, "handbrake", "handbrake", 0, Set.of(TardisConsoleUnitControlFlags.DEPENDS_ON_OWNER)),
