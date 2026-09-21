@@ -31,6 +31,7 @@ public final class ModNetworkClient {
         Registration.registerPacket(NetworkManager.Side.S2C, TardisRoundelBlockTemplateClearPacket.PACKET_ID, TardisRoundelBlockTemplateClearPacket.PACKET_CODEC, () -> ClientPackets::handleTardisRoundelBlockTemplateClear);
         Registration.registerPacket(NetworkManager.Side.S2C, TardisRoundelBlockTemplateUpdatePacket.PACKET_ID, TardisRoundelBlockTemplateUpdatePacket.PACKET_CODEC, () -> ClientPackets::handleTardisRoundelBlockTemplateUpdate);
         Registration.registerPacket(NetworkManager.Side.S2C, TardisRoundelUpdatePacket.PACKET_ID, TardisRoundelUpdatePacket.PACKET_CODEC, () -> ClientPackets::handleTardisRoundelUpdate);
+        Registration.registerPacket(NetworkManager.Side.S2C, TardisTakeoffSoundPacket.PACKET_ID, TardisTakeoffSoundPacket.PACKET_CODEC, () -> ClientPackets::handleTardisTakeoffSound);
         Registration.registerPacket(NetworkManager.Side.S2C, TardisToyotaSpinnerUpdatePacket.PACKET_ID, TardisToyotaSpinnerUpdatePacket.PACKET_CODEC, () -> ClientPackets::handleTardisToyotaSpinnerUpdate);
         Registration.registerPacket(NetworkManager.Side.S2C, TardisTeleporterOpenPacket.PACKET_ID, TardisTeleporterOpenPacket.PACKET_CODEC, () -> ClientPackets::handleTardisTeleporterOpen);
     }

@@ -145,17 +145,17 @@ public abstract class BaseTardisExteriorBlockEntity extends BlockEntity {
     }
 
     // Flyover takeoff: no fade. The shell stays as it is until the block is removed a couple of ticks later, and
-    // the flying copy appears in that very tick, so the handover is a single swap.
+    // the flying copy appears in that very tick, so the handover is a single swap. Its sound is timed to the flyover
+    // (TardisFlyoverSession), so none is played here.
     public void dematInstant() {
         this.tick = -1;
-        ModSounds.playTardisTakeoffSound(this.world, this.getPos());
         this.markDirty();
     }
 
-    // Flyover landing: no fade either - the shell is just there, with a heavy thud and a puff of ground debris.
+    // Flyover landing: no fade either - the shell is just there, with a puff of ground debris. The thud is played a
+    // little earlier, by the flight system, so it lines up with the touchdown.
     public void rematInstant() {
         this.normalize();
-        ModSounds.playTardisGroundLandingSound(this.world, this.getPos());
         this.spawnLandingDust();
     }
 

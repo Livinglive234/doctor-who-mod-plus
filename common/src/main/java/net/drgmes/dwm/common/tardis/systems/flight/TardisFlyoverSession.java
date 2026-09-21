@@ -7,6 +7,7 @@ import net.drgmes.dwm.common.tardis.exteriors.TardisExteriors;
 import net.drgmes.dwm.common.tardis.systems.TardisSystemMaterialization;
 import net.drgmes.dwm.entities.tardis.exteriors.TardisFlyoverEntity;
 import net.drgmes.dwm.setup.ModEntities;
+import net.drgmes.dwm.setup.ModSounds;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -33,6 +34,7 @@ public class TardisFlyoverSession {
     private final List<TardisFlyoverPlanner.Flyby> flybyZones = new ArrayList<>();
 
     private Boolean plannedInstantLanding = null;
+    private boolean thudPlayed = false;
     private boolean flybysEnabled = false;
     private double countdownAccumulator = 0;
 
@@ -41,13 +43,19 @@ public class TardisFlyoverSession {
         this.planner = planner;
     }
 
-    /** Whether a flyover has committed to the landing being a slam (or not), null if none has. */
-    public Boolean plannedInstantLanding() {
+    /**
+     * Whether the landing is a slam: what the flyover planned, or else decided now. That may load the chunk, which
+     * placing the exterior is about to do anyway - so a slam is a slam, and the interior hears it, whether or not
+     * anyone is outside to see it.
+     */
+    public boolean landsInstantly() {
+        if (this.plannedInstantLanding == null) this.plannedInstantLanding = this.planner.findInstantLandingSpot(true) != null;
         return this.plannedInstantLanding;
     }
 
     public void reset() {
         this.plannedInstantLanding = null;
+        this.thudPlayed = false;
         this.flybysEnabled = false;
         this.flybyServed.clear();
         this.pendingFlybys.clear();
@@ -68,36 +76,66 @@ public class TardisFlyoverSession {
 
     /** Once demat is done: the flyover that carries the TARDIS away. */
     public void spawnDeparture(int flightTicks, boolean takeoffWasInstant) {
+        TardisFlyoverEntity flyover = this.spawnDepartureFlyover(flightTicks, takeoffWasInstant);
+        if (takeoffWasInstant) this.playTakeoffSounds(flightTicks, flyover != null ? Math.min(flyover.getLifetime(), flightTicks) : flightTicks);
+    }
+
+    private TardisFlyoverEntity spawnDepartureFlyover(int flightTicks, boolean takeoffWasInstant) {
         boolean interdimensional = this.planner.isInterdimensional();
         TardisFlyoverPlanner.Mode mode = this.planner.mode();
 
         // Leaving for another dimension lifts off and flies straight up, if there was a take-off to lift off from.
-        if (interdimensional ? !takeoffWasInstant : mode == TardisFlyoverPlanner.Mode.NONE) return;
+        if (interdimensional ? !takeoffWasInstant : mode == TardisFlyoverPlanner.Mode.NONE) return null;
 
         ServerWorld world = this.tardis.getExteriorWorld();
-        if (world == null) return;
+        if (world == null) return null;
 
         Vec3d start = Vec3d.ofBottomCenter(this.tardis.getCurrentExteriorPosition());
         float startYaw = this.tardis.getCurrentExteriorFacing().asRotation();
         String exteriorType = this.exteriorTypeName();
 
-        if (interdimensional) {
-            this.spawn(world, (entity) -> entity.configureAscent(start, exteriorType, startYaw));
-            return;
-        }
+        if (interdimensional) return this.spawn(world, (entity) -> entity.configureAscent(start, exteriorType, startYaw));
 
         // After a normal demat (underground) there is nothing to lift off from, so it comes down from the sky.
         TardisFlyoverEntity.Departure departure = takeoffWasInstant ? TardisFlyoverEntity.Departure.GROUND : TardisFlyoverEntity.Departure.SKY;
 
         if (mode == TardisFlyoverPlanner.Mode.FULL_ROUTE) {
             LandingPlan plan = this.planLanding();
-            this.spawn(world, (entity) -> entity.configureRoute(start, plan.target(), exteriorType, flightTicks, departure, startYaw, plan.arrival(), plan.yaw()));
+            return this.spawn(world, (entity) -> entity.configureRoute(start, plan.target(), exteriorType, flightTicks, departure, startYaw, plan.arrival(), plan.yaw()));
         }
-        else {
-            Vec3d destination = Vec3d.ofBottomCenter(this.tardis.getDestinationExteriorPosition());
-            this.spawn(world, (entity) -> entity.configureDepartureStreak(start, destination, exteriorType, departure, startYaw));
-            this.flybysEnabled = true;
-        }
+
+        Vec3d destination = Vec3d.ofBottomCenter(this.tardis.getDestinationExteriorPosition());
+        this.flybysEnabled = true;
+        return this.spawn(world, (entity) -> entity.configureDepartureStreak(start, destination, exteriorType, departure, startYaw));
+    }
+
+    // An instant takeoff has no demat to carry the takeoff sound, so it is played here: outside it fades out from
+    // liftoff, since the TARDIS is soon in the air and gone, and inside before the flight ends, or it would drown
+    // out the landing.
+    private void playTakeoffSounds(int flightTicks, int flyoverTicks) {
+        int fade = DWM.FLYOVER.TAKEOFF_SOUND_FADE;
+
+        ServerWorld exteriorWorld = this.tardis.getExteriorWorld();
+        if (exteriorWorld != null) ModSounds.playTardisTakeoffSound(exteriorWorld, this.tardis.getCurrentExteriorPosition(), 1.0F, 0, Math.min(flyoverTicks, DWM.FLYOVER.TAKEOFF_SOUND_LIFTOFF_FADE));
+
+        int interiorEnd = flightTicks - DWM.FLYOVER.TAKEOFF_SOUND_LANDING_MARGIN;
+        ModSounds.playTardisTakeoffSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition(), 0.6F, Math.max(0, interiorEnd - fade), fade); // quieter in-room
+    }
+
+    /**
+     * The thud of a slam landing outside, a little ahead of the exterior appearing so it lands with the touchdown
+     * (the interior's is played with the landing itself). Played once: the landing asks again, in case the flight
+     * never passed that moment.
+     */
+    public void playLandingThud() {
+        if (this.thudPlayed || !this.landsInstantly()) return;
+        this.thudPlayed = true;
+
+        ServerWorld world = this.tardis.getDestinationExteriorWorld();
+        if (world == null) return;
+
+        TardisSystemMaterialization.LandingSpot spot = this.planner.findInstantLandingSpot(true);
+        ModSounds.playTardisGroundLandingSound(world, spot != null ? spot.pos() : this.tardis.getDestinationExteriorPosition());
     }
 
     /** The far end of a long hop, when someone is there to see it and its chunks are loaded (entities only tick in loaded chunks). */
@@ -231,7 +269,7 @@ public class TardisFlyoverSession {
             if (player == null || this.flybyServed.contains(flyby.player())) continue;
 
             Vec3d pass = new Vec3d(line.originX() + line.dirX() * flyby.along(), player.getY(), line.originZ() + line.dirZ() * flyby.along());
-            if (!this.spawn(world, (entity) -> entity.configureFlyby(pass, direction, exteriorType, DWM.FLYOVER.FLYBY_DURATION, flyby.half()))) continue;
+            if (this.spawn(world, (entity) -> entity.configureFlyby(pass, direction, exteriorType, DWM.FLYOVER.FLYBY_DURATION, flyby.half())) == null) continue;
 
             this.flybyZones.add(flyby);
             extraTicks += (int) Math.ceil(TardisFlyoverPlanner.flybyExtraTicks(flyby.half(), normalSpeed));
@@ -252,14 +290,14 @@ public class TardisFlyoverSession {
     // Entities //
     // //////// //
 
-    private boolean spawn(ServerWorld world, Consumer<TardisFlyoverEntity> configure) {
+    private TardisFlyoverEntity spawn(ServerWorld world, Consumer<TardisFlyoverEntity> configure) {
         TardisFlyoverEntity entity = ModEntities.TARDIS_FLYOVER.getEntityType().create(world);
-        if (entity == null) return false;
+        if (entity == null) return null;
 
         configure.accept(entity);
         world.spawnEntity(entity);
         this.entities.add(entity);
-        return true;
+        return entity;
     }
 
     private String exteriorTypeName() {

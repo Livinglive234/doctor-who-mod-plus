@@ -495,9 +495,6 @@ public class TardisStateManager extends PersistentState {
         if (this.lightEnabled == flag) return false;
         this.lightEnabled = flag;
 
-        if (flag) ModSounds.playTardisLightOnSound(this.world, this.getMainConsolePosition());
-        else ModSounds.playTardisLightOffSound(this.world, this.getMainConsolePosition());
-
         this.markDirty();
         this.markExteriorUpdated();
         return true;
@@ -948,11 +945,6 @@ public class TardisStateManager extends PersistentState {
             if (exteriorBlockState.get(BaseTardisExteriorBlock.OPEN) != this.isDoorsOpened()) {
                 if (this.isDoorsOpened()) ModSounds.playTardisDoorsOpenSound(exteriorWorld, exteriorBlockPos, tardisExteriorBlock.isWooden());
                 else ModSounds.playTardisDoorsCloseSound(exteriorWorld, exteriorBlockPos, tardisExteriorBlock.isWooden());
-            }
-
-            if (exteriorBlockState.get(BaseTardisExteriorBlock.LIT) != this.isLightEnabled()) {
-                if (this.isLightEnabled()) ModSounds.playTardisLightOnSound(exteriorWorld, exteriorBlockPos);
-                else ModSounds.playTardisLightOffSound(exteriorWorld, exteriorBlockPos);
             }
 
             exteriorBlockState = exteriorBlockState.with(BaseTardisExteriorBlock.OPEN, this.isDoorsOpened());

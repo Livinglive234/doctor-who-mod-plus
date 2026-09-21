@@ -138,6 +138,7 @@ public class TardisSystemFlight extends TardisBaseSystem {
                 if (advanced) {
                     if (this.tick == DWM.FLYOVER.ARRIVAL_DURATION) this.flyover.spawnArrival(this.tick);
                     if (this.tick == DWM.FLYOVER.DROP_DURATION) this.flyover.spawnDrop(this.tick);
+                    if (this.tick == DWM.FLYOVER.SLAM_THUD_LEAD) this.flyover.playLandingThud();
                     if (this.tick % 3 == 0) this.tardis.markConsoleTilesUpdated();
                 }
 
@@ -212,10 +213,8 @@ public class TardisSystemFlight extends TardisBaseSystem {
         TardisSystemMaterialization materializationSystem = this.tardis.getSystem(TardisSystemMaterialization.class);
         if (!materializationSystem.isEnabled() || materializationSystem.inProgress()) return false;
 
-        // If no flyover planned the landing, decide now. That may load the chunk, which placing the exterior is about
-        // to do anyway - so a slam is a slam, and the interior hears it, whether or not anyone is outside to see it.
-        Boolean planned = this.flyover.plannedInstantLanding();
-        boolean landInstantly = planned != null ? planned : this.flyoverPlanner.findInstantLandingSpot(true) != null;
+        boolean landInstantly = this.flyover.landsInstantly();
+        this.flyover.playLandingThud();
         this.flyover.finishLanding();
 
         this.tardis.setDimension(this.tardis.getDestinationExteriorDimension(), true);
@@ -395,7 +394,9 @@ public class TardisSystemFlight extends TardisBaseSystem {
         }
         else if (this.soundTick == 0) {
             this.soundTick = DWM.TIMINGS.FLIGHT_LOOP;
-            ModSounds.playTardisFlightSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition(), 0.6F); // quieter in-room, like the takeoff and landing sounds
+
+            // A loop that would run past the end of the flight would play over the landing.
+            if (this.tick >= DWM.TIMINGS.FLIGHT_LOOP) ModSounds.playTardisFlightSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition(), 0.6F); // quieter in-room, like the takeoff and landing sounds
         }
     }
 }

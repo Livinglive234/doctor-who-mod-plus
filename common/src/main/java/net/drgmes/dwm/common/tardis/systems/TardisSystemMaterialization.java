@@ -169,8 +169,8 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
         this.tardis.markConsoleTilesUpdated();
 
         this.sendExteriorUpdatePacket(this.instant ? TardisExteriorAction.DEMAT_INSTANT : TardisExteriorAction.DEMAT);
-        // Quieter than the exterior's takeoff sound, which the update packet above plays at full volume
-        ModSounds.playTardisTakeoffSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition(), 0.6F);
+        // Quieter than the exterior's takeoff sound, which the update packet above plays at full volume. An instant takeoff's is timed to the flyover.
+        if (!this.instant) ModSounds.playTardisTakeoffSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition(), 0.6F);
         return true;
     }
 

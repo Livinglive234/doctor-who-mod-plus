@@ -1,14 +1,19 @@
 package net.drgmes.dwm.setup;
 
+import net.drgmes.dwm.network.client.TardisTakeoffSoundPacket;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 import java.util.function.Supplier;
 
 public class ModSounds {
+    private static final double EARSHOT = 16; // blocks, at volume 1
+
     public static final Supplier<SoundEvent> SONIC_SCREWDRIVER_MAIN = Registration.registerSoundEvent("sonic_screwdriver_main");
     public static final Supplier<SoundEvent> SONIC_SUNGLASSES_MAIN = Registration.registerSoundEvent("sonic_sunglasses_main");
 
@@ -69,14 +74,6 @@ public class ModSounds {
         playSound(world, blockPos, isWooden ? TARDIS_DOORS_CLOSE_WOODEN.get() : TARDIS_DOORS_CLOSE.get(), 1.0F, 1.0F);
     }
 
-    public static void playTardisLightOnSound(World world, BlockPos blockPos) {
-        playSound(world, blockPos, SoundEvents.ENTITY_ENDER_EYE_LAUNCH, 1.0F, 1.0F);
-    }
-
-    public static void playTardisLightOffSound(World world, BlockPos blockPos) {
-        playSound(world, blockPos, SoundEvents.ENTITY_ENDER_EYE_LAUNCH, 1.0F, 1.0F);
-    }
-
     public static void playTardisShieldsOnSound(World world, BlockPos blockPos) {
         playSound(world, blockPos, SoundEvents.BLOCK_BEACON_ACTIVATE, 1.0F, 1.0F);
     }
@@ -107,6 +104,16 @@ public class ModSounds {
 
     public static void playTardisTakeoffSound(World world, BlockPos blockPos, float volume) {
         playSound(world, blockPos, TARDIS_TAKEOFF.get(), volume, 1.0F);
+    }
+
+    /**
+     * The takeoff sound, faded out after {@code fadeDelay} ticks over {@code fadeTicks}, so it can be made to end with
+     * a flyover. Played by each client in earshot, since a sound the server plays can't be faded.
+     */
+    public static void playTardisTakeoffSound(ServerWorld world, BlockPos blockPos, float volume, int fadeDelay, int fadeTicks) {
+        Vec3d center = Vec3d.ofCenter(blockPos);
+        new TardisTakeoffSoundPacket(blockPos, volume, fadeDelay, fadeTicks)
+            .sendTo(world.getPlayers((player) -> player.squaredDistanceTo(center) < EARSHOT * EARSHOT));
     }
 
     public static void playTardisLandingSound(World world, BlockPos blockPos) {

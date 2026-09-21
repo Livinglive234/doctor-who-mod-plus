@@ -317,6 +317,11 @@ public class TardisFlyoverEntity extends Entity {
         return MathHelper.lerp(tickDelta, this.clientPrevSpin, this.clientSpin);
     }
 
+    /** How many ticks the flyover lasts. */
+    public int getLifetime() {
+        return this.totalTicks;
+    }
+
     /** A slam that keeps resting on its spot after the flight ends, to overlap the exterior appearing. */
     public boolean isLingeringSlam() {
         return this.arrival == Arrival.SLAM;

@@ -31,6 +31,7 @@ public class ModNetwork {
             registerS2CType(TardisRoundelBlockTemplateClearPacket.PACKET_ID, TardisRoundelBlockTemplateClearPacket.PACKET_CODEC);
             registerS2CType(TardisRoundelBlockTemplateUpdatePacket.PACKET_ID, TardisRoundelBlockTemplateUpdatePacket.PACKET_CODEC);
             registerS2CType(TardisRoundelUpdatePacket.PACKET_ID, TardisRoundelUpdatePacket.PACKET_CODEC);
+            registerS2CType(TardisTakeoffSoundPacket.PACKET_ID, TardisTakeoffSoundPacket.PACKET_CODEC);
             registerS2CType(TardisToyotaSpinnerUpdatePacket.PACKET_ID, TardisToyotaSpinnerUpdatePacket.PACKET_CODEC);
             registerS2CType(TardisTeleporterOpenPacket.PACKET_ID, TardisTeleporterOpenPacket.PACKET_CODEC);
         }

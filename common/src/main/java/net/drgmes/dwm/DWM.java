@@ -55,6 +55,7 @@ public class DWM {
         public static final int SLAM_DURATION = 24;
         public static final int SLAM_LEAD = 3; // the plunge ends this long before the exterior appears, since clients see entities late
         public static final int SLAM_HOLD = 2; // and it rests on the spot this long after
+        public static final int SLAM_THUD_LEAD = 5; // the thud is played this long before the exterior appears: its file opens with about a fifth of a second of near-silence
         public static final float SLAM_HEIGHT = 48.0F;
         public static final int ASCENT_DURATION = 30; // shoot-up before a landing underground
         public static final int DEPARTURE_ASCENT_DURATION = 75; // straight-up departure of an interdimensional hop
@@ -91,6 +92,11 @@ public class DWM {
         public static final float ARRIVAL_PLAYER_RADIUS = (float) Math.ceil(Math.hypot(ARRIVAL_DISTANCE + FLYBY_MIN_HALF_LENGTH, FLYBY_MAX_OFFSET)); // reaches every player a fly-by doesn't
         public static final float DROP_PLAYER_RADIUS = 128.0F;
         public static final float RENDER_DISTANCE = 256.0F; // vanilla would cull an entity this small at about 96
+
+        // Takeoff sound of an instant takeoff: it can't outlast the flyover, or drown out the landing
+        public static final int TAKEOFF_SOUND_FADE = 30; // inside, the fade at the end (1.5 seconds)
+        public static final int TAKEOFF_SOUND_LANDING_MARGIN = 10; // inside, it is gone this long before the flight ends
+        public static final int TAKEOFF_SOUND_LIFTOFF_FADE = 100; // outside, it fades from liftoff over this long (5 seconds), or the flyover if that is shorter
 
         // Spin, only while flying horizontally
         public static final float SPIN_DEGREES_PER_TICK = 9.0F;

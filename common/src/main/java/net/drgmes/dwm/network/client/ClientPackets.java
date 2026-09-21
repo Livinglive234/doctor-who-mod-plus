@@ -18,6 +18,8 @@ import net.drgmes.dwm.common.sonicdevice.SonicDevice;
 import net.drgmes.dwm.common.tardis.consolerooms.TardisConsoleRoomEntry;
 import net.drgmes.dwm.common.tardis.consolerooms.TardisConsoleRooms;
 import net.drgmes.dwm.enums.TardisTelepathicInterfaceDataType;
+import net.drgmes.dwm.setup.ModSounds;
+import net.drgmes.dwm.utils.sounds.FadingSoundInstance;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
@@ -210,6 +212,12 @@ public final class ClientPackets {
                 }
             }
         });
+    }
+
+    public static void handleTardisTakeoffSound(TardisTakeoffSoundPacket payload, NetworkManager.PacketContext context) {
+        context.queue(() -> MinecraftClient.getInstance().getSoundManager().play(
+            new FadingSoundInstance(ModSounds.TARDIS_TAKEOFF.get(), payload.blockPos(), payload.volume(), payload.fadeDelay(), payload.fadeTicks())
+        ));
     }
 
     public static void handleTardisRoundelBlockTemplateClear(TardisRoundelBlockTemplateClearPacket payload, NetworkManager.PacketContext context) {
