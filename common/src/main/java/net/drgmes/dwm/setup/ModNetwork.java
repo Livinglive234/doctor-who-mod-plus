@@ -55,6 +55,7 @@ public class ModNetwork {
         Registration.registerPacket(NetworkManager.Side.C2S, TardisConsoleUnitSoundPacket.PACKET_ID, TardisConsoleUnitSoundPacket.PACKET_CODEC, () -> TardisConsoleUnitSoundPacket::handle);
         Registration.registerPacket(NetworkManager.Side.C2S, TardisConsoleUnitTelepathicInterfaceLocationApplyPacket.PACKET_ID, TardisConsoleUnitTelepathicInterfaceLocationApplyPacket.PACKET_CODEC, () -> TardisConsoleUnitTelepathicInterfaceLocationApplyPacket::handle);
         Registration.registerPacket(NetworkManager.Side.C2S, TardisConsoleUnitTelepathicInterfaceMapBannerApplyPacket.PACKET_ID, TardisConsoleUnitTelepathicInterfaceMapBannerApplyPacket.PACKET_CODEC, () -> TardisConsoleUnitTelepathicInterfaceMapBannerApplyPacket::handle);
+        Registration.registerPacket(NetworkManager.Side.C2S, TardisMapDestinationApplyPacket.PACKET_ID, TardisMapDestinationApplyPacket.PACKET_CODEC, () -> TardisMapDestinationApplyPacket::handle);
         Registration.registerPacket(NetworkManager.Side.C2S, TardisTeleporterApplyPacket.PACKET_ID, TardisTeleporterApplyPacket.PACKET_CODEC, () -> TardisTeleporterApplyPacket::handle);
     }
 

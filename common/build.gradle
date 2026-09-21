@@ -59,6 +59,12 @@ dependencies {
             transitive(false)
         }
     }
+
+    if (rootProject.hasProperty('xaero_worldmap_version')) {
+        modCompileOnlyApi("maven.modrinth:xaeros-world-map:fabric-$rootProject.minecraft_version-$rootProject.xaero_worldmap_version") {
+            transitive(false)
+        }
+    }
 }
 
 sourceSets.main.resources {

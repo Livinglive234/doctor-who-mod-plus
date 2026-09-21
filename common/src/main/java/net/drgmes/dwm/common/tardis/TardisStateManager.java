@@ -16,7 +16,6 @@ import net.drgmes.dwm.items.tardis.systems.TardisSystemItem;
 import net.drgmes.dwm.network.client.TardisConsoleUnitUpdatePacket;
 import net.drgmes.dwm.setup.ModCompats;
 import net.drgmes.dwm.setup.ModSounds;
-import net.drgmes.dwm.utils.helpers.CommonHelper;
 import net.drgmes.dwm.utils.helpers.DimensionHelper;
 import net.drgmes.dwm.utils.helpers.TardisHelper;
 import net.minecraft.block.Block;
@@ -353,10 +352,7 @@ public class TardisStateManager extends PersistentState {
 
         if (!hasBaseAccess && deep) {
             for (ItemStack itemStack : player.getInventory().main) {
-                if (itemStack.getItem() instanceof TardisKeyItem) {
-                    NbtCompound tag = CommonHelper.getItemStackData(itemStack).copyNbt();
-                    if (tag.contains("tardisId") && tag.getString("tardisId").equals(this.getId())) return true;
-                }
+                if (this.getId().equals(TardisKeyItem.getTardisId(itemStack))) return true;
             }
         }
 

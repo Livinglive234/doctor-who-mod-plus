@@ -31,6 +31,30 @@ public class TardisKeyItem extends Item {
         super(props);
     }
 
+    /** The TARDIS of the key a player holds - in a hand first, then anywhere in the inventory - or null if they have none. */
+    public static String findTardisId(PlayerEntity player) {
+        String id = getTardisId(player.getMainHandStack());
+        if (id != null) return id;
+
+        id = getTardisId(player.getOffHandStack());
+        if (id != null) return id;
+
+        for (ItemStack itemStack : player.getInventory().main) {
+            id = getTardisId(itemStack);
+            if (id != null) return id;
+        }
+
+        return null;
+    }
+
+    /** The TARDIS a key is bound to, or null if the stack isn't a key, or one that has been bound to none. */
+    public static String getTardisId(ItemStack itemStack) {
+        if (!(itemStack.getItem() instanceof TardisKeyItem)) return null;
+
+        NbtCompound tag = CommonHelper.getItemStackData(itemStack).copyNbt();
+        return tag.contains("tardisId") ? tag.getString("tardisId") : null;
+    }
+
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
         ItemStack itemStack = player.getStackInHand(hand);

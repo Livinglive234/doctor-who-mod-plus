@@ -5,7 +5,8 @@
   "package": "net.drgmes.dwm.mixin",
   "refmap": "dwm.refmap.json",
   "client": [
-    "MixinMinecraftClient"
+    "MixinMinecraftClient",
+    "MixinXaeroGuiMap"
   ],
   "mixins": [
     "MixinEntity",

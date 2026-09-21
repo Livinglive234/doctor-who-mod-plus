@@ -2382,6 +2382,10 @@
 
   "message.dwm.tardis.telepathic_interface.biome.found": "Биом §aнайден",
   "message.dwm.tardis.telepathic_interface.biome.not_found": "Биом §cне найден",
+  "message.dwm.tardis.map_destination.no_key": "§cНет ключа от ТАРДИС",
+  "message.dwm.tardis.map_destination.unavailable": "§cМесто назначения недоступно",
+  "message.dwm.tardis.map_destination.set": "Пункт назначения задан: X §e%1$s§r Z §e%2$s§r (§e%3$s§r)",
+  "gui.dwm.map.set_tardis_destination": "Задать место назначения ТАРДИС здесь",
   "message.dwm.tardis.telepathic_interface.structure.found": "Структура §aнайдена",
   "message.dwm.tardis.telepathic_interface.structure.not_found": "Структура §cне найдена",
 

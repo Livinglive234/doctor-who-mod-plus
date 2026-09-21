@@ -2382,6 +2382,10 @@
 
   "message.dwm.tardis.telepathic_interface.biome.found": "Biome §aFound",
   "message.dwm.tardis.telepathic_interface.biome.not_found": "Biome §cNot Found",
+  "message.dwm.tardis.map_destination.no_key": "§cNo TARDIS key",
+  "message.dwm.tardis.map_destination.unavailable": "§cDestination not available",
+  "message.dwm.tardis.map_destination.set": "Destination set: X §e%1$s§r Z §e%2$s§r (§e%3$s§r)",
+  "gui.dwm.map.set_tardis_destination": "Set TARDIS destination here",
   "message.dwm.tardis.telepathic_interface.structure.found": "Structure §aFound",
   "message.dwm.tardis.telepathic_interface.structure.not_found": "Structure §cNot Found",
 
