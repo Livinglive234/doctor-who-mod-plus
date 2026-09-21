@@ -99,6 +99,7 @@ public class DWM {
         // Outside they follow the flyover, quieter the further it is (range in blocks, down to nothing)
         public static final float TAKEOFF_SOUND_VOLUME = 1.0F;
         public static final float TAKEOFF_SOUND_RANGE = TERRAIN_CLEARANCE; // gone by the time it has risen to flying height
+        public static final int TAKEOFF_SOUND_END_FADE = 20; // and it ends with the lift-off however far away the listener is, so it can't ride along to the landing
         public static final float FLYBY_SOUND_VOLUME = 0.6F;
         public static final float FLYBY_SOUND_RANGE = 40.0F; // it passes 24 up, so it is heard from about 30 to the side, loudest right overhead
 

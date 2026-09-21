@@ -294,6 +294,7 @@ public class TardisFlyoverSession {
         if (entity == null) return null;
 
         configure.accept(entity);
+        entity.keepChunkLoaded();
         world.spawnEntity(entity);
         this.entities.add(entity);
         return entity;

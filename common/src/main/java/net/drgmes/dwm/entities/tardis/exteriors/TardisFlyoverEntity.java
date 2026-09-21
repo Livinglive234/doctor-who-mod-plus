@@ -9,10 +9,15 @@ import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.server.world.ChunkTicketType;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.World;
+
+import java.util.Comparator;
 
 /**
  * Purely cosmetic flying copy of a TARDIS, shown while its real exterior doesn't exist in the world (see
@@ -53,6 +58,10 @@ public class TardisFlyoverEntity extends Entity {
     /** What clients near it hear it make, following it around until it is gone: TAKEOFF for a takeoff, FLIGHT (a loop) for a fly-by. */
     public enum Sound { NONE, TAKEOFF, FLIGHT }
 
+    // Keeps the chunk it is over loaded and ticking, as an ender pearl does; without it a flyover over ground nobody is
+    // near freezes there, and the flight goes on without it.
+    private static final ChunkTicketType<ChunkPos> CHUNK_TICKET = ChunkTicketType.create("dwm:flyover", Comparator.comparingLong(ChunkPos::toLong), 20);
+
     private static final TrackedData<String> EXTERIOR_TYPE = DataTracker.registerData(
         TardisFlyoverEntity.class,
         TrackedDataHandlerRegistry.STRING
@@ -66,6 +75,12 @@ public class TardisFlyoverEntity extends Entity {
     );
 
     private static final TrackedData<Integer> SOUND = DataTracker.registerData(
+        TardisFlyoverEntity.class,
+        TrackedDataHandlerRegistry.INTEGER
+    );
+
+    // How many ticks from its start the sound lasts, 0 for as long as the entity is there.
+    private static final TrackedData<Integer> SOUND_TICKS = DataTracker.registerData(
         TardisFlyoverEntity.class,
         TrackedDataHandlerRegistry.INTEGER
     );
@@ -139,6 +154,7 @@ public class TardisFlyoverEntity extends Entity {
         builder.add(SPIN_ANGLE, 0F);
         builder.add(ALPHA, 1F);
         builder.add(SOUND, Sound.NONE.ordinal());
+        builder.add(SOUND_TICKS, 0);
     }
 
     // Cosmetic and short-lived: not worth persisting across a chunk unload or restart mid-flight.
@@ -328,8 +344,20 @@ public class TardisFlyoverEntity extends Entity {
         this.dataTracker.set(ALPHA, alpha);
     }
 
+    /**
+     * Makes the entity carry a sound. Call it once the timeline is set up: a takeoff sound lasts through the departure
+     * (the whole ascent, if it is going straight up) and no longer, so it stays at the takeoff and can't ride along
+     * to a landing; a fly-by's lasts as long as the fly-by.
+     */
     public void setSound(Sound sound) {
+        int ticks = sound != Sound.TAKEOFF ? 0 : (this.kind == Kind.ASCENT ? this.totalTicks : this.departureTicks);
+
+        this.dataTracker.set(SOUND_TICKS, ticks);
         this.dataTracker.set(SOUND, sound.ordinal());
+    }
+
+    public int getSoundTicks() {
+        return this.dataTracker.get(SOUND_TICKS);
     }
 
     public Sound getSound() {
@@ -385,6 +413,17 @@ public class TardisFlyoverEntity extends Entity {
         else if (t <= this.departureTicks) this.tickDeparture(t);
         else if (t <= this.departureTicks + this.travelTicks) this.tickTravel(t - this.departureTicks);
         else this.tickTail(t - this.departureTicks - this.travelTicks);
+
+        // After moving, so the chunk it has moved into is already ticking on its next tick.
+        this.keepChunkLoaded();
+    }
+
+    /** Holds the chunk the entity is over loaded and entity-ticking for the next few ticks. */
+    public void keepChunkLoaded() {
+        if (!(this.getWorld() instanceof ServerWorld world)) return;
+
+        ChunkPos chunkPos = this.getChunkPos();
+        world.getChunkManager().addTicket(CHUNK_TICKET, chunkPos, 2, chunkPos);
     }
 
     // The phase before travel - no rotation, it holds the facing it started with.
