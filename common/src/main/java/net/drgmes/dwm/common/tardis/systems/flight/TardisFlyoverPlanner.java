@@ -105,9 +105,10 @@ public class TardisFlyoverPlanner {
      * Where the TARDIS lands if that is a spot with open sky - null otherwise (lever off, ceiling, or covered).
      * Judged on the spot the landing scan resolves, not the requested one.
      *
-     * @param loadChunks whether the destination chunk may be loaded to look. Estimates and plans say no, so a far-off
-     *                   destination isn't loaded just to look at it; the landing itself says yes, since it loads the
-     *                   chunk to place the exterior anyway.
+     * @param loadChunks whether the destination chunk may be loaded to look. Estimates and the drop say no, so a
+     *                   far-off destination isn't loaded just to look at it; the landing itself says yes, since it
+     *                   loads the chunk to place the exterior anyway, and so does the plan of a short hop, which
+     *                   has to be right before it sets off (a "no" from an unloaded chunk is not "covered").
      */
     public TardisSystemMaterialization.LandingSpot findInstantLandingSpot(boolean loadChunks) {
         if (!this.tardis.isFlyoverEnabled()) return null;

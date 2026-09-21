@@ -171,9 +171,12 @@ public class TardisFlyoverSession {
         this.plannedInstantLanding = true;
     }
 
-    // Slam onto the landing spot if it has open sky, otherwise fade out over the spot before a normal remat.
+    // Slam onto the landing spot if it has open sky, otherwise fade out over the spot before a normal remat. It may
+    // load the destination chunk to look: a short hop has to know how it lands before it sets off, and the plan is
+    // what the landing goes by, so an empty, unloaded spot must not be taken for a covered one. (The other caller has
+    // checked that the chunk is loaded.)
     private LandingPlan planLanding() {
-        TardisSystemMaterialization.LandingSpot spot = this.planner.findInstantLandingSpot(false);
+        TardisSystemMaterialization.LandingSpot spot = this.planner.findInstantLandingSpot(true);
         this.plannedInstantLanding = spot != null;
 
         if (spot != null) return new LandingPlan(TardisFlyoverEntity.Arrival.SLAM, Vec3d.ofBottomCenter(spot.pos()), spot.facing().asRotation());
