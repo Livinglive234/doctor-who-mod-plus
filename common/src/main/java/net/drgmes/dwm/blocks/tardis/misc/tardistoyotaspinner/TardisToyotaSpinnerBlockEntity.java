@@ -37,9 +37,10 @@ public class TardisToyotaSpinnerBlockEntity extends BlockEntity {
                 boolean prevInProgress = this.inProgress;
                 this.inProgress = tardis.getSystem(TardisSystemMaterialization.class).inProgress() || tardis.getSystem(TardisSystemFlight.class).inProgress();
 
+                // Only this TARDIS's own interior, not every spinner on the server sitting at the same local position.
                 if (prevInProgress != this.inProgress) {
                     new TardisToyotaSpinnerUpdatePacket(this.getPos(), this.inProgress)
-                        .sendToAll(serverWorld.getServer());
+                        .sendToWorld(serverWorld);
                 }
             });
         }

@@ -59,19 +59,21 @@ public class TardisRoundelBlockEntity extends BlockEntity {
         else tag.remove("blockTemplate");
     }
 
+    // Only this TARDIS's own interior: a server-wide broadcast would land on any other player whose roundel
+    // happens to sit at the same local position, since the packet carries no dimension.
     public void sendUpdatePacket() {
         if (!(this.world instanceof ServerWorld serverWorld)) return;
 
         new TardisRoundelUpdatePacket(this.getPos(), this.uncovered, this.lightMode)
-            .sendToAll(serverWorld.getServer());
+            .sendToWorld(serverWorld);
 
         if (this.blockTemplate != null) {
             new TardisRoundelBlockTemplateUpdatePacket(this.getPos(), this.blockTemplate.toString())
-                .sendToAll(serverWorld.getServer());
+                .sendToWorld(serverWorld);
         }
         else {
             new TardisRoundelBlockTemplateClearPacket(this.getPos())
-                .sendToAll(serverWorld.getServer());
+                .sendToWorld(serverWorld);
         }
     }
 }

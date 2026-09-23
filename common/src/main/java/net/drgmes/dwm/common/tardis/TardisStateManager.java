@@ -876,8 +876,11 @@ public class TardisStateManager extends PersistentState {
             tag.put("tardisState", this.writeNbt(new NbtCompound(), this.world.getRegistryManager()));
             tile.tardisStateManager.readNbt(tag.getCompound("tardisState"), this.world.getRegistryManager());
 
+            // Only this TARDIS's own interior, never the whole server: every console room is placed at the same local
+            // coordinates, so a server-wide broadcast lands on any other player's console sitting at that same spot
+            // in their own TARDIS, and their client applies it there since the packet carries no dimension.
             new TardisConsoleUnitUpdatePacket(tile.getPos(), tag)
-                .sendToAll(this.world.getServer());
+                .sendToWorld(this.world);
         });
     }
 

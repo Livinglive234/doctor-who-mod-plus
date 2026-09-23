@@ -183,7 +183,9 @@ public class TardisSystemConsoleRoom extends TardisBaseSystem {
             }
         }
 
+        // Only the exterior's own world: a server-wide broadcast can reach another TARDIS whose exterior happens to
+        // share the same coordinates (e.g. one landed inside another's interior), and the packet carries no dimension.
         new TardisExteriorUpdatePacket(exteriorBlockPos, exteriorAction)
-            .sendToAll(exteriorWorld.getServer());
+            .sendToWorld(exteriorWorld);
     }
 }

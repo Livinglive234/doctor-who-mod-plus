@@ -336,8 +336,10 @@ public abstract class BaseTardisConsoleUnitBlockEntity extends BlockEntity {
         tag.put("tardisState", tardis.writeNbt(new NbtCompound(), serverWorld.getRegistryManager()));
         this.tardisStateManager.readNbt(tag.getCompound("tardisState"), serverWorld.getRegistryManager());
 
+        // Only this TARDIS's own interior: every console room places its console at the same local position, so a
+        // server-wide broadcast lands on any other player's console too.
         new TardisConsoleUnitUpdatePacket(this.getPos(), tag)
-            .sendToAll(serverWorld.getServer());
+            .sendToWorld(serverWorld);
     }
 
     private void createControls() {
@@ -391,19 +393,20 @@ public abstract class BaseTardisConsoleUnitBlockEntity extends BlockEntity {
         return false;
     }
 
+    // Only this TARDIS's own interior, for the same reason as updateTardisData above.
     private void sendControlsUpdatePacket(ServerWorld world) {
         new TardisConsoleUnitControlsStatesUpdatePacket(this.getPos(), this.controlsStorage.writeNbt(new NbtCompound()))
-            .sendToAll(world.getServer());
+            .sendToWorld(world);
     }
 
     private void sendMonitorUpdatePacket(ServerWorld world) {
         new TardisConsoleUnitMonitorPageUpdatePacket(this.getPos(), this.monitorPage)
-            .sendToAll(world.getServer());
+            .sendToWorld(world);
     }
 
     private void sendSonicScrewdriverSlotUpdatePacket(ServerWorld world) {
         new TardisConsoleUnitSonicScrewdriverSlotUpdatePacket(this.getPos(), this.sonicScrewdriverItemStack)
-            .sendToAll(world.getServer());
+            .sendToWorld(world);
     }
 
     private void sendMonitorOpenPacket(ServerPlayerEntity player, TardisStateManager tardis) {

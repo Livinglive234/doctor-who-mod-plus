@@ -513,7 +513,8 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
             }
         }
 
+        // Only the exterior's own world, for the same reason as TardisSystemConsoleRoom's exterior update.
         new TardisExteriorUpdatePacket(exteriorBlockPos, exteriorAction)
-            .sendToAll(exteriorWorld.getServer());
+            .sendToWorld(exteriorWorld);
     }
 }
