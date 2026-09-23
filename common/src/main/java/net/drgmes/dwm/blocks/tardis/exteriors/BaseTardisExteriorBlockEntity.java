@@ -29,6 +29,7 @@ public abstract class BaseTardisExteriorBlockEntity extends BlockEntity {
     private TardisExteriorState exteriorState = TardisExteriorState.MATERIALIZED;
     private boolean inited;
     private int tick = -1;
+    private boolean cloaked = false;
 
     public BaseTardisExteriorBlockEntity(BlockEntityType<?> type, BlockPos blockPos, BlockState blockState) {
         super(type, blockPos, blockState);
@@ -51,6 +52,7 @@ public abstract class BaseTardisExteriorBlockEntity extends BlockEntity {
         if (tag.contains("tardisId")) this.tardisId = tag.getString("tardisId");
         if (tag.contains("exteriorState")) this.exteriorState = TardisExteriorState.valueOf(tag.getString("exteriorState"));
         if (tag.contains("tick")) this.tick = tag.getInt("tick");
+        this.cloaked = tag.getBoolean("cloaked");
     }
 
     @Override
@@ -61,6 +63,7 @@ public abstract class BaseTardisExteriorBlockEntity extends BlockEntity {
         if (this.tardisId != null) tag.putString("tardisId", this.tardisId);
         tag.putString("exteriorState", this.exteriorState.name());
         tag.putInt("tick", this.tick);
+        tag.putBoolean("cloaked", this.cloaked);
     }
 
     public String getOrCreateTardisId() {
@@ -141,6 +144,21 @@ public abstract class BaseTardisExteriorBlockEntity extends BlockEntity {
         this.tick = DWM.TIMINGS.REMAT_DURATION;
         this.exteriorState = TardisExteriorState.PROCESS_REMAT;
         if (!this.isSilent()) ModSounds.playTardisLandingSound(this.world, this.getPos());
+        this.markDirty();
+    }
+
+    // Cloak: invisible to look at, but the door, collision and access checks all work exactly as they always have -
+    // Minecraft has no clean way to make a block solid for one player and walk-through for another without a much
+    // bigger rework, so it stays a "hidden but still there" cloak rather than the show's fully intangible one.
+    public boolean isCloaked() {
+        return this.cloaked;
+    }
+
+    // Pushed by TardisStateManager.setCloakedEnabled, both directly here and to every client through the same
+    // TardisExteriorUpdatePacket the demat/remat/pulse actions use, since plain markDirty() only reaches a chunk as
+    // it (re)loads, not a client already watching it.
+    public void setCloaked(boolean flag) {
+        this.cloaked = flag;
         this.markDirty();
     }
 

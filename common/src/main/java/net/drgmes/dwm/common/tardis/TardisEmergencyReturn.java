@@ -166,6 +166,7 @@ public class TardisEmergencyReturn {
         this.tardis.setDestinationDimension(home.dimension());
         this.tardis.setDestinationPosition(spot.pos());
         this.tardis.setDestinationFacing(spot.facing());
+        this.tardis.markEmergencyReturnFlight();
         this.tardis.getSystem(TardisSystemFlight.class).init(true, this.tardis.getOwner());
         this.tardis.markConsoleTilesUpdated();
     }

@@ -58,6 +58,7 @@ public abstract class BaseTardisExteriorBlockRenderer<C extends BaseTardisExteri
         DoubleBlockHalf half = tile.getCachedState().get(BaseTardisExteriorBlock.HALF);
         if (half != DoubleBlockHalf.LOWER) return;
         if (ImmersivePortalsShellCompat.shouldHideExteriorShell(tile.tardisId)) return;
+        if (tile.isCloaked()) return;
 
         boolean hasImmersivePortals = ModCompats.immersivePortals();
         boolean hasEnabledIrisShaders = ModCompats.iris() && Iris.isShaderPackInUse();

@@ -17,6 +17,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.enums.DoubleBlockHalf;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.predicate.entity.EntityPredicates;
@@ -177,7 +178,7 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
         this.tardis.setShieldsState(false);
         this.tardis.markConsoleTilesUpdated();
 
-        if (this.tardis.isNoStowawaysEnabled()) this.leaveBehindUnauthorized(exteriorWorld);
+        if (this.tardis.isLeaveBehindEnabled()) this.leaveBehindUnauthorized(exteriorWorld);
 
         this.sendExteriorUpdatePacket(this.instant ? TardisExteriorAction.DEMAT_INSTANT : TardisExteriorAction.DEMAT);
         // Quieter than the exterior's takeoff sound, which the update packet above plays at full volume. An instant takeoff's is timed to the flyover.
@@ -185,10 +186,11 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
         return true;
     }
 
-    // With No Stowaways on: put anyone aboard who isn't the owner and isn't carrying a key of their own outside,
+    // With Leave Behind on: put anyone aboard who isn't the owner and isn't carrying a key of their own outside,
     // right where the door currently is, before it leaves - so nobody gets a free ride just by being inside when it
-    // takes off. Runs for every departure, flight or a plain demat from the console; an owner-less TARDIS has nobody
-    // to check occupants against, so checkAccess lets everyone stay, same as it does everywhere else in the mod.
+    // takes off. Hostile mobs never belong aboard either way, key or no key. Runs for every departure, flight or a
+    // plain demat from the console; an owner-less TARDIS has nobody to check occupants against, so checkAccess lets
+    // everyone stay, same as it does everywhere else in the mod.
     private void leaveBehindUnauthorized(ServerWorld exteriorWorld) {
         Vec3d pos = Vec3d.ofBottomCenter(this.tardis.getCurrentExteriorPosition().offset(this.tardis.getCurrentExteriorFacing()));
         float yaw = this.tardis.getCurrentExteriorFacing().asRotation();
@@ -198,6 +200,15 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
 
             EntityHelper.teleport(player, exteriorWorld, pos, yaw);
             player.sendMessage(DWM.TEXTS.TARDIS_LEFT_BEHIND, true);
+        }
+
+        List<HostileEntity> hostiles = new ArrayList<>();
+        for (Entity entity : this.tardis.getWorld().iterateEntities()) {
+            if (entity instanceof HostileEntity hostile) hostiles.add(hostile);
+        }
+
+        for (HostileEntity hostile : hostiles) {
+            EntityHelper.teleport(hostile, exteriorWorld, pos, yaw);
         }
     }
 
@@ -399,6 +410,7 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
 
         if (exteriorWorld.getBlockEntity(exteriorBlockPos) instanceof BaseTardisExteriorBlockEntity tardisExteriorBlockEntity) {
             tardisExteriorBlockEntity.tardisId = this.tardis.getId();
+            tardisExteriorBlockEntity.setCloaked(this.tardis.isCloakedEnabled());
             return true;
         }
         else {

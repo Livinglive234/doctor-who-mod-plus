@@ -5,6 +5,7 @@ import net.drgmes.dwm.blocks.tardis.consoleunits.BaseTardisConsoleUnitBlockEntit
 import net.drgmes.dwm.blocks.tardis.doors.BaseTardisDoorsBlock;
 import net.drgmes.dwm.blocks.tardis.doors.BaseTardisDoorsBlockEntity;
 import net.drgmes.dwm.blocks.tardis.exteriors.BaseTardisExteriorBlock;
+import net.drgmes.dwm.blocks.tardis.exteriors.BaseTardisExteriorBlockEntity;
 import net.drgmes.dwm.common.tardis.consolerooms.TardisConsoleRoomEntry;
 import net.drgmes.dwm.common.tardis.consolerooms.TardisConsoleRooms;
 import net.drgmes.dwm.common.tardis.exteriors.TardisExteriorEntry;
@@ -13,7 +14,9 @@ import net.drgmes.dwm.common.tardis.systems.*;
 import net.drgmes.dwm.compat.immersiveportals.ImmersivePortals;
 import net.drgmes.dwm.items.tardis.keys.TardisKeyItem;
 import net.drgmes.dwm.items.tardis.systems.TardisSystemItem;
+import net.drgmes.dwm.enums.TardisExteriorAction;
 import net.drgmes.dwm.network.client.TardisConsoleUnitUpdatePacket;
+import net.drgmes.dwm.network.client.TardisExteriorUpdatePacket;
 import net.drgmes.dwm.setup.ModCompats;
 import net.drgmes.dwm.setup.ModSounds;
 import net.drgmes.dwm.utils.helpers.DimensionHelper;
@@ -107,7 +110,9 @@ public class TardisStateManager extends PersistentState {
     private boolean landingShieldsEnabled = false;
     private boolean silentTravelEnabled = false;
     private boolean emergencyReturnEnabled = false;
-    private boolean noStowawaysEnabled = false;
+    private boolean leaveBehindEnabled = false;
+    private boolean cloakedEnabled = false;
+    private boolean emergencyReturnFlight = false; // this trip was the emergency return, not an ordinary flight
 
     private int shieldsBeforeTakeoff = 0; // the special shields that were up when it last took off, as SHIELD_* bits
     private int xyzStep = 1;
@@ -195,7 +200,9 @@ public class TardisStateManager extends PersistentState {
         tag.putBoolean("landingShieldsEnabled", this.landingShieldsEnabled);
         tag.putBoolean("silentTravelEnabled", this.silentTravelEnabled);
         tag.putBoolean("emergencyReturnEnabled", this.emergencyReturnEnabled);
-        tag.putBoolean("noStowawaysEnabled", this.noStowawaysEnabled);
+        tag.putBoolean("leaveBehindEnabled", this.leaveBehindEnabled);
+        tag.putBoolean("cloakedEnabled", this.cloakedEnabled);
+        tag.putBoolean("emergencyReturnFlight", this.emergencyReturnFlight);
         tag.putInt("shieldsBeforeTakeoff", this.shieldsBeforeTakeoff);
 
         tag.putInt("xyzStep", this.xyzStep);
@@ -266,7 +273,9 @@ public class TardisStateManager extends PersistentState {
         this.landingShieldsEnabled = tag.getBoolean("landingShieldsEnabled");
         this.silentTravelEnabled = tag.getBoolean("silentTravelEnabled");
         this.emergencyReturnEnabled = tag.getBoolean("emergencyReturnEnabled");
-        this.noStowawaysEnabled = tag.getBoolean("noStowawaysEnabled");
+        this.leaveBehindEnabled = tag.getBoolean("leaveBehindEnabled");
+        this.cloakedEnabled = tag.getBoolean("cloakedEnabled");
+        this.emergencyReturnFlight = tag.getBoolean("emergencyReturnFlight");
         this.shieldsBeforeTakeoff = tag.getInt("shieldsBeforeTakeoff");
 
         this.xyzStep = tag.getInt("xyzStep");
@@ -570,13 +579,32 @@ public class TardisStateManager extends PersistentState {
 
     // With No Stowaways on, anyone aboard without the owner's blessing or a key of their own is put outside before it
     // leaves, rather than getting a free ride (see TardisSystemMaterialization.leaveBehindUnauthorized).
-    public boolean isNoStowawaysEnabled() {
-        return this.noStowawaysEnabled && this.getSystem(TardisSystemMaterialization.class).isEnabled();
+    public boolean isLeaveBehindEnabled() {
+        return this.leaveBehindEnabled && this.getSystem(TardisSystemMaterialization.class).isEnabled();
     }
 
-    public void setNoStowawaysEnabled(boolean flag) {
-        this.noStowawaysEnabled = flag;
+    public void setLeaveBehindEnabled(boolean flag) {
+        this.leaveBehindEnabled = flag;
         this.markDirty();
+    }
+
+    public boolean isCloakedEnabled() {
+        return this.cloakedEnabled && this.getSystem(TardisSystemMaterialization.class).isEnabled();
+    }
+
+    // Pushes the change onto the physical exterior, if it's materialized right now, so it takes effect immediately
+    // rather than only the next time it lands (plain markDirty() alone only reaches a chunk as it (re)loads).
+    public void setCloakedEnabled(boolean flag) {
+        this.cloakedEnabled = flag;
+        this.markDirty();
+
+        ServerWorld exteriorWorld = this.getExteriorWorld();
+        if (exteriorWorld == null) return;
+
+        if (exteriorWorld.getBlockEntity(this.getCurrentExteriorPosition()) instanceof BaseTardisExteriorBlockEntity tardisExteriorBlockEntity) {
+            tardisExteriorBlockEntity.setCloaked(flag);
+            new TardisExteriorUpdatePacket(this.getCurrentExteriorPosition(), flag ? TardisExteriorAction.CLOAK : TardisExteriorAction.UNCLOAK).sendToWorld(exteriorWorld);
+        }
     }
 
     public void setEmergencyReturnEnabled(boolean flag) {
@@ -597,10 +625,26 @@ public class TardisStateManager extends PersistentState {
     }
 
     // With the landing shields switch on, the shields come up once a flight has landed, and so do the special ones that were up before takeoff.
-    /** What every landing after a flight does: raise the shields, if it is to, and stand the emergency return down - it is for one trip. */
+    // Called right before the emergency return's own flight starts, so its landing (see onFlightLanded) knows to
+    // also set the handbrake - a safety stop, not something that should let the TARDIS quietly fly off again.
+    public void markEmergencyReturnFlight() {
+        this.emergencyReturnFlight = true;
+        this.markDirty();
+    }
+
+    /**
+     * What every landing after a flight does: raise the shields, if it is to, and stand the emergency return down -
+     * it is for one trip. If this landing was that trip, the handbrake goes on too, so the TARDIS sits still until
+     * someone deliberately releases it, rather than being free to take off again right away.
+     */
     public void onFlightLanded() {
         this.raiseLandingShields();
         this.setEmergencyReturnEnabled(false);
+
+        if (this.emergencyReturnFlight) {
+            this.emergencyReturnFlight = false;
+            this.setHandbrakeLockState(true, null);
+        }
     }
 
     private void raiseLandingShields() {

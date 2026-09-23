@@ -209,6 +209,8 @@ public final class ClientPackets {
                     case DEMAT_INSTANT -> tardisExteriorBlockEntity.dematInstant();
                     case REMAT_INSTANT -> tardisExteriorBlockEntity.rematInstant();
                     case PULSE -> tardisExteriorBlockEntity.pulse();
+                    case CLOAK -> tardisExteriorBlockEntity.setCloaked(true);
+                    case UNCLOAK -> tardisExteriorBlockEntity.setCloaked(false);
                 }
             }
         });

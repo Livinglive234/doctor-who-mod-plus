@@ -8,4 +8,6 @@ public enum TardisExteriorAction {
     DEMAT_INSTANT,
     REMAT_INSTANT,
     PULSE,
+    CLOAK,
+    UNCLOAK,
 }

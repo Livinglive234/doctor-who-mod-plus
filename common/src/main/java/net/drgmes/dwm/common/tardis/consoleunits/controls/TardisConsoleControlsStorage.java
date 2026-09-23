@@ -113,7 +113,8 @@ public class TardisConsoleControlsStorage {
         this.values.put(TardisConsoleUnitControlRole.LANDING_SHIELDS, tardis.isLandingShieldsEnabled());
         this.values.put(TardisConsoleUnitControlRole.SILENT_TRAVEL, tardis.isSilentTravelEnabled());
         this.values.put(TardisConsoleUnitControlRole.EMERGENCY_RETURN, tardis.isEmergencyReturnEnabled());
-        this.values.put(TardisConsoleUnitControlRole.NO_STOWAWAYS, tardis.isNoStowawaysEnabled());
+        this.values.put(TardisConsoleUnitControlRole.LEAVE_BEHIND, tardis.isLeaveBehindEnabled());
+        this.values.put(TardisConsoleUnitControlRole.CLOAKED, tardis.isCloakedEnabled());
         this.values.put(TardisConsoleUnitControlRole.DOORS, tardis.isDoorsOpened());
         this.values.put(TardisConsoleUnitControlRole.HANDBRAKE, tardis.isHandbrakeLocked());
         this.values.put(TardisConsoleUnitControlRole.FACING, switch (tardis.getDestinationExteriorFacing()) {
@@ -360,7 +361,7 @@ public class TardisConsoleControlsStorage {
             }
 
             case EMERGENCY_RETURN -> {
-                if (!materializationSystem.isEnabled() || !flightSystem.isEnabled()) {
+                if (!materializationSystem.isEnabled() || !flightSystem.isEnabled() || !tardis.checkAccess(player, false, true)) {
                     this.values.put(TardisConsoleUnitControlRole.EMERGENCY_RETURN, tardis.isEmergencyReturnEnabled());
                     yield false;
                 }
@@ -369,13 +370,23 @@ public class TardisConsoleControlsStorage {
                 yield true;
             }
 
-            case NO_STOWAWAYS -> {
-                if (!materializationSystem.isEnabled()) {
-                    this.values.put(TardisConsoleUnitControlRole.NO_STOWAWAYS, tardis.isNoStowawaysEnabled());
+            case LEAVE_BEHIND -> {
+                if (!materializationSystem.isEnabled() || !tardis.checkAccess(player, false, true)) {
+                    this.values.put(TardisConsoleUnitControlRole.LEAVE_BEHIND, tardis.isLeaveBehindEnabled());
                     yield false;
                 }
 
-                tardis.setNoStowawaysEnabled((boolean) value);
+                tardis.setLeaveBehindEnabled((boolean) value);
+                yield true;
+            }
+
+            case CLOAKED -> {
+                if (!materializationSystem.isEnabled()) {
+                    this.values.put(TardisConsoleUnitControlRole.CLOAKED, tardis.isCloakedEnabled());
+                    yield false;
+                }
+
+                tardis.setCloakedEnabled((boolean) value);
                 yield true;
             }
 
@@ -494,6 +505,14 @@ public class TardisConsoleControlsStorage {
             return;
         }
 
+        // Stricter: the owner only, not a key-holder too (checkAccess(player, false, true) skips its usual fallback
+        // of scanning the inventory for a key).
+        if (controlRole.flags.contains(TardisConsoleUnitControlFlags.OWNER_ONLY) && !tardis.checkAccess(player, false, true)) {
+            if (needSound) ModSounds.playSound(tardis.getWorld(), tardis.getMainConsolePosition(), SoundEvents.BLOCK_WOOD_PLACE, 1.0F, 1.0F);
+            player.sendMessage(DWM.TEXTS.TARDIS_NOT_ALLOWED, true);
+            return;
+        }
+
         if (controlRole.flags.contains(TardisConsoleUnitControlFlags.DEPENDS_ON_SHIELDS_ON) && !tardis.isShieldsEnabled()) {
             if (needSound) ModSounds.playSound(tardis.getWorld(), tardis.getMainConsolePosition(), SoundEvents.BLOCK_WOOD_PLACE, 1.0F, 1.0F);
             player.sendMessage(DWM.TEXTS.SHIELDS_SYSTEM_NOT_ACTIVE, true);
@@ -507,7 +526,7 @@ public class TardisConsoleControlsStorage {
         }
 
         Text component = switch (controlRole) {
-            case DOORS, LIGHT, FLYOVER, LANDING_SHIELDS, SILENT_TRAVEL, EMERGENCY_RETURN, NO_STOWAWAYS, SHIELDS, SHIELDS_OXYGEN, SHIELDS_FIRE_PROOF, SHIELDS_MEDICAL, SHIELDS_MINING, SHIELDS_GRAVITATION, SHIELDS_SPECIAL, FUEL_HARVESTING, ENERGY_HARVESTING, HANDBRAKE -> Text.translatable(message + ((boolean) value ? ".active" : ".inactive"));
+            case DOORS, LIGHT, FLYOVER, LANDING_SHIELDS, SILENT_TRAVEL, EMERGENCY_RETURN, LEAVE_BEHIND, CLOAKED, SHIELDS, SHIELDS_OXYGEN, SHIELDS_FIRE_PROOF, SHIELDS_MEDICAL, SHIELDS_MINING, SHIELDS_GRAVITATION, SHIELDS_SPECIAL, FUEL_HARVESTING, ENERGY_HARVESTING, HANDBRAKE -> Text.translatable(message + ((boolean) value ? ".active" : ".inactive"));
             case DIM_PREV, DIM_NEXT -> Text.translatable(message, "§e" + tardis.getDestinationExteriorDimension().getValue().getPath().replace("_", " ").toUpperCase());
             case FACING -> Text.translatable(message, Text.translatable(message + "." + (tardis.getDestinationExteriorFacing().ordinal() - 2)));
             case XSET -> Text.translatable(message, "§e" + tardis.getDestinationExteriorPosition().getX());
