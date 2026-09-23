@@ -17,6 +17,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.enums.DoubleBlockHalf;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.registry.tag.FluidTags;
@@ -176,10 +177,28 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
         this.tardis.setShieldsState(false);
         this.tardis.markConsoleTilesUpdated();
 
+        if (this.tardis.isNoStowawaysEnabled()) this.leaveBehindUnauthorized(exteriorWorld);
+
         this.sendExteriorUpdatePacket(this.instant ? TardisExteriorAction.DEMAT_INSTANT : TardisExteriorAction.DEMAT);
         // Quieter than the exterior's takeoff sound, which the update packet above plays at full volume. An instant takeoff's is timed to the flyover.
         if (!this.instant && !this.tardis.isSilentTravelEnabled()) ModSounds.playTardisTakeoffSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition(), 0.6F);
         return true;
+    }
+
+    // With No Stowaways on: put anyone aboard who isn't the owner and isn't carrying a key of their own outside,
+    // right where the door currently is, before it leaves - so nobody gets a free ride just by being inside when it
+    // takes off. Runs for every departure, flight or a plain demat from the console; an owner-less TARDIS has nobody
+    // to check occupants against, so checkAccess lets everyone stay, same as it does everywhere else in the mod.
+    private void leaveBehindUnauthorized(ServerWorld exteriorWorld) {
+        Vec3d pos = Vec3d.ofBottomCenter(this.tardis.getCurrentExteriorPosition().offset(this.tardis.getCurrentExteriorFacing()));
+        float yaw = this.tardis.getCurrentExteriorFacing().asRotation();
+
+        for (PlayerEntity player : List.copyOf(this.tardis.getWorld().getPlayers())) {
+            if (this.tardis.checkAccess(player, true, false)) continue;
+
+            EntityHelper.teleport(player, exteriorWorld, pos, yaw);
+            player.sendMessage(DWM.TEXTS.TARDIS_LEFT_BEHIND, true);
+        }
     }
 
     public boolean finishDemat() {

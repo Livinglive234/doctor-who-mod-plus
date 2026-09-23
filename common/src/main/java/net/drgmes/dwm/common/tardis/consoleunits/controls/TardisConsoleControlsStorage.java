@@ -113,6 +113,7 @@ public class TardisConsoleControlsStorage {
         this.values.put(TardisConsoleUnitControlRole.LANDING_SHIELDS, tardis.isLandingShieldsEnabled());
         this.values.put(TardisConsoleUnitControlRole.SILENT_TRAVEL, tardis.isSilentTravelEnabled());
         this.values.put(TardisConsoleUnitControlRole.EMERGENCY_RETURN, tardis.isEmergencyReturnEnabled());
+        this.values.put(TardisConsoleUnitControlRole.NO_STOWAWAYS, tardis.isNoStowawaysEnabled());
         this.values.put(TardisConsoleUnitControlRole.DOORS, tardis.isDoorsOpened());
         this.values.put(TardisConsoleUnitControlRole.HANDBRAKE, tardis.isHandbrakeLocked());
         this.values.put(TardisConsoleUnitControlRole.FACING, switch (tardis.getDestinationExteriorFacing()) {
@@ -368,6 +369,16 @@ public class TardisConsoleControlsStorage {
                 yield true;
             }
 
+            case NO_STOWAWAYS -> {
+                if (!materializationSystem.isEnabled()) {
+                    this.values.put(TardisConsoleUnitControlRole.NO_STOWAWAYS, tardis.isNoStowawaysEnabled());
+                    yield false;
+                }
+
+                tardis.setNoStowawaysEnabled((boolean) value);
+                yield true;
+            }
+
             case SHIELDS -> {
                 if (!materializationSystem.isMaterialized() || !tardis.setShieldsState((boolean) value)) {
                     this.values.put(TardisConsoleUnitControlRole.FUEL_HARVESTING, tardis.isFuelHarvesting());
@@ -496,7 +507,7 @@ public class TardisConsoleControlsStorage {
         }
 
         Text component = switch (controlRole) {
-            case DOORS, LIGHT, FLYOVER, LANDING_SHIELDS, SILENT_TRAVEL, EMERGENCY_RETURN, SHIELDS, SHIELDS_OXYGEN, SHIELDS_FIRE_PROOF, SHIELDS_MEDICAL, SHIELDS_MINING, SHIELDS_GRAVITATION, SHIELDS_SPECIAL, FUEL_HARVESTING, ENERGY_HARVESTING, HANDBRAKE -> Text.translatable(message + ((boolean) value ? ".active" : ".inactive"));
+            case DOORS, LIGHT, FLYOVER, LANDING_SHIELDS, SILENT_TRAVEL, EMERGENCY_RETURN, NO_STOWAWAYS, SHIELDS, SHIELDS_OXYGEN, SHIELDS_FIRE_PROOF, SHIELDS_MEDICAL, SHIELDS_MINING, SHIELDS_GRAVITATION, SHIELDS_SPECIAL, FUEL_HARVESTING, ENERGY_HARVESTING, HANDBRAKE -> Text.translatable(message + ((boolean) value ? ".active" : ".inactive"));
             case DIM_PREV, DIM_NEXT -> Text.translatable(message, "§e" + tardis.getDestinationExteriorDimension().getValue().getPath().replace("_", " ").toUpperCase());
             case FACING -> Text.translatable(message, Text.translatable(message + "." + (tardis.getDestinationExteriorFacing().ordinal() - 2)));
             case XSET -> Text.translatable(message, "§e" + tardis.getDestinationExteriorPosition().getX());

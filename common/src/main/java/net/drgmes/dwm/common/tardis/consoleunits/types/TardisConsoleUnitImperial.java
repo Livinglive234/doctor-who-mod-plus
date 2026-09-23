@@ -16,6 +16,9 @@ public class TardisConsoleUnitImperial extends TardisConsoleUnitEntry {
         this.addControlEntry(TardisConsoleUnitControlRole.SONIC_SCREWDRIVER_SLOT, TardisConsoleUnitControlType.OTHER, new Vec3d(0.535F, 0.55F, 0.5425F), "sonic_screwdriver_slot");
 
         this.addControlEntry(TardisConsoleUnitControlRole.MATERIALIZATION, TardisConsoleUnitControlType.SLIDER, new Vec3d(0.855F, 0.575F, -0.0775F), "controls/control_sliders_v/control_slider_v_3$_handle", ModEntities.TARDIS_CONSOLE_UNIT_CONTROL_SMALL);
+        // The slider slot right next to Materialization's (v_2), same row: a bit closer to it than the levers are to
+        // each other (0.0875), per how it looked in-game - z=0.01 (full lever spacing) sat a touch too far out.
+        this.addControlEntry(TardisConsoleUnitControlRole.NO_STOWAWAYS, TardisConsoleUnitControlType.SLIDER, new Vec3d(0.855F, 0.575F, -0.0025F), "controls/control_sliders_v/control_slider_v_2$_handle", ModEntities.TARDIS_CONSOLE_UNIT_CONTROL_SMALL);
         this.addControlEntry(TardisConsoleUnitControlRole.MONITOR_PAGE_PREV, TardisConsoleUnitControlType.BUTTON, new Vec3d(-0.1315F, 0.6F, -0.735F), "controls/control_buttons/control_button_7$_r1", ModEntities.TARDIS_CONSOLE_UNIT_CONTROL_SMALL);
         this.addControlEntry(TardisConsoleUnitControlRole.MONITOR_PAGE_NEXT, TardisConsoleUnitControlType.BUTTON, new Vec3d(-0.1875F, 0.6F, -0.705F), "controls/control_buttons/control_button_8$_r1", ModEntities.TARDIS_CONSOLE_UNIT_CONTROL_SMALL);
         this.addControlEntry(TardisConsoleUnitControlRole.DIM_PREV, TardisConsoleUnitControlType.BUTTON, new Vec3d(-0.4975F, 0.6F, -0.5295F), "controls/control_buttons/control_button_9$_r1", ModEntities.TARDIS_CONSOLE_UNIT_CONTROL_SMALL);

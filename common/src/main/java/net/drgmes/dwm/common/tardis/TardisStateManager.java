@@ -107,6 +107,7 @@ public class TardisStateManager extends PersistentState {
     private boolean landingShieldsEnabled = false;
     private boolean silentTravelEnabled = false;
     private boolean emergencyReturnEnabled = false;
+    private boolean noStowawaysEnabled = false;
 
     private int shieldsBeforeTakeoff = 0; // the special shields that were up when it last took off, as SHIELD_* bits
     private int xyzStep = 1;
@@ -194,6 +195,7 @@ public class TardisStateManager extends PersistentState {
         tag.putBoolean("landingShieldsEnabled", this.landingShieldsEnabled);
         tag.putBoolean("silentTravelEnabled", this.silentTravelEnabled);
         tag.putBoolean("emergencyReturnEnabled", this.emergencyReturnEnabled);
+        tag.putBoolean("noStowawaysEnabled", this.noStowawaysEnabled);
         tag.putInt("shieldsBeforeTakeoff", this.shieldsBeforeTakeoff);
 
         tag.putInt("xyzStep", this.xyzStep);
@@ -264,6 +266,7 @@ public class TardisStateManager extends PersistentState {
         this.landingShieldsEnabled = tag.getBoolean("landingShieldsEnabled");
         this.silentTravelEnabled = tag.getBoolean("silentTravelEnabled");
         this.emergencyReturnEnabled = tag.getBoolean("emergencyReturnEnabled");
+        this.noStowawaysEnabled = tag.getBoolean("noStowawaysEnabled");
         this.shieldsBeforeTakeoff = tag.getInt("shieldsBeforeTakeoff");
 
         this.xyzStep = tag.getInt("xyzStep");
@@ -563,6 +566,17 @@ public class TardisStateManager extends PersistentState {
         return this.emergencyReturnEnabled
             && this.getSystem(TardisSystemMaterialization.class).isEnabled()
             && this.getSystem(TardisSystemFlight.class).isEnabled();
+    }
+
+    // With No Stowaways on, anyone aboard without the owner's blessing or a key of their own is put outside before it
+    // leaves, rather than getting a free ride (see TardisSystemMaterialization.leaveBehindUnauthorized).
+    public boolean isNoStowawaysEnabled() {
+        return this.noStowawaysEnabled && this.getSystem(TardisSystemMaterialization.class).isEnabled();
+    }
+
+    public void setNoStowawaysEnabled(boolean flag) {
+        this.noStowawaysEnabled = flag;
+        this.markDirty();
     }
 
     public void setEmergencyReturnEnabled(boolean flag) {

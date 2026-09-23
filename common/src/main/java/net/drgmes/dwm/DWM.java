@@ -148,6 +148,7 @@ public class DWM {
         public static final Text TARDIS_ALREADY_DEMATERIALIZED = Text.translatable("message.dwm.tardis.already_dematerialized");
         public static final Text TARDIS_ALREADY_IN_FLIGHT = Text.translatable("message.dwm.tardis.already_in_flight");
         public static final Text TARDIS_ALREADY_LANDED = Text.translatable("message.dwm.tardis.already_landed");
+        public static final Text TARDIS_LEFT_BEHIND = Text.translatable("message.dwm.tardis.left_behind");
         public static final Text TARDIS_NOT_ENOUGH_FUEL = Text.translatable("message.dwm.tardis.fuel.not_enough");
         public static final Text TARDIS_HANDBRAKE_ACTIVATED = Text.translatable("message.dwm.tardis.handbrake.activated");
         public static final Text TARDIS_DOORS_LOCKED = Text.translatable("message.dwm.tardis.control.role.doors.locked");
