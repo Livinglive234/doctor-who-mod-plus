@@ -598,18 +598,23 @@ public class TardisStateManager extends PersistentState {
     }
 
     // Pushes the change onto the physical exterior, if it's materialized right now, so it takes effect immediately
-    // rather than only the next time it lands (plain markDirty() alone only reaches a chunk as it (re)loads).
-    public void setCloakedEnabled(boolean flag) {
+    // rather than only the next time it lands (plain markDirty() alone only reaches a chunk as it (re)loads). A null
+    // player is a system call (takeoff reset, the owner-death check) and always passes, same as the other setters here.
+    public boolean setCloakedEnabled(boolean flag, PlayerEntity player) {
+        if (!this.checkAccess(player, false, true)) return false;
+
         this.cloakedEnabled = flag;
         this.markDirty();
 
         ServerWorld exteriorWorld = this.getExteriorWorld();
-        if (exteriorWorld == null) return;
+        if (exteriorWorld == null) return true;
 
         if (exteriorWorld.getBlockEntity(this.getCurrentExteriorPosition()) instanceof BaseTardisExteriorBlockEntity tardisExteriorBlockEntity) {
             tardisExteriorBlockEntity.setCloaked(flag);
             new TardisExteriorUpdatePacket(this.getCurrentExteriorPosition(), flag ? TardisExteriorAction.CLOAK : TardisExteriorAction.UNCLOAK).sendToWorld(exteriorWorld);
         }
+
+        return true;
     }
 
     public boolean setEmergencyReturnEnabled(boolean flag, PlayerEntity player) {

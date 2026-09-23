@@ -4,8 +4,10 @@ import net.drgmes.dwm.DWM;
 import net.drgmes.dwm.blocks.tardis.exteriors.BaseTardisExteriorBlock;
 import net.drgmes.dwm.blocks.tardis.exteriors.BaseTardisExteriorBlockEntity;
 import net.drgmes.dwm.common.tardis.TardisStateManager;
+import net.drgmes.dwm.items.tardis.keys.TardisKeyItem;
 import net.drgmes.dwm.setup.ModDimensions.ModDimensionTypes;
 import net.drgmes.dwm.world.generator.TardisChunkGenerator;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.MinecraftServer;
@@ -17,9 +19,27 @@ import net.minecraft.world.dimension.DimensionOptions;
 import net.minecraft.world.dimension.DimensionType;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public class TardisHelper {
     public static final BlockPos TARDIS_POS = new BlockPos(0, 128, 0).toImmutable();
+
+    // The same rule as TardisStateManager.checkAccess(player, true, false), but by owner id and tardisId directly
+    // instead of a TardisStateManager instance: monitor screens only ever have a client-side mirror of one, which
+    // never has its world set (only readNbt is ever called on it client-side), and checkAccess's key-holder scan
+    // needs the TARDIS's id, which it otherwise derives from that world.
+    public static boolean hasOwnerOrKeyAccess(UUID ownerId, String tardisId, PlayerEntity player) {
+        if (player == null) return false;
+        if (ownerId == null || ownerId.equals(player.getUuid())) return true;
+
+        return tardisId.equals(TardisKeyItem.findTardisId(player));
+    }
+
+    // The same rule as TardisStateManager.checkAccess(player, false, true): the owner, and only the owner - no
+    // key-holder fallback, and (unlike hasOwnerOrKeyAccess) no free pass for an unclaimed TARDIS either.
+    public static boolean isOwner(UUID ownerId, PlayerEntity player) {
+        return player != null && ownerId != null && ownerId.equals(player.getUuid());
+    }
 
     public static BlockPos getTardisFarPos(int index) {
         return TARDIS_POS.add(DWM.COMMON.TARDIS_ROOMS_OFFSET, 0, DWM.COMMON.TARDIS_ROOMS_OFFSET).multiply(index).withY(TARDIS_POS.getY()).toImmutable();

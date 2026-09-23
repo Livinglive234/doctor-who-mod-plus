@@ -26,6 +26,8 @@ import java.util.UUID;
  * The emergency return. When its owner is down to half a heart the TARDIS tolls the cloister bell, inside and out, twice; when they
  * die it tolls three times and then takes itself to a spot near their bed, or near the world spawn if they have none.
  * <p>
+ * The same owner-death check also drops Cloak, if it's up, so a keyless owner isn't locked out of their own TARDIS.
+ * <p>
  * Nothing here is saved: a sequence a restart cuts short isn't worth a save format.
  */
 public class TardisEmergencyReturn {
@@ -59,12 +61,15 @@ public class TardisEmergencyReturn {
     }
 
     public void tick() {
+        // Runs regardless of the Emergency Return lever: Cloak also rides on the death check below, and needs it
+        // even when Emergency Return itself is off.
+        this.watchOwner();
+
         if (!this.tardis.isEmergencyReturnEnabled()) {
             this.reset();
             return;
         }
 
-        this.watchOwner();
         this.ring();
 
         if (this.home != null && this.chimesLeft == 0 && this.chimeTimer == 0) this.travel();
@@ -90,6 +95,9 @@ public class TardisEmergencyReturn {
             this.ownerState = OwnerState.DEAD;
             this.chimesLeft = 3;
             this.noteHome(owner);
+
+            // Otherwise a dead owner with no key on them couldn't get back into their own TARDIS.
+            if (this.tardis.isCloakedEnabled()) this.tardis.setCloakedEnabled(false, null);
         }
         else if (owner.getHealth() <= HALF_HEART) {
             if (this.ownerState != OwnerState.HEALTHY) return;

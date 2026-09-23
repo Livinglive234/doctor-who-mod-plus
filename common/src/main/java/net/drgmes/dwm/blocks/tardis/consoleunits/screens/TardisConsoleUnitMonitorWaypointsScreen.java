@@ -152,7 +152,7 @@ public class TardisConsoleUnitMonitorWaypointsScreen extends BaseTardisConsoleUn
 
         Vector2i removeButtonPos = acceptButtonPos.add(-BUTTON_SIZE - BUTTON_MARGIN, 0);
         this.removeButton = new BaseButton(removeButtonPos, BUTTON_SIZE, BUTTON_PADDING, DWM.TEXTS.MONITOR_WAYPOINTS_REMOVE, DWM.TEXTURES.GUI.COMMON.ELEMENTS.CROSS, (b) -> {
-            if (this.selected == null) return;
+            if (this.selected == null || !this.hasOwnerOrKeyAccess(this.tardisId)) return;
             this.client.setScreen(new TardisConsoleUnitMonitorWaypointRemoveConfirmationScreen(this.tardisConsoleUnitBlockEntity, this.tardisId, this.selected.waypointEntry, this));
         });
 
@@ -345,7 +345,7 @@ public class TardisConsoleUnitMonitorWaypointsScreen extends BaseTardisConsoleUn
 
         this.nameField.setPlaceholder(Text.literal(this.getGeneratedWaypointName()).formatted(Formatting.GRAY));
         this.acceptButton.active = true;
-        this.removeButton.active = true;
+        this.removeButton.active = this.hasOwnerOrKeyAccess(this.tardisId);
 
         this.resetNameButton.active = nameText == null || !nameText.equals(this.selected.waypointEntry.name());
         this.resetXButton.active = this.blockPos != null && this.blockPos.getX() != this.selected.waypointEntry.blockPos().getX();

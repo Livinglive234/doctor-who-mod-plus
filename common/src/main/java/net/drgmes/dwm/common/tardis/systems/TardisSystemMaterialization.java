@@ -180,7 +180,7 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
         this.tardis.setShieldsState(false);
         // Cloak never carries a trip, and never carries into the next landing either: it has to be turned back on
         // deliberately once materialized again.
-        this.tardis.setCloakedEnabled(false);
+        this.tardis.setCloakedEnabled(false, null);
         this.tardis.markConsoleTilesUpdated();
 
         if (this.tardis.isLeaveBehindEnabled()) this.leaveBehindUnauthorized(exteriorWorld);

@@ -380,12 +380,11 @@ public class TardisConsoleControlsStorage {
             }
 
             case CLOAKED -> {
-                if (!materializationSystem.isEnabled() || !ModCompats.immersivePortals()) {
+                if (!materializationSystem.isEnabled() || !ModCompats.immersivePortals() || !tardis.setCloakedEnabled((boolean) value, player)) {
                     this.values.put(TardisConsoleUnitControlRole.CLOAKED, tardis.isCloakedEnabled());
                     yield false;
                 }
 
-                tardis.setCloakedEnabled((boolean) value);
                 yield true;
             }
 

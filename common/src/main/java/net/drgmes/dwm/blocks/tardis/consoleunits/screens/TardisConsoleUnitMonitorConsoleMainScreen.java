@@ -29,47 +29,45 @@ import java.util.function.Function;
 
 @Environment(EnvType.CLIENT)
 public class TardisConsoleUnitMonitorConsoleMainScreen extends BaseTardisConsoleUnitMonitorScreen {
+    // NONE: open to anyone. OWNER: the owner only, matching the apply packet's checkAccess(player, false, true) - no
+    // key-holder fallback. OWNER_OR_KEY: the owner or a key-holder, matching checkAccess(player, true, false).
+    private enum AccessLevel {
+        NONE, OWNER, OWNER_OR_KEY
+    }
+
     private enum EActions {
-        EXTERIOR(DWM.TEXTS.MONITOR_ACTION_EXTERIOR, (screen) -> screen.exteriorType.getBlock(), (screen) -> {
+        // Owner only: matches TardisConsoleUnitMonitorExternalShellApplyPacket's own access check.
+        EXTERIOR(DWM.TEXTS.MONITOR_ACTION_EXTERIOR, AccessLevel.OWNER, new Vector2i(0, 0), (screen) -> screen.exteriorType.getBlock(), (screen) -> {
             screen.client.setScreen(new TardisConsoleUnitMonitorExternalShellsScreen(screen.tardisConsoleUnitBlockEntity, screen.tardisId, screen.tag, screen));
         }),
 
-        ROOMS(DWM.TEXTS.MONITOR_ACTION_CONSOLE_ROOMS, (screen) -> ModBlocks.TARDIS_ARS_CREATOR.getBlockItem(), (screen) -> {
+        // Owner only: matches TardisConsoleUnitMonitorConsoleRoomApplyPacket's own access check.
+        ROOMS(DWM.TEXTS.MONITOR_ACTION_CONSOLE_ROOMS, AccessLevel.OWNER, new Vector2i(0, 0), (screen) -> ModBlocks.TARDIS_ARS_CREATOR.getBlockItem(), (screen) -> {
             screen.client.setScreen(new TardisConsoleUnitMonitorConsoleRoomsScreen(screen.tardisConsoleUnitBlockEntity, screen.tardisId, screen.tag, screen));
         }),
 
-        WAYPOINTS(DWM.TEXTS.MONITOR_ACTION_WAYPOINTS, (screen) -> Items.FILLED_MAP, (screen) -> {
+        WAYPOINTS(DWM.TEXTS.MONITOR_ACTION_WAYPOINTS, AccessLevel.NONE, new Vector2i(0, 0), (screen) -> Items.FILLED_MAP, (screen) -> {
             screen.client.setScreen(new TardisConsoleUnitMonitorWaypointsScreen(screen.tardisConsoleUnitBlockEntity, screen.tardisId, screen.tag, screen));
         }),
 
-        RESEARCHER(DWM.TEXTS.MONITOR_ACTION_HISTORY, new Vector2i(0, 1), (screen) -> Items.WRITABLE_BOOK, (screen) -> {
+        // Owner or key-holder: matches the history screen's own apply/clear/delete actions (TardisConsoleUnitMonitorHistory*Packet).
+        // Greyed out here rather than left to bounce off the server, since there's nothing to apply/clear/delete for anyone else anyway.
+        RESEARCHER(DWM.TEXTS.MONITOR_ACTION_HISTORY, AccessLevel.OWNER_OR_KEY, new Vector2i(0, 1), (screen) -> Items.WRITABLE_BOOK, (screen) -> {
             screen.client.setScreen(new TardisConsoleUnitMonitorHistoryScreen(screen.tardisConsoleUnitBlockEntity, screen.tardisId, screen.tag, screen));
         });
 
         private final Text title;
-        private final boolean disabled;
+        private final AccessLevel accessLevel;
         private final Vector2i offset;
         private final Function<TardisConsoleUnitMonitorConsoleMainScreen, ItemConvertible> iconSupplier;
         private final Consumer<TardisConsoleUnitMonitorConsoleMainScreen> onPress;
 
-        EActions(Text title, boolean disabled, Vector2i offset, Function<TardisConsoleUnitMonitorConsoleMainScreen, ItemConvertible> iconSupplier, Consumer<TardisConsoleUnitMonitorConsoleMainScreen> onPress) {
+        EActions(Text title, AccessLevel accessLevel, Vector2i offset, Function<TardisConsoleUnitMonitorConsoleMainScreen, ItemConvertible> iconSupplier, Consumer<TardisConsoleUnitMonitorConsoleMainScreen> onPress) {
             this.title = title;
-            this.disabled = disabled;
+            this.accessLevel = accessLevel;
             this.offset = offset;
             this.iconSupplier = iconSupplier;
             this.onPress = onPress;
-        }
-
-        EActions(Text title, Vector2i offset, Function<TardisConsoleUnitMonitorConsoleMainScreen, ItemConvertible> iconSupplier, Consumer<TardisConsoleUnitMonitorConsoleMainScreen> onPress) {
-            this(title, false, offset, iconSupplier, onPress);
-        }
-
-        EActions(Text title, boolean disabled, Function<TardisConsoleUnitMonitorConsoleMainScreen, ItemConvertible> iconSupplier, Consumer<TardisConsoleUnitMonitorConsoleMainScreen> onPress) {
-            this(title, disabled, new Vector2i(0, 0), iconSupplier, onPress);
-        }
-
-        EActions(Text title, Function<TardisConsoleUnitMonitorConsoleMainScreen, ItemConvertible> iconSupplier, Consumer<TardisConsoleUnitMonitorConsoleMainScreen> onPress) {
-            this(title, false, iconSupplier, onPress);
         }
     }
 
@@ -96,6 +94,14 @@ public class TardisConsoleUnitMonitorConsoleMainScreen extends BaseTardisConsole
     @Override
     public boolean shouldCloseOnInventoryKey() {
         return true;
+    }
+
+    private boolean hasAccess(AccessLevel accessLevel) {
+        return switch (accessLevel) {
+            case NONE -> true;
+            case OWNER -> this.isOwner();
+            case OWNER_OR_KEY -> this.hasOwnerOrKeyAccess(this.tardisId);
+        };
     }
 
     @Override
@@ -134,7 +140,7 @@ public class TardisConsoleUnitMonitorConsoleMainScreen extends BaseTardisConsole
             );
 
             button.setTooltip(Tooltip.of(action.title));
-            button.active = !action.disabled;
+            button.active = this.hasAccess(action.accessLevel);
 
             buttons.put(action, button);
             this.addDrawableChild(button);
