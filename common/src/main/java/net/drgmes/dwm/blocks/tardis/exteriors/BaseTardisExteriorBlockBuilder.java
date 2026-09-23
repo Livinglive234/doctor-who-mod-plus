@@ -19,7 +19,11 @@ public abstract class BaseTardisExteriorBlockBuilder extends BlockBuilder {
     }
 
     public static AbstractBlock.Settings getBlockSettings() {
-        return AbstractBlock.Settings.copy(Blocks.BEDROCK).luminance((blockState) -> (
+        // nonOpaque(): the "is this a solid opaque cube" flag Minecraft caches per blockstate is computed once at
+        // registration from these settings, separately from the live getOutlineShape/getCollisionShape we already
+        // go empty on when cloaked - without this, neighbor blocks would still have their touching face culled
+        // (light-blocking, face-culling) as if against a full block even while cloaked and walk-through.
+        return AbstractBlock.Settings.copy(Blocks.BEDROCK).nonOpaque().luminance((blockState) -> (
             blockState.get(BaseTardisExteriorBlock.HALF) == DoubleBlockHalf.UPPER && blockState.get(BaseTardisExteriorBlock.LIT) ? 15 : 0
         ));
     }
