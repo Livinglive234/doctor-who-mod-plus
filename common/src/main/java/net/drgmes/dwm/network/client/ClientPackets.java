@@ -3,6 +3,8 @@ package net.drgmes.dwm.network.client;
 import dev.architectury.networking.NetworkManager;
 import net.drgmes.dwm.blocks.tardis.consoleunits.BaseTardisConsoleUnitBlockEntity;
 import net.drgmes.dwm.blocks.tardis.consoleunits.screens.TardisConsoleUnitMonitorConsoleMainScreen;
+import net.drgmes.dwm.blocks.tardis.consoleunits.screens.TardisConsoleUnitPhoneDialScreen;
+import net.drgmes.dwm.blocks.tardis.consoleunits.screens.TardisConsoleUnitPhoneIncomingCallScreen;
 import net.drgmes.dwm.blocks.tardis.consoleunits.screens.TardisConsoleUnitTelepathicInterfaceLocationsScreen;
 import net.drgmes.dwm.blocks.tardis.consoleunits.screens.TardisConsoleUnitTelepathicInterfaceMapBannersScreen;
 import net.drgmes.dwm.blocks.tardis.exteriors.BaseTardisExteriorBlockEntity;
@@ -132,6 +134,26 @@ public final class ClientPackets {
 
                 tardisConsoleUnitBlockEntity.tardisStateManager.readNbt(payload.tardisTag(), player.getRegistryManager());
                 MinecraftClient.getInstance().setScreen(new TardisConsoleUnitMonitorConsoleMainScreen(tardisConsoleUnitBlockEntity, payload.tardisId(), payload.owner(), tag));
+            }
+        });
+    }
+
+    public static void handleTardisPhoneDialOpen(TardisPhoneDialOpenPacket payload, NetworkManager.PacketContext context) {
+        context.queue(() -> {
+            ClientPlayerEntity player = (ClientPlayerEntity) context.getPlayer();
+
+            if (player.getWorld().getBlockEntity(payload.blockPos()) instanceof BaseTardisConsoleUnitBlockEntity tardisConsoleUnitBlockEntity) {
+                MinecraftClient.getInstance().setScreen(new TardisConsoleUnitPhoneDialScreen(tardisConsoleUnitBlockEntity, TardisPhoneDialOpenPacket.readEntries(payload.tag())));
+            }
+        });
+    }
+
+    public static void handleTardisPhoneIncomingCallOpen(TardisPhoneIncomingCallOpenPacket payload, NetworkManager.PacketContext context) {
+        context.queue(() -> {
+            ClientPlayerEntity player = (ClientPlayerEntity) context.getPlayer();
+
+            if (player.getWorld().getBlockEntity(payload.blockPos()) instanceof BaseTardisConsoleUnitBlockEntity tardisConsoleUnitBlockEntity) {
+                MinecraftClient.getInstance().setScreen(new TardisConsoleUnitPhoneIncomingCallScreen(tardisConsoleUnitBlockEntity, payload.callerName()));
             }
         });
     }

@@ -72,4 +72,16 @@ public class ModCompats {
             return false;
         }
     }
+
+    // Not the voicechat-api dependency itself - that's bundled into this mod's own jar regardless (see
+    // common/build.gradle), so its classes are always on the classpath. This checks for the actual Simple Voice
+    // Chat mod, whose class of the same name only exists when it's really installed.
+    public static boolean simpleVoiceChat() {
+        try {
+            Class.forName("de.maxhenkel.voicechat.Voicechat");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
 }

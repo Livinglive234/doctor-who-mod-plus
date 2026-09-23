@@ -451,6 +451,20 @@ public class TardisConsoleControlsStorage {
                 yield true;
             }
 
+            // No tardis-side effect - just a physical switch. TardisVoicechatPlugin reads its position live off
+            // this same storage at relay time to decide whether to broadcast to the whole room or just the one
+            // player on the phone, so there's nothing to persist onto the tardis itself. Same all-or-nothing
+            // gating as Cloak/Immersive Portals: without Simple Voice Chat there's no relay for this to restrict,
+            // so the switch snaps back instead of actually flipping.
+            case PHONE_PRIVACY -> {
+                if (!ModCompats.simpleVoiceChat()) {
+                    this.values.put(TardisConsoleUnitControlRole.PHONE_PRIVACY, !(boolean) value);
+                    yield false;
+                }
+
+                yield true;
+            }
+
             default -> false;
         };
 
@@ -485,11 +499,17 @@ public class TardisConsoleControlsStorage {
             return;
         }
 
-        // Cloak specifically, not a role.flags-driven check like the rest of these: it's the only lever that needs a
-        // compat mod rather than one of the TARDIS's own systems.
+        // Cloak and Privacy specifically, not a role.flags-driven check like the rest of these: each needs its
+        // own compat mod rather than one of the TARDIS's own systems.
         if (controlRole == TardisConsoleUnitControlRole.CLOAKED && !ModCompats.immersivePortals()) {
             if (needSound) ModSounds.playSound(tardis.getWorld(), tardis.getMainConsolePosition(), SoundEvents.BLOCK_WOOD_PLACE, 1.0F, 1.0F);
             player.sendMessage(DWM.TEXTS.IMMERSIVE_PORTALS_NOT_INSTALLED, true);
+            return;
+        }
+
+        if (controlRole == TardisConsoleUnitControlRole.PHONE_PRIVACY && !ModCompats.simpleVoiceChat()) {
+            if (needSound) ModSounds.playSound(tardis.getWorld(), tardis.getMainConsolePosition(), SoundEvents.BLOCK_WOOD_PLACE, 1.0F, 1.0F);
+            player.sendMessage(DWM.TEXTS.SIMPLE_VOICE_CHAT_NOT_INSTALLED, true);
             return;
         }
 
@@ -532,7 +552,7 @@ public class TardisConsoleControlsStorage {
         }
 
         Text component = switch (controlRole) {
-            case DOORS, LIGHT, FLYOVER, LANDING_SHIELDS, SILENT_TRAVEL, EMERGENCY_RETURN, LEAVE_BEHIND, CLOAKED, SHIELDS, SHIELDS_OXYGEN, SHIELDS_FIRE_PROOF, SHIELDS_MEDICAL, SHIELDS_MINING, SHIELDS_GRAVITATION, SHIELDS_SPECIAL, FUEL_HARVESTING, ENERGY_HARVESTING, HANDBRAKE -> Text.translatable(message + ((boolean) value ? ".active" : ".inactive"));
+            case DOORS, LIGHT, FLYOVER, LANDING_SHIELDS, SILENT_TRAVEL, EMERGENCY_RETURN, LEAVE_BEHIND, CLOAKED, PHONE_PRIVACY, SHIELDS, SHIELDS_OXYGEN, SHIELDS_FIRE_PROOF, SHIELDS_MEDICAL, SHIELDS_MINING, SHIELDS_GRAVITATION, SHIELDS_SPECIAL, FUEL_HARVESTING, ENERGY_HARVESTING, HANDBRAKE -> Text.translatable(message + ((boolean) value ? ".active" : ".inactive"));
             case DIM_PREV, DIM_NEXT -> Text.translatable(message, "§e" + tardis.getDestinationExteriorDimension().getValue().getPath().replace("_", " ").toUpperCase());
             case FACING -> Text.translatable(message, Text.translatable(message + "." + (tardis.getDestinationExteriorFacing().ordinal() - 2)));
             case XSET -> Text.translatable(message, "§e" + tardis.getDestinationExteriorPosition().getX());

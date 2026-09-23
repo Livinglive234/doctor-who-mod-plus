@@ -5,6 +5,7 @@ import net.drgmes.dwm.common.tardis.consolerooms.TardisConsoleRoomEntry;
 import net.drgmes.dwm.common.tardis.consolerooms.TardisConsoleRooms;
 import net.drgmes.dwm.network.IPacket;
 import net.drgmes.dwm.utils.helpers.CommonHelper;
+import net.drgmes.dwm.utils.helpers.TardisHelper;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.codec.PacketCodec;
@@ -15,7 +16,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public record TardisConsoleUnitMonitorOpenPacket(
@@ -51,15 +51,8 @@ public record TardisConsoleUnitMonitorOpenPacket(
     }
 
     private static String getOwnerName(ServerPlayerEntity player, NbtCompound tardisTag) {
-        String ownerName = "NONE";
-
-        if (tardisTag.contains("owner") && player.getServer() != null) {
-            UUID uuid = tardisTag.getUuid("owner");
-            ServerPlayerEntity owner = player.getServer().getPlayerManager().getPlayer(uuid);
-            ownerName = owner != null ? owner.getName().getString() : uuid.toString();
-        }
-
-        return ownerName;
+        if (!tardisTag.contains("owner") || player.getServer() == null) return "NONE";
+        return TardisHelper.getOwnerDisplayName(tardisTag.getUuid("owner"), player.getServer());
     }
 
     private static NbtCompound createRoomsTag(String currentConsoleRoomId) {

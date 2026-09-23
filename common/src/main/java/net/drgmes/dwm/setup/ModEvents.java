@@ -2,14 +2,17 @@ package net.drgmes.dwm.setup;
 
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.*;
+import net.drgmes.dwm.DWM;
 import net.drgmes.dwm.common.sonicdevice.modes.BaseSonicDeviceMode;
 import net.drgmes.dwm.common.tardis.TardisEnergyManager;
 import net.drgmes.dwm.common.tardis.TardisStateManager;
+import net.drgmes.dwm.common.tardis.phone.TardisPhoneManager;
 import net.drgmes.dwm.compat.immersiveportals.ImmersivePortals;
 import net.drgmes.dwm.items.sonicdevices.ISonicDeviceItem;
 import net.drgmes.dwm.items.sonicdevices.SonicScrewdriverItem;
 import net.drgmes.dwm.items.tardis.keys.TardisKeyItem;
 import net.drgmes.dwm.network.server.SonicDeviceUsePacket;
+import net.drgmes.dwm.utils.helpers.DimensionHelper;
 import net.drgmes.dwm.utils.helpers.TardisHelper;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.ItemEntity;
@@ -27,6 +30,7 @@ public class ModEvents {
 
         LifecycleEvent.SERVER_STARTED.register((server) -> {
             TardisEnergyManager.clear();
+            TardisPhoneManager.clear();
             ModDimensions.loadWorldsRegistry(server);
             if (ModCompats.immersivePortals()) ImmersivePortals.clearTardisPortalsState();
         });
@@ -43,11 +47,21 @@ public class ModEvents {
             }
         });
 
+        // A TARDIS going away mid-call (removed, or just never comes back this session) shouldn't leave its other
+        // party's line stuck busy forever. end() is a no-op if it wasn't in a call.
+        LifecycleEvent.SERVER_LEVEL_UNLOAD.register((world) -> {
+            if (TardisHelper.isTardisDimension(world)) {
+                TardisPhoneManager.end(world.getServer(), DimensionHelper.getWorldId(world), DWM.TEXTS.PHONE_ENDED);
+            }
+        });
+
         TickEvent.SERVER_LEVEL_POST.register((world) -> {
             if (TardisHelper.isTardisDimension(world)) {
                 TardisStateManager.get(world).ifPresent(TardisStateManager::tick);
             }
         });
+
+        TickEvent.SERVER_POST.register(TardisPhoneManager::tick);
 
         // ///////////// //
         // Entity Events //

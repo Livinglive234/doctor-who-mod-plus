@@ -1,5 +1,6 @@
 package net.drgmes.dwm.utils.helpers;
 
+import com.mojang.authlib.GameProfile;
 import net.drgmes.dwm.DWM;
 import net.drgmes.dwm.blocks.tardis.exteriors.BaseTardisExteriorBlock;
 import net.drgmes.dwm.blocks.tardis.exteriors.BaseTardisExteriorBlockEntity;
@@ -11,6 +12,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -39,6 +41,22 @@ public class TardisHelper {
     // key-holder fallback, and (unlike hasOwnerOrKeyAccess) no free pass for an unclaimed TARDIS either.
     public static boolean isOwner(UUID ownerId, PlayerEntity player) {
         return player != null && ownerId != null && ownerId.equals(player.getUuid());
+    }
+
+    // The owner's current name if they're online, their raw UUID if they're not (or the TARDIS has none) - the same
+    // fallback TardisConsoleUnitMonitorOpenPacket has always resolved for display purposes.
+    // An offline owner has no ServerPlayerEntity, but the server's profile cache remembers the username of anyone
+    // who has ever joined - falling straight back to the raw UUID (as this used to) meant every dial-screen entry
+    // and monitor readout for an offline owner showed their UUID instead of their name.
+    public static String getOwnerDisplayName(UUID ownerId, MinecraftServer server) {
+        if (ownerId == null) return "NONE";
+
+        ServerPlayerEntity owner = server.getPlayerManager().getPlayer(ownerId);
+        if (owner != null) return owner.getName().getString();
+
+        return server.getUserCache() != null
+            ? server.getUserCache().getByUuid(ownerId).map(GameProfile::getName).orElse(ownerId.toString())
+            : ownerId.toString();
     }
 
     public static BlockPos getTardisFarPos(int index) {

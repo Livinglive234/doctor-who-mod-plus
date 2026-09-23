@@ -6,6 +6,8 @@ import net.drgmes.dwm.common.tardis.TardisStateManager;
 import net.drgmes.dwm.common.tardis.consoleunits.TardisConsoleUnitEntry;
 import net.drgmes.dwm.common.tardis.consoleunits.controls.TardisConsoleControlsStorage;
 import net.drgmes.dwm.common.tardis.consoleunits.controls.TardisConsoleUnitControlEntry;
+import net.drgmes.dwm.common.tardis.phone.TardisPhoneCall;
+import net.drgmes.dwm.common.tardis.phone.TardisPhoneManager;
 import net.drgmes.dwm.common.tardis.systems.TardisSystemConsoleRoom;
 import net.drgmes.dwm.common.tardis.systems.TardisSystemFlight;
 import net.drgmes.dwm.common.tardis.systems.TardisSystemMaterialization;
@@ -15,8 +17,10 @@ import net.drgmes.dwm.enums.TardisConsoleUnitControlType;
 import net.drgmes.dwm.enums.TardisConsoleUnitControlValueType;
 import net.drgmes.dwm.items.sonicdevices.SonicScrewdriverItem;
 import net.drgmes.dwm.network.client.*;
+import net.drgmes.dwm.setup.ModCompats;
 import net.drgmes.dwm.setup.ModSounds;
 import net.drgmes.dwm.utils.helpers.DimensionHelper;
+import net.drgmes.dwm.utils.helpers.TardisHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
@@ -30,12 +34,14 @@ import net.minecraft.item.map.MapState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -107,6 +113,22 @@ public abstract class BaseTardisConsoleUnitBlockEntity extends BlockEntity {
 
     public NbtCompound getSavedTardisTag(PlayerEntity player) {
         return this.tardisStateManager.writeNbt(new NbtCompound(), player.getRegistryManager());
+    }
+
+    // The live position of one of this console's control entities, e.g. for TardisVoicechatPlugin to give the
+    // phone's relayed audio a real point of origin instead of playing flat everywhere in the room.
+    public Vec3d getControlPosition(TardisConsoleUnitControlRole role) {
+        for (TardisConsoleControlEntity control : this.controls) {
+            if (control.getTardisControlRole() == role) return control.getPos();
+        }
+
+        return null;
+    }
+
+    // For TardisVoicechatPlugin to check live, per relayed packet, rather than snapshotting it onto the call -
+    // the switch is a physical position on this console, not a property of any one call.
+    public boolean isPhonePrivacyEnabled() {
+        return (boolean) this.controlsStorage.get(TardisConsoleUnitControlRole.PHONE_PRIVACY);
     }
 
     public void tick() {
@@ -265,6 +287,38 @@ public abstract class BaseTardisConsoleUnitBlockEntity extends BlockEntity {
                 }
             }
 
+            case PHONE -> {
+                if (hand != Hand.OFF_HAND) return;
+                if (tardisHolder.isEmpty() || this.throwNotifyIfLocked(tardisHolder.get(), player)) return;
+
+                // The whole phone runs over Simple Voice Chat's relay - without it there's no way to carry a
+                // call at all, so it's gated the same all-or-nothing way Cloak is gated on Immersive Portals,
+                // not just on starting a fresh one.
+                if (!ModCompats.simpleVoiceChat()) {
+                    ModSounds.playSound(this.getWorld(), this.getPos(), SoundEvents.BLOCK_WOOD_PLACE, 1.0F, 1.0F);
+                    player.sendMessage(DWM.TEXTS.SIMPLE_VOICE_CHAT_NOT_INSTALLED, true);
+                    return;
+                }
+
+                String tardisId = tardisHolder.get().getId();
+                Optional<TardisPhoneCall> call = TardisPhoneManager.getCall(tardisId);
+
+                if (call.isEmpty()) {
+                    controlRole.playSound(this.getWorld(), this.getPos());
+                    this.sendPhoneDialOpenPacket(player, tardisId);
+                }
+                else if (!call.get().isConnected() && call.get().calleeId.equals(tardisId)) {
+                    // Sneaking is still an instant decline - only a plain right-click opens the incoming-call
+                    // screen, so accepting a call is a deliberate choice rather than whatever right-clicking
+                    // the phone used to do by reflex.
+                    if (player.isSneaking()) TardisPhoneManager.end(serverWorld.getServer(), tardisId, DWM.TEXTS.PHONE_DECLINED);
+                    else this.sendPhoneIncomingCallOpenPacket(player, serverWorld.getServer(), call.get());
+                }
+                else {
+                    TardisPhoneManager.end(serverWorld.getServer(), tardisId, DWM.TEXTS.PHONE_ENDED);
+                }
+            }
+
             default -> {
                 boolean isUpdated = this.controlsStorage.update(controlRole, hand);
 
@@ -411,6 +465,17 @@ public abstract class BaseTardisConsoleUnitBlockEntity extends BlockEntity {
 
     private void sendMonitorOpenPacket(ServerPlayerEntity player, TardisStateManager tardis) {
         new TardisConsoleUnitMonitorOpenPacket(player, this.getPos(), tardis.getId(), tardis.writeNbt(new NbtCompound(), tardis.getWorld().getRegistryManager()))
+            .sendTo(player);
+    }
+
+    private void sendPhoneDialOpenPacket(ServerPlayerEntity player, String tardisId) {
+        new TardisPhoneDialOpenPacket(this.getPos(), player.getServer(), tardisId)
+            .sendTo(player);
+    }
+
+    private void sendPhoneIncomingCallOpenPacket(ServerPlayerEntity player, MinecraftServer server, TardisPhoneCall call) {
+        // Whoever's actually dialing, not the tardis owner - see TardisPhoneManager.startCall.
+        new TardisPhoneIncomingCallOpenPacket(this.getPos(), TardisHelper.getOwnerDisplayName(call.callerPlayerId, server))
             .sendTo(player);
     }
 

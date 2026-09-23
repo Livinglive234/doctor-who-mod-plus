@@ -40,11 +40,21 @@ public class ModSounds {
     public static final Supplier<SoundEvent> TARDIS_CONTROL_HANDBRAKE_OFF = Registration.registerSoundEvent("tardis_control_handbrake_off");
     public static final Supplier<SoundEvent> TARDIS_CONTROL_RANDOMIZER = Registration.registerSoundEvent("tardis_control_randomizer");
 
+    public static final Supplier<SoundEvent> TARDIS_PHONE_RING = Registration.registerSoundEvent("tardis_phone_ring");
+    public static final Supplier<SoundEvent> TARDIS_PHONE_RINGBACK = Registration.registerSoundEvent("tardis_phone_ringback");
+    public static final Supplier<SoundEvent> TARDIS_PHONE_HANGUP = Registration.registerSoundEvent("tardis_phone_hangup");
+
     public static void init() {
     }
 
     public static void playSound(World world, BlockPos blockPos, SoundEvent sound, float volume, float pitch) {
         world.playSound(null, blockPos, sound, SoundCategory.BLOCKS, volume, pitch);
+    }
+
+    // Anchored to an exact point rather than a block, e.g. a control entity's own position - so it fades and pans
+    // the way any other positional sound does as a player moves away from or around it.
+    public static void playSound(World world, Vec3d pos, SoundEvent sound, float volume, float pitch) {
+        world.playSound(null, pos.x, pos.y, pos.z, sound, SoundCategory.BLOCKS, volume, pitch);
     }
 
     public static void playTardisConsoleCrackSound(World world, BlockPos blockPos) {
@@ -185,5 +195,29 @@ public class ModSounds {
 
     public static void playTardisTeleporterReceivedSound(World world, BlockPos blockPos) {
         playSound(world, blockPos, SoundEvents.BLOCK_BEACON_ACTIVATE, 1.0F, 1.0F);
+    }
+
+    // Natural pitch - these are real recordings, not a vanilla sound reused for its tone, so pitching them up
+    // like a control click would just speed the whole recording up and make it sound wrong.
+    public static void playTardisPhoneRingSound(World world, BlockPos blockPos) {
+        playSound(world, blockPos, TARDIS_PHONE_RING.get(), 0.6F, 1.0F);
+    }
+
+    public static void playTardisPhoneRingSound(World world, Vec3d pos) {
+        playSound(world, pos, TARDIS_PHONE_RING.get(), 0.6F, 1.0F);
+    }
+
+    public static void playTardisPhoneRingbackSound(World world, BlockPos blockPos) {
+        playSound(world, blockPos, TARDIS_PHONE_RINGBACK.get(), 0.6F, 1.0F);
+    }
+
+    public static void playTardisPhoneConnectSound(World world, BlockPos blockPos) {
+        playSound(world, blockPos, SoundEvents.BLOCK_BEACON_ACTIVATE, 1.0F, 1.4F);
+    }
+
+    // Pitched down slightly, but baked into the recording itself (see hangup.ogg) rather than via the pitch
+    // param here - that param changes playback speed, not just tone, which is what made the ring sound earlier.
+    public static void playTardisPhoneEndSound(World world, BlockPos blockPos) {
+        playSound(world, blockPos, TARDIS_PHONE_HANGUP.get(), 0.4F, 1.0F);
     }
 }

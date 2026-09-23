@@ -32,6 +32,9 @@
     ],
     "modmenu": [
       "net.drgmes.dwm.compat.modmenu.ModMenu"
+    ],
+    "voicechat": [
+      "net.drgmes.dwm.compat.simplevoicechat.TardisVoicechatPlugin"
     ]
   },
   "mixins": [

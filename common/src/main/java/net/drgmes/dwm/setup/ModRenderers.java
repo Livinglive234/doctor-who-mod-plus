@@ -70,6 +70,7 @@ public class ModRenderers {
         EntityRendererRegistry.register(ModEntities.TARDIS_CONSOLE_UNIT_CONTROL_SMALL.entityType, TardisConsoleControlEntityRenderer::new);
         EntityRendererRegistry.register(ModEntities.TARDIS_CONSOLE_UNIT_CONTROL_MEDIUM.entityType, TardisConsoleControlEntityRenderer::new);
         EntityRendererRegistry.register(ModEntities.TARDIS_CONSOLE_UNIT_CONTROL_LARGE.entityType, TardisConsoleControlEntityRenderer::new);
+        EntityRendererRegistry.register(ModEntities.TARDIS_CONSOLE_UNIT_CONTROL_PHONE.entityType, TardisConsoleControlEntityRenderer::new);
         EntityRendererRegistry.register(ModEntities.TARDIS_FLYOVER.entityType, TardisFlyoverEntityRenderer::new);
     }
 

@@ -92,7 +92,14 @@ public class ImmersivePortals {
         }
 
         public void createEntrancePortals() {
-            if (this.tardis.getWorld() == null) return;
+            ServerWorld tardisWorld = this.tardis.getWorld();
+            if (tardisWorld == null) return;
+
+            // The exterior's dimension can still be unloaded when this runs right after server startup (worlds
+            // load in an arbitrary order) - PortalAPI.createReversePortal NPEs if it can't resolve a ServerWorld
+            // for the destination, so skip for now. validatePortals() re-checks every second and will retry this
+            // once the destination world is up.
+            if (tardisWorld.getServer().getWorld(this.tardis.getCurrentExteriorDimension()) == null) return;
 
             TardisExteriorEntry exteriorType = this.tardis.getExteriorType();
             BaseTardisDoorsBlockEntity doorTile = this.tardis.getMainInteriorDoorsTile();

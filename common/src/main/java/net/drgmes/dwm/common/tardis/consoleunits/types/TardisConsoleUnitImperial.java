@@ -14,6 +14,14 @@ public class TardisConsoleUnitImperial extends TardisConsoleUnitEntry {
         this.addControlEntry(TardisConsoleUnitControlRole.MONITOR, TardisConsoleUnitControlType.OTHER, new Vec3d(-0.4F, 0.5F, -0.7F), "controls/control_monitor", ModEntities.TARDIS_CONSOLE_UNIT_CONTROL_MEDIUM);
         this.addControlEntry(TardisConsoleUnitControlRole.TELEPATHIC_INTERFACE, TardisConsoleUnitControlType.OTHER, new Vec3d(0.45F, 0.4F, -0.75F), "controls/control_telepathic_interface", ModEntities.TARDIS_CONSOLE_UNIT_CONTROL_LARGE);
         this.addControlEntry(TardisConsoleUnitControlRole.SONIC_SCREWDRIVER_SLOT, TardisConsoleUnitControlType.OTHER, new Vec3d(0.535F, 0.55F, 0.5425F), "sonic_screwdriver_slot");
+        // Read via /dwm tardis mark, eye right against the phone model's top (0.6166F, 0.6019F, 0.6622F) and
+        // bottom (0.7309F, 0.5575F, 0.8644F) - anchored at the bottom, horizontally centered between the two
+        // (see ModEntities.TARDIS_CONSOLE_UNIT_CONTROL_PHONE for the derived hitbox size).
+        this.addControlEntry(TardisConsoleUnitControlRole.PHONE, TardisConsoleUnitControlType.OTHER, new Vec3d(0.6738F, 0.5575F, 0.7633F), "controls/control_phone", ModEntities.TARDIS_CONSOLE_UNIT_CONTROL_PHONE);
+        // Read via /dwm tardis mark, above the sonic screwdriver slot and phone on that same side of the console.
+        // Slot v_4 - the next free one along from Materialization/Leave Behind/Cloak's v_3/v_2/v_1, but on its own
+        // over here rather than in that row, so no spacing to match against.
+        this.addControlEntry(TardisConsoleUnitControlRole.PHONE_PRIVACY, TardisConsoleUnitControlType.SLIDER, new Vec3d(0.4799F, 0.5815F, 0.4276F), "controls/control_sliders_v/control_slider_v_4$_handle", ModEntities.TARDIS_CONSOLE_UNIT_CONTROL_SMALL);
 
         this.addControlEntry(TardisConsoleUnitControlRole.MATERIALIZATION, TardisConsoleUnitControlType.SLIDER, new Vec3d(0.855F, 0.575F, -0.0775F), "controls/control_sliders_v/control_slider_v_3$_handle", ModEntities.TARDIS_CONSOLE_UNIT_CONTROL_SMALL);
         // The slider slot right next to Materialization's (v_2), same row: a bit closer to it than the levers are to

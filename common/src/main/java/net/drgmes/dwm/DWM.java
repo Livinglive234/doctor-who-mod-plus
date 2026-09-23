@@ -41,6 +41,10 @@ public class DWM {
         // The emergency return: one toll of the cloister bell, and how long it is until the next
         public static final int EMERGENCY_CHIME_INTERVAL = 65; // 3.25s, the length of the toll's sound
         public static final int EMERGENCY_HOME_RADIUS = 20; // how far from the owner's bed it may land
+
+        public static final int PHONE_RING_TIMEOUT = 600; // 30s unanswered before a call gives up
+        public static final int PHONE_RING_INTERVAL = 90; // 4.5s, the length of the ring sound including its trailing silence
+        public static final int PHONE_RINGBACK_INTERVAL = 121; // 6.05s, one tone-and-silence cycle of the ringback sound
     }
 
     // The flying TARDIS shown while the flyover lever is on - the design is in CHANGELOG.md.
@@ -168,7 +172,17 @@ public class DWM {
         public static final Text SHIELDS_SYSTEM_NOT_INSTALLED = Text.translatable("message.dwm.tardis.system.shields.not_installed");
 
         public static final Text IMMERSIVE_PORTALS_NOT_INSTALLED = Text.translatable("message.dwm.tardis.compat.immersive_portals.not_installed");
+        public static final Text SIMPLE_VOICE_CHAT_NOT_INSTALLED = Text.translatable("message.dwm.tardis.compat.simple_voice_chat.not_installed");
         public static final Text SHIELDS_SYSTEM_NOT_ACTIVE = Text.translatable("message.dwm.tardis.system.shields.not_active");
+
+        public static final Text PHONE_CALLING = Text.translatable("message.dwm.tardis.phone.calling");
+        public static final Function<String, Text> PHONE_RINGING = (caller) -> Text.translatable("message.dwm.tardis.phone.ringing", Text.literal(caller).formatted(Formatting.AQUA));
+        public static final Text PHONE_CONNECTED = Text.translatable("message.dwm.tardis.phone.connected");
+        public static final Text PHONE_NO_ANSWER = Text.translatable("message.dwm.tardis.phone.no_answer");
+        public static final Text PHONE_DECLINED = Text.translatable("message.dwm.tardis.phone.declined");
+        public static final Text PHONE_ENDED = Text.translatable("message.dwm.tardis.phone.ended");
+        public static final Text PHONE_LINE_BUSY = Text.translatable("message.dwm.tardis.phone.busy");
+        public static final Text PHONE_UNREACHABLE = Text.translatable("message.dwm.tardis.phone.unreachable");
 
         public static final Text ARS_CONSOLE_ROOM_REBUILD_LOCKED = Text.translatable("message.dwm.tardis.ars.console_room.rebuild.locked");
         public static final Text ARS_CONSOLE_ROOM_REBUILD_IN_PROGRESS = Text.translatable("message.dwm.tardis.ars.console_room.rebuild.in_progress");
@@ -261,6 +275,19 @@ public class DWM {
         public static final Text MONITOR_WAYPOINTS_CREATE_BTN_CANCEL = Text.translatable("screen.dwm.monitor.waypoints.create.button.cancel");
         public static final Text MONITOR_WAYPOINTS_CREATE_BTN_ACCEPT = Text.translatable("screen.dwm.monitor.waypoints.create.button.accept");
         public static final Text MONITOR_WAYPOINTS_CREATE_BTN_RESET = Text.translatable("screen.dwm.monitor.waypoints.create.button.reset");
+
+        public static final Text PHONE_DIAL_TITLE = Text.translatable("screen.dwm.phone.dial.title");
+        public static final Text PHONE_DIAL_SEARCH = Text.translatable("screen.dwm.phone.dial.search");
+        public static final Text PHONE_DIAL_EMPTY = Text.translatable("screen.dwm.phone.dial.empty");
+        public static final Text PHONE_DIAL_CANCEL = Text.translatable("screen.dwm.phone.dial.cancel");
+        public static final Text PHONE_DIAL_CALL = Text.translatable("screen.dwm.phone.dial.call");
+        public static final Function<String, Text> PHONE_DIAL_ENTRY = (ownerName) -> Text.translatable("screen.dwm.phone.dial.entry", ownerName);
+        public static final Text PHONE_CALL_ANSWER = Text.translatable("screen.dwm.phone.call.answer");
+        public static final Text PHONE_CALL_DECLINE = Text.translatable("screen.dwm.phone.call.decline");
+        public static final Text PHONE_CALL_HANG_UP = Text.translatable("screen.dwm.phone.call.hang_up");
+        public static final Function<String, Text> PHONE_CALL_STATE_CALLING = (name) -> Text.translatable("screen.dwm.phone.call.state.calling", Text.literal(name).formatted(Formatting.AQUA));
+        public static final Function<String, Text> PHONE_CALL_STATE_RINGING = (name) -> Text.translatable("screen.dwm.phone.call.state.ringing", Text.literal(name).formatted(Formatting.AQUA));
+        public static final Function<String, Text> PHONE_CALL_STATE_CONNECTED = (name) -> Text.translatable("screen.dwm.phone.call.state.connected", Text.literal(name).formatted(Formatting.AQUA));
 
         public static final Text TELEPATHIC_INTERFACE_TITLE_LOCATIONS = Text.translatable("screen.dwm.telepathic_interface.title.locations");
         public static final Text TELEPATHIC_INTERFACE_TITLE_BANNERS = Text.translatable("screen.dwm.telepathic_interface.title.banners");

@@ -16,6 +16,8 @@ public enum TardisConsoleUnitControlRole {
     MONITOR(TardisConsoleUnitControlValueType.NONE),
     TELEPATHIC_INTERFACE(TardisConsoleUnitControlValueType.NONE, "telepathic_interface"),
     SONIC_SCREWDRIVER_SLOT(TardisConsoleUnitControlValueType.NONE, "sonic_screwdriver_slot"),
+    PHONE(TardisConsoleUnitControlValueType.NONE, "phone"),
+    PHONE_PRIVACY(TardisConsoleUnitControlValueType.BOOLEAN, "phone_privacy", "phone_privacy", 0, ModSounds.TARDIS_CONTROL_2, Set.of()),
     DOORS(TardisConsoleUnitControlValueType.BOOLEAN, "doors", "doors", 0, ModSounds.TARDIS_CONTROL_3, 0.5F, Set.of(TardisConsoleUnitControlFlags.MUST_BE_MATERIALIZED)),
     SHIELDS(TardisConsoleUnitControlValueType.BOOLEAN, "shields", "shields", 0, ModSounds.TARDIS_CONTROL_3, 0.5F, Set.of(TardisConsoleUnitControlFlags.REQUIRED_SHIELDS_SYSTEM, TardisConsoleUnitControlFlags.MUST_BE_MATERIALIZED)),
     SHIELDS_OXYGEN(TardisConsoleUnitControlValueType.BOOLEAN, "shields_oxygen", "shields_oxygen", 0, ModSounds.TARDIS_CONTROL_2, Set.of(TardisConsoleUnitControlFlags.REQUIRED_SHIELDS_SYSTEM, TardisConsoleUnitControlFlags.MUST_BE_MATERIALIZED, TardisConsoleUnitControlFlags.DEPENDS_ON_SHIELDS_ON)),

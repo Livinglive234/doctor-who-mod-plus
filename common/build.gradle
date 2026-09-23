@@ -65,6 +65,12 @@ dependencies {
             transitive(false)
         }
     }
+
+    // Not a mod jar - plain interfaces with no Minecraft-mapped types, so no Loom remapping needed - and small
+    // enough to just bundle rather than gate behind a build property like the compat dependencies above.
+    if (rootProject.hasProperty('svc_api_version')) {
+        implementation "de.maxhenkel.voicechat:voicechat-api:$rootProject.svc_api_version"
+    }
 }
 
 sourceSets.main.resources {

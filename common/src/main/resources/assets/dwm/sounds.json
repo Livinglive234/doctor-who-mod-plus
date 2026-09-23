@@ -86,5 +86,17 @@
   "tardis_takeoff": {
     "subtitle": "message.dwm.sound.tardis.takeoff",
     "sounds": ["dwm:tardis/takeoff"]
+  },
+  "tardis_phone_ring": {
+    "subtitle": "message.dwm.sound.tardis.phone_ring",
+    "sounds": ["dwm:tardis/phone/ring"]
+  },
+  "tardis_phone_ringback": {
+    "subtitle": "message.dwm.sound.tardis.phone_ringback",
+    "sounds": ["dwm:tardis/phone/ringback"]
+  },
+  "tardis_phone_hangup": {
+    "subtitle": "message.dwm.sound.tardis.phone_hangup",
+    "sounds": ["dwm:tardis/phone/hangup"]
   }
 }

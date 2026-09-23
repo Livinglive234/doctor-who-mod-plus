@@ -23,6 +23,8 @@ public class ModNetwork {
             registerS2CType(TardisConsoleUnitControlsStatesUpdatePacket.PACKET_ID, TardisConsoleUnitControlsStatesUpdatePacket.PACKET_CODEC);
             registerS2CType(TardisConsoleUnitMonitorOpenPacket.PACKET_ID, TardisConsoleUnitMonitorOpenPacket.PACKET_CODEC);
             registerS2CType(TardisConsoleUnitMonitorPageUpdatePacket.PACKET_ID, TardisConsoleUnitMonitorPageUpdatePacket.PACKET_CODEC);
+            registerS2CType(TardisPhoneDialOpenPacket.PACKET_ID, TardisPhoneDialOpenPacket.PACKET_CODEC);
+            registerS2CType(TardisPhoneIncomingCallOpenPacket.PACKET_ID, TardisPhoneIncomingCallOpenPacket.PACKET_CODEC);
             registerS2CType(TardisConsoleUnitSonicScrewdriverSlotUpdatePacket.PACKET_ID, TardisConsoleUnitSonicScrewdriverSlotUpdatePacket.PACKET_CODEC);
             registerS2CType(TardisConsoleUnitTelepathicInterfaceLocationsOpenPacket.PACKET_ID, TardisConsoleUnitTelepathicInterfaceLocationsOpenPacket.PACKET_CODEC);
             registerS2CType(TardisConsoleUnitTelepathicInterfaceMapBannersOpenPacket.PACKET_ID, TardisConsoleUnitTelepathicInterfaceMapBannersOpenPacket.PACKET_CODEC);
@@ -56,6 +58,9 @@ public class ModNetwork {
         Registration.registerPacket(NetworkManager.Side.C2S, TardisConsoleUnitTelepathicInterfaceLocationApplyPacket.PACKET_ID, TardisConsoleUnitTelepathicInterfaceLocationApplyPacket.PACKET_CODEC, () -> TardisConsoleUnitTelepathicInterfaceLocationApplyPacket::handle);
         Registration.registerPacket(NetworkManager.Side.C2S, TardisConsoleUnitTelepathicInterfaceMapBannerApplyPacket.PACKET_ID, TardisConsoleUnitTelepathicInterfaceMapBannerApplyPacket.PACKET_CODEC, () -> TardisConsoleUnitTelepathicInterfaceMapBannerApplyPacket::handle);
         Registration.registerPacket(NetworkManager.Side.C2S, TardisMapDestinationApplyPacket.PACKET_ID, TardisMapDestinationApplyPacket.PACKET_CODEC, () -> TardisMapDestinationApplyPacket::handle);
+        Registration.registerPacket(NetworkManager.Side.C2S, TardisPhoneAnswerPacket.PACKET_ID, TardisPhoneAnswerPacket.PACKET_CODEC, () -> TardisPhoneAnswerPacket::handle);
+        Registration.registerPacket(NetworkManager.Side.C2S, TardisPhoneDeclinePacket.PACKET_ID, TardisPhoneDeclinePacket.PACKET_CODEC, () -> TardisPhoneDeclinePacket::handle);
+        Registration.registerPacket(NetworkManager.Side.C2S, TardisPhoneDialPacket.PACKET_ID, TardisPhoneDialPacket.PACKET_CODEC, () -> TardisPhoneDialPacket::handle);
         Registration.registerPacket(NetworkManager.Side.C2S, TardisTeleporterApplyPacket.PACKET_ID, TardisTeleporterApplyPacket.PACKET_CODEC, () -> TardisTeleporterApplyPacket::handle);
     }
 
