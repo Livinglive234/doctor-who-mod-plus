@@ -8,6 +8,7 @@ import net.drgmes.dwm.common.tardis.systems.TardisSystemResearch;
 import net.drgmes.dwm.common.tardis.systems.TardisSystemShields;
 import net.drgmes.dwm.enums.TardisConsoleUnitControlFlags;
 import net.drgmes.dwm.enums.TardisConsoleUnitControlRole;
+import net.drgmes.dwm.setup.ModCompats;
 import net.drgmes.dwm.setup.ModSounds;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -361,27 +362,25 @@ public class TardisConsoleControlsStorage {
             }
 
             case EMERGENCY_RETURN -> {
-                if (!materializationSystem.isEnabled() || !flightSystem.isEnabled() || !tardis.checkAccess(player, false, true)) {
+                if (!materializationSystem.isEnabled() || !flightSystem.isEnabled() || !tardis.setEmergencyReturnEnabled((boolean) value, player)) {
                     this.values.put(TardisConsoleUnitControlRole.EMERGENCY_RETURN, tardis.isEmergencyReturnEnabled());
                     yield false;
                 }
 
-                tardis.setEmergencyReturnEnabled((boolean) value);
                 yield true;
             }
 
             case LEAVE_BEHIND -> {
-                if (!materializationSystem.isEnabled() || !tardis.checkAccess(player, false, true)) {
+                if (!materializationSystem.isEnabled() || !tardis.setLeaveBehindEnabled((boolean) value, player)) {
                     this.values.put(TardisConsoleUnitControlRole.LEAVE_BEHIND, tardis.isLeaveBehindEnabled());
                     yield false;
                 }
 
-                tardis.setLeaveBehindEnabled((boolean) value);
                 yield true;
             }
 
             case CLOAKED -> {
-                if (!materializationSystem.isEnabled()) {
+                if (!materializationSystem.isEnabled() || !ModCompats.immersivePortals()) {
                     this.values.put(TardisConsoleUnitControlRole.CLOAKED, tardis.isCloakedEnabled());
                     yield false;
                 }
@@ -484,6 +483,14 @@ public class TardisConsoleControlsStorage {
         if (controlRole.flags.contains(TardisConsoleUnitControlFlags.REQUIRED_SHIELDS_SYSTEM) && !shieldsSystem.isEnabled()) {
             if (needSound) ModSounds.playSound(tardis.getWorld(), tardis.getMainConsolePosition(), SoundEvents.BLOCK_WOOD_PLACE, 1.0F, 1.0F);
             player.sendMessage(DWM.TEXTS.SHIELDS_SYSTEM_NOT_INSTALLED, true);
+            return;
+        }
+
+        // Cloak specifically, not a role.flags-driven check like the rest of these: it's the only lever that needs a
+        // compat mod rather than one of the TARDIS's own systems.
+        if (controlRole == TardisConsoleUnitControlRole.CLOAKED && !ModCompats.immersivePortals()) {
+            if (needSound) ModSounds.playSound(tardis.getWorld(), tardis.getMainConsolePosition(), SoundEvents.BLOCK_WOOD_PLACE, 1.0F, 1.0F);
+            player.sendMessage(DWM.TEXTS.IMMERSIVE_PORTALS_NOT_INSTALLED, true);
             return;
         }
 

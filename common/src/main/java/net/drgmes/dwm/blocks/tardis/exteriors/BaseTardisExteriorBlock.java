@@ -31,6 +31,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.TeleportTarget;
 import net.minecraft.world.World;
@@ -92,12 +93,31 @@ public abstract class BaseTardisExteriorBlock<C extends BaseTardisExteriorBlockE
     @Override
     @SuppressWarnings("deprecation")
     public VoxelShape getOutlineShape(BlockState blockState, BlockView blockView, BlockPos blockPos, ShapeContext context) {
+        return this.isCloaked(blockState, blockView, blockPos) ? VoxelShapes.empty() : this.shapeFor(blockState);
+    }
+
+    // Cloaked: no collision either, like a vanilla portal block, so it's properly walk-through and not just invisible.
+    // Interaction still works through the key (see TardisKeyItem.use), which doesn't go by this shape at all. A
+    // separate check from getOutlineShape's, rather than calling it, so entities colliding every tick near a
+    // materialized TARDIS aren't paying for the block-entity lookup twice.
+    @Override
+    @SuppressWarnings("deprecation")
+    public VoxelShape getCollisionShape(BlockState blockState, BlockView blockView, BlockPos blockPos, ShapeContext context) {
+        return this.isCloaked(blockState, blockView, blockPos) ? VoxelShapes.empty() : this.shapeFor(blockState);
+    }
+
+    private VoxelShape shapeFor(BlockState blockState) {
         return switch (blockState.get(FACING)) {
             case NORTH -> NORTH_SHAPE;
             case SOUTH -> SOUTH_SHAPE;
             case EAST -> EAST_SHAPE;
             default -> WEST_SHAPE;
         };
+    }
+
+    private boolean isCloaked(BlockState blockState, BlockView blockView, BlockPos blockPos) {
+        BlockPos lowerPos = blockState.get(HALF) == DoubleBlockHalf.LOWER ? blockPos : blockPos.down();
+        return blockView.getBlockEntity(lowerPos) instanceof BaseTardisExteriorBlockEntity tardisExteriorBlockEntity && tardisExteriorBlockEntity.isCloaked();
     }
 
     @Override

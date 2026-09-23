@@ -2298,6 +2298,7 @@
   "message.dwm.tardis.system.flight.not_installed": "§eСпрямовуючий модуль §cне встановлено",
 
   "message.dwm.tardis.system.shields.not_installed": "§eГенератор щитів §cне встановлено",
+  "message.dwm.tardis.compat.immersive_portals.not_installed": "§eImmersive Portals §cне встановлено",
   "message.dwm.tardis.system.shields.not_active": "§eГенератор щитів §cне запущено",
 
   "message.dwm.tardis.ars.console_room.rebuild.locked": "§cКонсоль заблокована на період реконфігурації ТАРДІС",

@@ -2298,6 +2298,7 @@
   "message.dwm.tardis.system.flight.not_installed": "§eDirectional Unit §cNot Installed",
 
   "message.dwm.tardis.system.shields.not_installed": "§eShields Generator §cNot Installed",
+  "message.dwm.tardis.compat.immersive_portals.not_installed": "§eImmersive Portals §cNot Installed",
   "message.dwm.tardis.system.shields.not_active": "§eShields Generator §cNot Active",
 
   "message.dwm.tardis.ars.console_room.rebuild.locked": "§cThe systems is locked during TARDIS reconfiguration",

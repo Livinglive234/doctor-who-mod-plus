@@ -39,6 +39,11 @@ public record TardisConsoleUnitMonitorHistoryDeletePacket(
             ServerWorld tardisWorld = DimensionHelper.getModWorld(payload.tardisId, player.getServer());
 
             TardisStateManager.get(tardisWorld).ifPresent((tardis) -> {
+                if (!tardis.checkAccess(player, true, false)) {
+                    player.sendMessage(DWM.TEXTS.TARDIS_NOT_ALLOWED, true);
+                    return;
+                }
+
                 boolean flag = tardis.getSystem(TardisSystemFlight.class).deleteHistoryEntry(payload.historyEntry);
                 if (flag) player.sendMessage(DWM.TEXTS.MONITOR_HISTORY_REMOVED, true);
             });

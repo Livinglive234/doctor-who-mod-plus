@@ -583,13 +583,18 @@ public class TardisStateManager extends PersistentState {
         return this.leaveBehindEnabled && this.getSystem(TardisSystemMaterialization.class).isEnabled();
     }
 
-    public void setLeaveBehindEnabled(boolean flag) {
+    public boolean setLeaveBehindEnabled(boolean flag, PlayerEntity player) {
+        if (!this.checkAccess(player, false, true)) return false;
+
         this.leaveBehindEnabled = flag;
         this.markDirty();
+        return true;
     }
 
+    // Genuinely walk-through, not just invisible - the exterior's collision drops out too while cloaked - so it needs
+    // Immersive Portals to open cleanly through the key rather than the jarring plain teleport its fallback would be.
     public boolean isCloakedEnabled() {
-        return this.cloakedEnabled && this.getSystem(TardisSystemMaterialization.class).isEnabled();
+        return this.cloakedEnabled && this.getSystem(TardisSystemMaterialization.class).isEnabled() && ModCompats.immersivePortals();
     }
 
     // Pushes the change onto the physical exterior, if it's materialized right now, so it takes effect immediately
@@ -607,9 +612,12 @@ public class TardisStateManager extends PersistentState {
         }
     }
 
-    public void setEmergencyReturnEnabled(boolean flag) {
+    public boolean setEmergencyReturnEnabled(boolean flag, PlayerEntity player) {
+        if (!this.checkAccess(player, false, true)) return false;
+
         this.emergencyReturnEnabled = flag;
         this.markDirty();
+        return true;
     }
 
     // Takeoff drops every shield, so which special ones were up is noted first, for the landing shields to raise again.
@@ -624,7 +632,6 @@ public class TardisStateManager extends PersistentState {
         this.markDirty();
     }
 
-    // With the landing shields switch on, the shields come up once a flight has landed, and so do the special ones that were up before takeoff.
     // Called right before the emergency return's own flight starts, so its landing (see onFlightLanded) knows to
     // also set the handbrake - a safety stop, not something that should let the TARDIS quietly fly off again.
     public void markEmergencyReturnFlight() {
@@ -639,7 +646,7 @@ public class TardisStateManager extends PersistentState {
      */
     public void onFlightLanded() {
         this.raiseLandingShields();
-        this.setEmergencyReturnEnabled(false);
+        this.setEmergencyReturnEnabled(false, null);
 
         if (this.emergencyReturnFlight) {
             this.emergencyReturnFlight = false;
@@ -647,6 +654,7 @@ public class TardisStateManager extends PersistentState {
         }
     }
 
+    // With the landing shields switch on, the shields come up once a flight has landed, and so do the special ones that were up before takeoff.
     private void raiseLandingShields() {
         if (!this.landingShieldsEnabled || this.shieldsEnabled || !this.getSystem(TardisSystemShields.class).isEnabled()) return;
 

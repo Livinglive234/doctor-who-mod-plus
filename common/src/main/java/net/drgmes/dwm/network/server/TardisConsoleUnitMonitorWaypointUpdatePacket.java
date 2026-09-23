@@ -41,6 +41,11 @@ public record TardisConsoleUnitMonitorWaypointUpdatePacket(
             ServerWorld tardisWorld = DimensionHelper.getModWorld(payload.tardisId, player.getServer());
 
             TardisStateManager.get(tardisWorld).ifPresent((tardis) -> {
+                if (!tardis.checkAccess(player, true, false)) {
+                    player.sendMessage(DWM.TEXTS.TARDIS_NOT_ALLOWED, true);
+                    return;
+                }
+
                 boolean flag = tardis.getSystem(TardisSystemFlight.class).updateWaypointEntry(payload.oldWaypointEntry, payload.newWaypointEntry);
                 if (flag) player.sendMessage(DWM.TEXTS.MONITOR_WAYPOINT_UPDATED, true);
             });

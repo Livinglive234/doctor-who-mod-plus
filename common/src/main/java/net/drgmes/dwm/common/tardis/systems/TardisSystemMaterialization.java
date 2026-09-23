@@ -12,6 +12,7 @@ import net.drgmes.dwm.network.client.TardisExteriorUpdatePacket;
 import net.drgmes.dwm.setup.ModCompats;
 import net.drgmes.dwm.setup.ModSounds;
 import net.drgmes.dwm.utils.helpers.EntityHelper;
+import net.drgmes.dwm.utils.helpers.TardisHelper;
 import net.drgmes.dwm.utils.helpers.WorldHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -34,6 +35,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.stream.StreamSupport;
 
 public class TardisSystemMaterialization extends TardisBaseSystem {
     private enum EStep {
@@ -176,6 +178,9 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
         this.tardis.setLightState(false);
         this.tardis.rememberSpecialShields();
         this.tardis.setShieldsState(false);
+        // Cloak never carries a trip, and never carries into the next landing either: it has to be turned back on
+        // deliberately once materialized again.
+        this.tardis.setCloakedEnabled(false);
         this.tardis.markConsoleTilesUpdated();
 
         if (this.tardis.isLeaveBehindEnabled()) this.leaveBehindUnauthorized(exteriorWorld);
@@ -202,10 +207,10 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
             player.sendMessage(DWM.TEXTS.TARDIS_LEFT_BEHIND, true);
         }
 
-        List<HostileEntity> hostiles = new ArrayList<>();
-        for (Entity entity : this.tardis.getWorld().iterateEntities()) {
-            if (entity instanceof HostileEntity hostile) hostiles.add(hostile);
-        }
+        List<HostileEntity> hostiles = StreamSupport.stream(this.tardis.getWorld().iterateEntities().spliterator(), false)
+            .filter(HostileEntity.class::isInstance)
+            .map(HostileEntity.class::cast)
+            .toList();
 
         for (HostileEntity hostile : hostiles) {
             EntityHelper.teleport(hostile, exteriorWorld, pos, yaw);
@@ -366,20 +371,33 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
         ModSounds.playTardisFailSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition());
     }
 
+    /**
+     * Landing on top of another TARDIS's own exterior, open sky or not, parks this one just outside that TARDIS's own
+     * interior door instead, and materializes it like any other landing - solid, visible, and cloaked only if this
+     * TARDIS's own Cloak lever already says so. Needs the spot right outside their door to actually be clear.
+     */
     private boolean tryLandToForeignTardis(ServerWorld exteriorWorld) {
         if (exteriorWorld.getBlockEntity(this.tardis.getCurrentExteriorPosition()) instanceof BaseTardisExteriorBlockEntity tardisExteriorBlockEntity) {
             ServerWorld foreignTardisWorld = tardisExteriorBlockEntity.getOrCreateTardisWorld();
+            if (foreignTardisWorld == null) return false;
 
-            if (foreignTardisWorld != null) {
-                Optional<TardisStateManager> tardisHolder = TardisStateManager.get(foreignTardisWorld);
-                if (tardisHolder.isEmpty() || tardisHolder.get().getSystem(TardisSystemShields.class).inProgress()) return false;
+            if (this.isShieldedAgainstEntry(foreignTardisWorld)) return false;
 
-                tardisHolder.get().init();
-                this.tardis.setDimension(tardisHolder.get().getWorld().getRegistryKey(), false);
-                this.tardis.setFacing(tardisHolder.get().getEntranceFacing(), false);
-                this.tardis.setPosition(tardisHolder.get().getEntrancePosition().offset(tardisHolder.get().getEntranceFacing()), false);
-                return true;
-            }
+            Optional<TardisStateManager> tardisHolder = TardisStateManager.get(foreignTardisWorld);
+            if (tardisHolder.isEmpty()) return false;
+
+            TardisStateManager foreignTardis = tardisHolder.get();
+            foreignTardis.init();
+
+            BlockPos spot = foreignTardis.getEntrancePosition().offset(foreignTardis.getEntranceFacing());
+            if (!WorldHelper.checkBlockIsEmpty(foreignTardis.getWorld().getBlockState(spot), true)
+                || !WorldHelper.checkBlockIsEmpty(foreignTardis.getWorld().getBlockState(spot.up()), true)) return false;
+
+            this.tardis.setDimension(foreignTardis.getWorld().getRegistryKey(), false);
+            this.tardis.setFacing(foreignTardis.getEntranceFacing(), false);
+            this.tardis.setPosition(spot, false);
+
+            return this.placeExteriorAt(foreignTardis.getWorld(), spot, foreignTardis.getEntranceFacing(), this.tardis.isCloakedEnabled());
         }
 
         return false;
@@ -389,18 +407,39 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
         ServerWorld exteriorWorld = this.tardis.getExteriorWorld();
         if (exteriorWorld == null) return false;
 
+        // A raw flight into someone else's TARDIS interior skips the "land on their exterior" intrusion entirely, so
+        // it needs the same shields check that mechanic already has - the console's own dimension picker never offers
+        // a TARDIS dimension to fly to in the first place, but that alone doesn't stop the destination getting set
+        // some other way (a waypoint, say).
+        if (TardisHelper.isTardisDimension(exteriorWorld) && this.isShieldedAgainstEntry(exteriorWorld)) {
+            this.playFailSound();
+            return false;
+        }
+
         if (!this.findSafePosition(exteriorWorld)) return false;
 
+        return this.placeExteriorAt(exteriorWorld, this.tardis.getCurrentExteriorPosition(), this.tardis.getCurrentExteriorFacing(), this.tardis.isCloakedEnabled());
+    }
+
+    // Whether a TARDIS's shields would refuse an intruder right now - the one rule that gates both ways into someone
+    // else's TARDIS: landing on its exterior, and a normal flight that happens to target a coordinate inside it.
+    private boolean isShieldedAgainstEntry(ServerWorld tardisWorld) {
+        Optional<TardisStateManager> tardisHolder = TardisStateManager.get(tardisWorld);
+        return tardisHolder.isEmpty() || tardisHolder.get().getSystem(TardisSystemShields.class).inProgress();
+    }
+
+    // The two-block exterior itself, wherever it's landing and however it got there: a normal safe-landing-spot
+    // search, or parked at a fixed spot inside someone else's TARDIS.
+    private boolean placeExteriorAt(ServerWorld exteriorWorld, BlockPos exteriorBlockPos, Direction facing, boolean cloaked) {
         TardisExteriorEntry exteriorType = this.tardis.getExteriorType();
         if (exteriorType == null) exteriorType = TardisExteriors.CAPSULE;
 
-        BlockPos exteriorBlockPos = this.tardis.getCurrentExteriorPosition();
         BlockState exteriorBlockState = exteriorWorld.getBlockState(exteriorBlockPos);
         BlockState exteriorUpBlockState = exteriorWorld.getBlockState(exteriorBlockPos.up());
 
         BlockState tardisExteriorBlockState = exteriorType.getBlock().getDefaultState();
         tardisExteriorBlockState = tardisExteriorBlockState.with(BaseTardisExteriorBlock.HALF, DoubleBlockHalf.LOWER);
-        tardisExteriorBlockState = tardisExteriorBlockState.with(BaseTardisExteriorBlock.FACING, this.tardis.getCurrentExteriorFacing());
+        tardisExteriorBlockState = tardisExteriorBlockState.with(BaseTardisExteriorBlock.FACING, facing);
         tardisExteriorBlockState = tardisExteriorBlockState.with(BaseTardisExteriorBlock.WATERLOGGED, exteriorBlockState.getFluidState().isIn(FluidTags.WATER));
         exteriorWorld.setBlockState(exteriorBlockPos, tardisExteriorBlockState, Block.NOTIFY_ALL);
 
@@ -410,7 +449,7 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
 
         if (exteriorWorld.getBlockEntity(exteriorBlockPos) instanceof BaseTardisExteriorBlockEntity tardisExteriorBlockEntity) {
             tardisExteriorBlockEntity.tardisId = this.tardis.getId();
-            tardisExteriorBlockEntity.setCloaked(this.tardis.isCloakedEnabled());
+            tardisExteriorBlockEntity.setCloaked(cloaked);
             return true;
         }
         else {

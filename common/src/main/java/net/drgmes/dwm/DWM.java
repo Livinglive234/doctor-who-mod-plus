@@ -166,6 +166,8 @@ public class DWM {
         public static final Text FLIGHT_SYSTEM_NOT_INSTALLED = Text.translatable("message.dwm.tardis.system.flight.not_installed");
 
         public static final Text SHIELDS_SYSTEM_NOT_INSTALLED = Text.translatable("message.dwm.tardis.system.shields.not_installed");
+
+        public static final Text IMMERSIVE_PORTALS_NOT_INSTALLED = Text.translatable("message.dwm.tardis.compat.immersive_portals.not_installed");
         public static final Text SHIELDS_SYSTEM_NOT_ACTIVE = Text.translatable("message.dwm.tardis.system.shields.not_active");
 
         public static final Text ARS_CONSOLE_ROOM_REBUILD_LOCKED = Text.translatable("message.dwm.tardis.ars.console_room.rebuild.locked");

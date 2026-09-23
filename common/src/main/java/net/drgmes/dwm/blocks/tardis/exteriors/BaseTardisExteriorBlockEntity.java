@@ -29,7 +29,7 @@ public abstract class BaseTardisExteriorBlockEntity extends BlockEntity {
     private TardisExteriorState exteriorState = TardisExteriorState.MATERIALIZED;
     private boolean inited;
     private int tick = -1;
-    private boolean cloaked = false;
+    private boolean cloaked;
 
     public BaseTardisExteriorBlockEntity(BlockEntityType<?> type, BlockPos blockPos, BlockState blockState) {
         super(type, blockPos, blockState);
@@ -147,9 +147,9 @@ public abstract class BaseTardisExteriorBlockEntity extends BlockEntity {
         this.markDirty();
     }
 
-    // Cloak: invisible to look at, but the door, collision and access checks all work exactly as they always have -
-    // Minecraft has no clean way to make a block solid for one player and walk-through for another without a much
-    // bigger rework, so it stays a "hidden but still there" cloak rather than the show's fully intangible one.
+    // Cloak: invisible, and no collision either (see BaseTardisExteriorBlock.getOutlineShape/getCollisionShape) - the
+    // door still opens exactly as it always has for the owner or a key-holder (see TardisKeyItem.use), which never
+    // went by this shape in the first place.
     public boolean isCloaked() {
         return this.cloaked;
     }
