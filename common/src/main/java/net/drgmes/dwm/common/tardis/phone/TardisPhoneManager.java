@@ -110,8 +110,8 @@ public class TardisPhoneManager {
 
         call.connect(answerer.getUuid());
 
-        getTardis(server, call.callerId).ifPresent((tardis) -> announce(tardis, DWM.TEXTS.PHONE_CONNECTED, ModSounds::playTardisPhoneConnectSound));
-        getTardis(server, call.calleeId).ifPresent((tardis) -> announce(tardis, DWM.TEXTS.PHONE_CONNECTED, ModSounds::playTardisPhoneConnectSound));
+        getTardis(server, call.callerId).ifPresent((tardis) -> announceMessage(tardis, DWM.TEXTS.PHONE_CONNECTED));
+        getTardis(server, call.calleeId).ifPresent((tardis) -> announceMessage(tardis, DWM.TEXTS.PHONE_CONNECTED));
     }
 
     public static void end(MinecraftServer server, String tardisId, Text reasonForOtherParty) {

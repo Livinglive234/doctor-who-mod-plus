@@ -211,10 +211,6 @@ public class ModSounds {
         playSound(world, blockPos, TARDIS_PHONE_RINGBACK.get(), 0.6F, 1.0F);
     }
 
-    public static void playTardisPhoneConnectSound(World world, BlockPos blockPos) {
-        playSound(world, blockPos, SoundEvents.BLOCK_BEACON_ACTIVATE, 1.0F, 1.4F);
-    }
-
     // Pitched down slightly, but baked into the recording itself (see hangup.ogg) rather than via the pitch
     // param here - that param changes playback speed, not just tone, which is what made the ring sound earlier.
     public static void playTardisPhoneEndSound(World world, BlockPos blockPos) {
