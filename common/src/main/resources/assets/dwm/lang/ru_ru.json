@@ -2296,6 +2296,7 @@
 
   "message.dwm.tardis.system.materialization.not_installed": "§eДематериализационная схема §cне установлена",
   "message.dwm.tardis.system.materialization.safe_position_not_found": "§cБезопасное место для приземления не обнаружено",
+  "message.dwm.tardis.system.materialization.target_shielded": "§cМатериализация не удалась - щиты цели подняты",
 
   "message.dwm.tardis.system.flight.not_installed": "§eНаправляющий модуль §cне установлен",
 
@@ -2499,10 +2500,7 @@
   "screen.dwm.phone.dial.call": "Позвонить",
   "screen.dwm.phone.call.answer": "Ответить",
   "screen.dwm.phone.call.decline": "Отклонить",
-  "screen.dwm.phone.call.hang_up": "Повесить трубку",
-  "screen.dwm.phone.call.state.calling": "Вызов %s...",
   "screen.dwm.phone.call.state.ringing": "%s вызывает",
-  "screen.dwm.phone.call.state.connected": "Соединено с %s",
 
   "screen.dwm.telepathic_interface.title.locations": "Телепатический интерфейс: Выберите локацию",
   "screen.dwm.telepathic_interface.title.banners": "Телепатический интерфейс: Выберите маркер",

@@ -11,7 +11,6 @@ import net.drgmes.dwm.common.tardis.TardisStateManager;
 import net.drgmes.dwm.common.tardis.consolerooms.TardisConsoleRoomEntry;
 import net.drgmes.dwm.common.tardis.exteriors.TardisExteriorEntry;
 import net.drgmes.dwm.utils.helpers.TardisHelper;
-import net.minecraft.block.BlockState;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -115,36 +114,23 @@ public class TardisDebugCommand {
     }
 
     // Mirrors TardisConsoleUnitControlEntry.createEntity's own formula in reverse: that one turns a hand-placed
-    // Vec3d plus the console's facing into a world position; this turns a world position (wherever the crosshair
-    // is) plus the console's facing back into the Vec3d that would produce it.
+    // Vec3d plus the console's facing into a world position; this turns a world position back into the Vec3d
+    // that would produce it, given the console's facing. raytrace uses wherever the crosshair hits; mark uses
+    // the player's own eye position directly, for placing against a model whose collision doesn't match its visuals.
     private static int executeRaytrace(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         ServerPlayerEntity player = context.getSource().getPlayer();
         if (player == null) return 0;
 
         ServerWorld world = player.getServerWorld();
-        if (!TardisHelper.isTardisDimension(world)) {
-            player.sendMessage(Text.literal("Not inside a TARDIS.").formatted(Formatting.RED), false);
-            return 0;
-        }
-
-        Optional<TardisStateManager> tardisHolder = TardisStateManager.get(world);
+        Optional<TardisStateManager> tardisHolder = getTardisIfInside(player, world);
         if (tardisHolder.isEmpty()) return 0;
-
-        BlockPos consolePos = tardisHolder.get().getMainConsolePosition();
-        BlockState consoleState = world.getBlockState(consolePos);
-        Direction facing = consoleState.get(Properties.HORIZONTAL_FACING);
 
         Vec3d eyePos = player.getEyePos();
         Vec3d reach = eyePos.add(player.getRotationVec(1.0F).multiply(8));
         BlockHitResult hitResult = world.raycast(new RaycastContext(eyePos, reach, RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, player));
         Vec3d hitPos = hitResult.getType() == HitResult.Type.MISS ? reach : hitResult.getPos();
 
-        float angle = 1.57F * ((facing.asRotation() - 90) / -90);
-        Vec3d offset = hitPos.subtract(Vec3d.ofCenter(consolePos)).rotateY(-angle);
-
-        player.sendMessage(Text.literal(String.format(Locale.ROOT, "Hit: %.4f, %.4f, %.4f", hitPos.x, hitPos.y, hitPos.z)).formatted(Formatting.GRAY), false);
-        player.sendMessage(Text.literal(String.format(Locale.ROOT, "new Vec3d(%.4fF, %.4fF, %.4fF)", offset.x, offset.y, offset.z)).formatted(Formatting.AQUA), false);
-
+        reportOffset(player, world, tardisHolder.get(), hitPos, "Hit");
         return Command.SINGLE_SUCCESS;
     }
 
@@ -153,25 +139,30 @@ public class TardisDebugCommand {
         if (player == null) return 0;
 
         ServerWorld world = player.getServerWorld();
-        if (!TardisHelper.isTardisDimension(world)) {
-            player.sendMessage(Text.literal("Not inside a TARDIS.").formatted(Formatting.RED), false);
-            return 0;
-        }
-
-        Optional<TardisStateManager> tardisHolder = TardisStateManager.get(world);
+        Optional<TardisStateManager> tardisHolder = getTardisIfInside(player, world);
         if (tardisHolder.isEmpty()) return 0;
 
-        BlockPos consolePos = tardisHolder.get().getMainConsolePosition();
-        BlockState consoleState = world.getBlockState(consolePos);
-        Direction facing = consoleState.get(Properties.HORIZONTAL_FACING);
-
-        Vec3d eyePos = player.getEyePos();
-        float angle = 1.57F * ((facing.asRotation() - 90) / -90);
-        Vec3d offset = eyePos.subtract(Vec3d.ofCenter(consolePos)).rotateY(-angle);
-
-        player.sendMessage(Text.literal(String.format(Locale.ROOT, "Eye: %.4f, %.4f, %.4f", eyePos.x, eyePos.y, eyePos.z)).formatted(Formatting.GRAY), false);
-        player.sendMessage(Text.literal(String.format(Locale.ROOT, "new Vec3d(%.4fF, %.4fF, %.4fF)", offset.x, offset.y, offset.z)).formatted(Formatting.AQUA), false);
-
+        reportOffset(player, world, tardisHolder.get(), player.getEyePos(), "Eye");
         return Command.SINGLE_SUCCESS;
+    }
+
+    private static Optional<TardisStateManager> getTardisIfInside(ServerPlayerEntity player, ServerWorld world) {
+        if (!TardisHelper.isTardisDimension(world)) {
+            player.sendMessage(Text.literal("Not inside a TARDIS.").formatted(Formatting.RED), false);
+            return Optional.empty();
+        }
+
+        return TardisStateManager.get(world);
+    }
+
+    private static void reportOffset(ServerPlayerEntity player, ServerWorld world, TardisStateManager tardis, Vec3d point, String pointLabel) {
+        BlockPos consolePos = tardis.getMainConsolePosition();
+        Direction facing = world.getBlockState(consolePos).get(Properties.HORIZONTAL_FACING);
+
+        float angle = 1.57F * ((facing.asRotation() - 90) / -90);
+        Vec3d offset = point.subtract(Vec3d.ofCenter(consolePos)).rotateY(-angle);
+
+        player.sendMessage(Text.literal(String.format(Locale.ROOT, "%s: %.4f, %.4f, %.4f", pointLabel, point.x, point.y, point.z)).formatted(Formatting.GRAY), false);
+        player.sendMessage(Text.literal(String.format(Locale.ROOT, "new Vec3d(%.4fF, %.4fF, %.4fF)", offset.x, offset.y, offset.z)).formatted(Formatting.AQUA), false);
     }
 }

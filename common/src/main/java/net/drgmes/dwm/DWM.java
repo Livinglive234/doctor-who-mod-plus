@@ -166,6 +166,7 @@ public class DWM {
 
         public static final Text MATERIALIZATION_SYSTEM_NOT_INSTALLED = Text.translatable("message.dwm.tardis.system.materialization.not_installed");
         public static final Text MATERIALIZATION_SYSTEM_SAFE_POSITION_NOT_FOUND = Text.translatable("message.dwm.tardis.system.materialization.safe_position_not_found");
+        public static final Text MATERIALIZATION_SYSTEM_TARGET_SHIELDED = Text.translatable("message.dwm.tardis.system.materialization.target_shielded");
 
         public static final Text FLIGHT_SYSTEM_NOT_INSTALLED = Text.translatable("message.dwm.tardis.system.flight.not_installed");
 
@@ -284,10 +285,7 @@ public class DWM {
         public static final Function<String, Text> PHONE_DIAL_ENTRY = (ownerName) -> Text.translatable("screen.dwm.phone.dial.entry", ownerName);
         public static final Text PHONE_CALL_ANSWER = Text.translatable("screen.dwm.phone.call.answer");
         public static final Text PHONE_CALL_DECLINE = Text.translatable("screen.dwm.phone.call.decline");
-        public static final Text PHONE_CALL_HANG_UP = Text.translatable("screen.dwm.phone.call.hang_up");
-        public static final Function<String, Text> PHONE_CALL_STATE_CALLING = (name) -> Text.translatable("screen.dwm.phone.call.state.calling", Text.literal(name).formatted(Formatting.AQUA));
         public static final Function<String, Text> PHONE_CALL_STATE_RINGING = (name) -> Text.translatable("screen.dwm.phone.call.state.ringing", Text.literal(name).formatted(Formatting.AQUA));
-        public static final Function<String, Text> PHONE_CALL_STATE_CONNECTED = (name) -> Text.translatable("screen.dwm.phone.call.state.connected", Text.literal(name).formatted(Formatting.AQUA));
 
         public static final Text TELEPATHIC_INTERFACE_TITLE_LOCATIONS = Text.translatable("screen.dwm.telepathic_interface.title.locations");
         public static final Text TELEPATHIC_INTERFACE_TITLE_BANNERS = Text.translatable("screen.dwm.telepathic_interface.title.banners");

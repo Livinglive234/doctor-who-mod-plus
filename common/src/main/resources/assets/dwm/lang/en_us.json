@@ -2296,6 +2296,7 @@
 
   "message.dwm.tardis.system.materialization.not_installed": "§eDematerialization Circuit §cNot Installed",
   "message.dwm.tardis.system.materialization.safe_position_not_found": "§cNo safe landing position was found",
+  "message.dwm.tardis.system.materialization.target_shielded": "§cMaterialization failed - target's shields are up",
 
   "message.dwm.tardis.system.flight.not_installed": "§eDirectional Unit §cNot Installed",
 
@@ -2503,10 +2504,7 @@
   "screen.dwm.phone.dial.call": "Call",
   "screen.dwm.phone.call.answer": "Answer",
   "screen.dwm.phone.call.decline": "Decline",
-  "screen.dwm.phone.call.hang_up": "Hang Up",
-  "screen.dwm.phone.call.state.calling": "Calling %s...",
   "screen.dwm.phone.call.state.ringing": "%s is calling",
-  "screen.dwm.phone.call.state.connected": "Connected to %s",
 
   "screen.dwm.telepathic_interface.title.locations": "Telepathic Interface: Choose a Location",
   "screen.dwm.telepathic_interface.title.banners": "Telepathic Interface: Choose an Anchor",

@@ -4,6 +4,7 @@ import net.drgmes.dwm.blocks.tardis.consoleunits.BaseTardisConsoleUnitBlock;
 import net.drgmes.dwm.blocks.tardis.consoleunits.BaseTardisConsoleUnitBlockRenderer;
 import net.drgmes.dwm.blocks.tardis.consoleunits.tardisconsoleunittoyota.models.TardisConsoleUnitToyotaModel;
 import net.drgmes.dwm.common.tardis.consoleunits.TardisConsoleUnits;
+import net.drgmes.dwm.enums.TardisConsoleUnitControlFlags;
 import net.drgmes.dwm.enums.TardisConsoleUnitControlRole;
 import net.drgmes.dwm.enums.TardisConsoleUnitControlValueType;
 import net.minecraft.client.MinecraftClient;
@@ -82,7 +83,8 @@ public class TardisConsoleUnitToyotaBlockRenderer extends BaseTardisConsoleUnitB
 
     @Override
     protected void activateSlider(ModelPart model, boolean value, TardisConsoleUnitControlRole controlRole, float delta) {
-        if (value) model.pivotZ -= 4F;
+        if (!value) return;
+        model.pivotZ += controlRole.flags.contains(TardisConsoleUnitControlFlags.REVERSED_SLIDER) ? 4F : -4F;
     }
 
     @Override

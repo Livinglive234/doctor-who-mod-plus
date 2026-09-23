@@ -18,10 +18,11 @@ public class TardisConsoleUnitImperial extends TardisConsoleUnitEntry {
         // bottom (0.7309F, 0.5575F, 0.8644F) - anchored at the bottom, horizontally centered between the two
         // (see ModEntities.TARDIS_CONSOLE_UNIT_CONTROL_PHONE for the derived hitbox size).
         this.addControlEntry(TardisConsoleUnitControlRole.PHONE, TardisConsoleUnitControlType.OTHER, new Vec3d(0.6738F, 0.5575F, 0.7633F), "controls/control_phone", ModEntities.TARDIS_CONSOLE_UNIT_CONTROL_PHONE);
-        // Read via /dwm tardis mark, above the sonic screwdriver slot and phone on that same side of the console.
-        // Slot v_4 - the next free one along from Materialization/Leave Behind/Cloak's v_3/v_2/v_1, but on its own
-        // over here rather than in that row, so no spacing to match against.
-        this.addControlEntry(TardisConsoleUnitControlRole.PHONE_PRIVACY, TardisConsoleUnitControlType.SLIDER, new Vec3d(0.4799F, 0.5815F, 0.4276F), "controls/control_sliders_v/control_slider_v_4$_handle", ModEntities.TARDIS_CONSOLE_UNIT_CONTROL_SMALL);
+        // Read via /dwm tardis mark - this is the invisible entity's own position (where you actually click), not
+        // where the v_4 slider model itself renders, which stays fixed wherever the console model bakes it (with
+        // Materialization/Leave Behind/Cloak's v_3/v_2/v_1). Deliberate: this spot was preferred over lining up
+        // with the visible model.
+        this.addControlEntry(TardisConsoleUnitControlRole.PHONE_PRIVACY, TardisConsoleUnitControlType.SLIDER, new Vec3d(0.1865F, 0.5851F, 0.7727F), "controls/control_sliders_v/control_slider_v_4$_handle", ModEntities.TARDIS_CONSOLE_UNIT_CONTROL_SMALL);
 
         this.addControlEntry(TardisConsoleUnitControlRole.MATERIALIZATION, TardisConsoleUnitControlType.SLIDER, new Vec3d(0.855F, 0.575F, -0.0775F), "controls/control_sliders_v/control_slider_v_3$_handle", ModEntities.TARDIS_CONSOLE_UNIT_CONTROL_SMALL);
         // The slider slot right next to Materialization's (v_2), same row: a bit closer to it than the levers are to

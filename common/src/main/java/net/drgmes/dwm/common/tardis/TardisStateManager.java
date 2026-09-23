@@ -325,6 +325,11 @@ public class TardisStateManager extends PersistentState {
     }
 
     public void setWorld(ServerWorld world) {
+        // get() calls this on every lookup, not just the first - skipping the rebind when nothing's actually
+        // changing matters now that TardisVoicechatPlugin calls get() on every relayed microphone packet, which
+        // was turning a no-op into two chunk-ticket mutations dozens of times a second per active call.
+        if (this.world == world) return;
+
         this.unbindChunkLoaders();
         this.world = world;
         this.bindChunkLoaders();

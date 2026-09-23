@@ -9,6 +9,10 @@ import net.drgmes.dwm.common.tardis.systems.flight.TardisFlyoverSession;
 import net.drgmes.dwm.setup.ModSounds;
 import net.drgmes.dwm.utils.helpers.CommonHelper;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.World;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -217,6 +221,15 @@ public class TardisSystemFlight extends TardisBaseSystem {
         this.flyover.playLandingThud();
         this.flyover.finishLanding();
 
+        // initRemat() (see TardisSystemMaterialization) reads the tardis's own "current" dimension/position/facing
+        // as the spot to place the exterior at, so these have to be set to the destination before it runs - but if
+        // it then refuses (shields up at the destination), nothing reverts them, leaving the tardis's own idea of
+        // where it currently is pointed at a foreign, un-materialized location it never actually reached. Anything
+        // reading "current" afterwards - the phone's exterior ring included - was following that stale claim.
+        RegistryKey<World> previousDimension = this.tardis.getCurrentExteriorDimension();
+        BlockPos previousPosition = this.tardis.getCurrentExteriorPosition();
+        Direction previousFacing = this.tardis.getCurrentExteriorFacing();
+
         this.tardis.setDimension(this.tardis.getDestinationExteriorDimension(), true);
         this.tardis.setPosition(this.tardis.getDestinationExteriorPosition(), true);
         this.tardis.setFacing(this.tardis.getDestinationExteriorFacing(), true);
@@ -227,6 +240,11 @@ public class TardisSystemFlight extends TardisBaseSystem {
 
                 // Silent travel makes no sound at all but this: the thud of arriving, inside, whatever the landing.
                 if (this.tardis.isSilentTravelEnabled()) ModSounds.playTardisGroundLandingSound(this.tardis.getWorld(), this.tardis.getMainConsolePosition());
+            }
+            else {
+                this.tardis.setDimension(previousDimension, true);
+                this.tardis.setPosition(previousPosition, true);
+                this.tardis.setFacing(previousFacing, true);
             }
 
             this.reset();

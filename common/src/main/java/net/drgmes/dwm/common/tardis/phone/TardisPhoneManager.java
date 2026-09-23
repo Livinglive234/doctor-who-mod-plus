@@ -5,6 +5,7 @@ import net.drgmes.dwm.blocks.tardis.consoleunits.BaseTardisConsoleUnitBlockEntit
 import net.drgmes.dwm.common.tardis.TardisStateManager;
 import net.drgmes.dwm.common.tardis.systems.TardisSystemMaterialization;
 import net.drgmes.dwm.enums.TardisConsoleUnitControlRole;
+import net.drgmes.dwm.setup.ModDimensions;
 import net.drgmes.dwm.setup.ModSounds;
 import net.drgmes.dwm.utils.helpers.DimensionHelper;
 import net.drgmes.dwm.utils.helpers.TardisHelper;
@@ -49,9 +50,7 @@ public class TardisPhoneManager {
     public static List<DialEntry> listCallableTardises(MinecraftServer server, String excludingTardisId) {
         List<DialEntry> entries = new ArrayList<>();
 
-        for (RegistryKey<World> worldKey : server.getWorldRegistryKeys()) {
-            if (!TardisHelper.isTardisDimension(worldKey)) continue;
-
+        for (RegistryKey<World> worldKey : ModDimensions.WORLDS) {
             ServerWorld world = DimensionHelper.getWorld(worldKey, server);
             if (world == null || !TardisHelper.isTardisDimension(world)) continue;
 

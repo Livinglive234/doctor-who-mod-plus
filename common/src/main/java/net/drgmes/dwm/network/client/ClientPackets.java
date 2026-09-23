@@ -143,7 +143,7 @@ public final class ClientPackets {
             ClientPlayerEntity player = (ClientPlayerEntity) context.getPlayer();
 
             if (player.getWorld().getBlockEntity(payload.blockPos()) instanceof BaseTardisConsoleUnitBlockEntity tardisConsoleUnitBlockEntity) {
-                MinecraftClient.getInstance().setScreen(new TardisConsoleUnitPhoneDialScreen(tardisConsoleUnitBlockEntity, TardisPhoneDialOpenPacket.readEntries(payload.tag())));
+                MinecraftClient.getInstance().setScreen(new TardisConsoleUnitPhoneDialScreen(tardisConsoleUnitBlockEntity, payload.entries()));
             }
         });
     }

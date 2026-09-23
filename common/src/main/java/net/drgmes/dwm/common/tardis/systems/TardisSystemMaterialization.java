@@ -413,6 +413,14 @@ public class TardisSystemMaterialization extends TardisBaseSystem {
         // some other way (a waypoint, say).
         if (TardisHelper.isTardisDimension(exteriorWorld) && this.isShieldedAgainstEntry(exteriorWorld)) {
             this.playFailSound();
+
+            // Unlike tryLandToForeignTardis (which falls back to a normal safe-landing search when shields block
+            // it, so it's not a real failure), this is the end of the line - the destination was a raw coordinate
+            // inside their interior with nowhere else to fall back to, so say why instead of a silent no-op.
+            for (PlayerEntity player : this.tardis.getWorld().getPlayers()) {
+                player.sendMessage(DWM.TEXTS.MATERIALIZATION_SYSTEM_TARGET_SHIELDED, true);
+            }
+
             return false;
         }
 

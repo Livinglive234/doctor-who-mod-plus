@@ -12,4 +12,7 @@ public enum TardisConsoleUnitControlFlags {
     OWNER_ONLY,
     DEPENDS_ON_SHIELDS_ON,
     DEPENDS_ON_HANDBRAKE_OFF,
+    // A SLIDER control's "on" position slides its model the opposite way from the rest - for one sitting off on
+    // its own rather than in a row of other sliders, where there's no shared "on" direction to stay consistent with.
+    REVERSED_SLIDER,
 }
