@@ -10,9 +10,11 @@ import net.drgmes.dwm.setup.ModSounds;
 import net.drgmes.dwm.utils.helpers.DimensionHelper;
 import net.drgmes.dwm.utils.helpers.TardisHelper;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.network.packet.s2c.play.StopSoundS2CPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -109,6 +111,7 @@ public class TardisPhoneManager {
         if (call == null || call.isConnected() || !call.calleeId.equals(tardisId)) return;
 
         call.connect(answerer.getUuid());
+        stopRinging(server, call);
 
         getTardis(server, call.callerId).ifPresent((tardis) -> announceMessage(tardis, DWM.TEXTS.PHONE_CONNECTED));
         getTardis(server, call.calleeId).ifPresent((tardis) -> announceMessage(tardis, DWM.TEXTS.PHONE_CONNECTED));
@@ -118,6 +121,7 @@ public class TardisPhoneManager {
         TardisPhoneCall call = CALLS.remove(tardisId);
         if (call == null) return;
         CALLS.remove(call.otherPartyOf(tardisId));
+        if (!call.isConnected()) stopRinging(server, call);
 
         getTardis(server, tardisId).ifPresent((tardis) -> announce(tardis, DWM.TEXTS.PHONE_ENDED, ModSounds::playTardisPhoneEndSound));
         getTardis(server, call.otherPartyOf(tardisId)).ifPresent((tardis) -> announce(tardis, reasonForOtherParty, ModSounds::playTardisPhoneEndSound));
@@ -153,6 +157,29 @@ public class TardisPhoneManager {
     private static void announceMessage(TardisStateManager tardis, Text message) {
         for (ServerPlayerEntity player : tardis.getWorld().getPlayers()) {
             player.sendMessage(message, true);
+        }
+    }
+
+    // The ring and ringback are one-shot plays of a few seconds each (looped by re-playing them), so on their own
+    // they'd finish out after the call is answered or dropped - this cuts whatever's mid-play for everyone in
+    // earshot: both TARDISes' interiors and, for the ring, outside the callee's exterior.
+    private static void stopRinging(MinecraftServer server, TardisPhoneCall call) {
+        List<StopSoundS2CPacket> packets = List.of(
+            new StopSoundS2CPacket(ModSounds.TARDIS_PHONE_RING.get().getId(), SoundCategory.BLOCKS),
+            new StopSoundS2CPacket(ModSounds.TARDIS_PHONE_RINGBACK.get().getId(), SoundCategory.BLOCKS)
+        );
+
+        for (String tardisId : List.of(call.callerId, call.calleeId)) {
+            getTardis(server, tardisId).ifPresent((tardis) -> {
+                List<ServerPlayerEntity> players = new ArrayList<>(tardis.getWorld().getPlayers());
+
+                ServerWorld exteriorWorld = tardis.getExteriorWorld();
+                if (exteriorWorld != null && exteriorWorld != tardis.getWorld()) players.addAll(exteriorWorld.getPlayers());
+
+                for (ServerPlayerEntity player : players) {
+                    packets.forEach(player.networkHandler::sendPacket);
+                }
+            });
         }
     }
 

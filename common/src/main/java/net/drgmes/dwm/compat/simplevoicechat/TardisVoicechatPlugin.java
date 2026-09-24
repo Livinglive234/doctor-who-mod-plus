@@ -36,9 +36,10 @@ import java.util.UUID;
 public class TardisVoicechatPlugin implements VoicechatPlugin {
     public static final String PLUGIN_ID = DWM.MODID + "_phone";
 
-    // How close a speaker needs to be to their own phone to be picked up at all - without this, anyone anywhere
-    // in the room (or the whole interior) got relayed to the other side regardless of distance from the phone.
-    private static final double MIC_RANGE = 4.0;
+    // How close a speaker needs to be to their own phone to be picked up, and how far from the phone the relayed
+    // voice carries on the other end (never past Simple Voice Chat's own range, if a server sets that lower).
+    private static final double MIC_RANGE = 9.0;
+    private static final double HEARING_RANGE = 13.0;
 
     @Override
     public String getPluginId() {
@@ -78,6 +79,8 @@ public class TardisVoicechatPlugin implements VoicechatPlugin {
             BaseTardisConsoleUnitBlockEntity speakerConsoleUnit = getConsoleUnit(speakerWorld);
             if (speakerConsoleUnit == null) return;
 
+            VoicechatServerApi api = event.getVoicechat();
+
             Vec3d speakerPhonePosition = speakerConsoleUnit.getControlPosition(TardisConsoleUnitControlRole.PHONE);
             if (speakerPhonePosition == null || speaker.getPos().squaredDistanceTo(speakerPhonePosition) > MIC_RANGE * MIC_RANGE) return;
 
@@ -93,12 +96,11 @@ public class TardisVoicechatPlugin implements VoicechatPlugin {
             Vec3d phonePosition = consoleUnit.getControlPosition(TardisConsoleUnitControlRole.PHONE);
             if (phonePosition == null) return;
 
-            VoicechatServerApi api = event.getVoicechat();
             Position position = api.createPosition(phonePosition.x, phonePosition.y, phonePosition.z);
 
             LocationalSoundPacket soundPacket = event.getPacket().locationalSoundPacketBuilder()
                 .position(position)
-                .distance((float) api.getVoiceChatDistance())
+                .distance((float) Math.min(api.getVoiceChatDistance(), HEARING_RANGE))
                 .opusEncodedData(event.getPacket().getOpusEncodedData())
                 .sender(speaker.getUuid())
                 .channelId(call.getChannelId(speakerTardisId))
