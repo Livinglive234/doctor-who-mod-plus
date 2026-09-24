@@ -23,15 +23,19 @@ import net.minecraft.world.World;
 import java.util.UUID;
 
 /**
- * The emergency return. When its owner is down to half a heart the TARDIS tolls the cloister bell, inside and out, twice; when they
- * die it tolls three times and then takes itself to a spot near their bed, or near the world spawn if they have none.
+ * The owner watch. Whether or not the Emergency Return lever is on, when the owner is down to a heart and a half the
+ * TARDIS tolls the cloister bell, inside and out, up to ten times, stopping as soon as they heal past that.
  * <p>
- * The same owner-death check also drops Cloak, if it's up, so a keyless owner isn't locked out of their own TARDIS.
+ * When the owner dies, with the lever on it tolls three times and then takes itself to a spot near their bed, or near
+ * the world spawn if they have none. With it off, it only closes its doors if they're open.
+ * <p>
+ * Either way the owner-death check also drops Cloak, if it's up, so a keyless owner isn't locked out of their own TARDIS.
  * <p>
  * Nothing here is saved: a sequence a restart cuts short isn't worth a save format.
  */
 public class TardisEmergencyReturn {
-    private static final float HALF_HEART = 1.0F;
+    private static final float WOUNDED_HEALTH = 3.0F; // a heart and a half
+    private static final int WOUNDED_CHIMES = 10;
     private static final int LANDING_ATTEMPTS = 16;
     private static final int MIN_DISTANCE_FROM_BED = 2;
     private static final int HOME_RADIUS = DWM.TIMINGS.EMERGENCY_HOME_RADIUS;
@@ -61,25 +65,18 @@ public class TardisEmergencyReturn {
     }
 
     public void tick() {
-        // Runs regardless of the Emergency Return lever: Cloak also rides on the death check below, and needs it
-        // even when Emergency Return itself is off.
+        // All of this but the trip home runs regardless of the Emergency Return lever.
         this.watchOwner();
 
+        // Switched off mid-sequence: there's no trip to make, and no death toll to finish.
         if (!this.tardis.isEmergencyReturnEnabled()) {
-            this.reset();
-            return;
+            this.home = null;
+            if (this.ownerState == OwnerState.DEAD) this.chimesLeft = 0;
         }
 
         this.ring();
 
         if (this.home != null && this.chimesLeft == 0 && this.chimeTimer == 0) this.travel();
-    }
-
-    private void reset() {
-        this.ownerState = OwnerState.HEALTHY;
-        this.chimesLeft = 0;
-        this.chimeTimer = 0;
-        this.home = null;
     }
 
     private void watchOwner() {
@@ -93,19 +90,28 @@ public class TardisEmergencyReturn {
             if (this.ownerState == OwnerState.DEAD) return;
 
             this.ownerState = OwnerState.DEAD;
-            this.chimesLeft = 3;
-            this.noteHome(owner);
+
+            if (this.tardis.isEmergencyReturnEnabled()) {
+                this.chimesLeft = 3;
+                this.noteHome(owner);
+            }
+            else {
+                this.chimesLeft = 0;
+                if (this.tardis.isDoorsOpened()) this.tardis.setDoorsOpenState(false);
+            }
 
             // Otherwise a dead owner with no key on them couldn't get back into their own TARDIS.
             if (this.tardis.isCloakedEnabled()) this.tardis.setCloakedEnabled(false, null);
         }
-        else if (owner.getHealth() <= HALF_HEART) {
+        else if (owner.getHealth() <= WOUNDED_HEALTH) {
             if (this.ownerState != OwnerState.HEALTHY) return;
 
             this.ownerState = OwnerState.WOUNDED;
-            this.chimesLeft = 2;
+            this.chimesLeft = WOUNDED_CHIMES;
         }
         else {
+            // Healed: the wounded toll stops, but a death toll already under way (they've respawned) plays out.
+            if (this.ownerState == OwnerState.WOUNDED) this.chimesLeft = 0;
             this.ownerState = OwnerState.HEALTHY;
         }
     }

@@ -4,6 +4,11 @@ Fork changes on top of DrGmes' Doctor Who Mod (Architectury multi-loader mod: `c
 
 Build: there is no Gradle wrapper. Use Gradle 8.14 with JDK 21, e.g. `gradle build`. Datagen is `gradle :fabric:runDatagen`; its output (`common/src/main/generated`) is tracked in git, so re-run it and commit the result whenever recipes, blocks or worldgen builders change.
 
+## 1.0.38.1 — Owner Watch
+
+- **The TARDIS now chimes when its owner is badly hurt, with or without Emergency Return on.** At a heart and a half or below it tolls the cloister bell, inside and out, up to ten times, and stops as soon as they heal past that; getting hurt again starts a fresh run. It used to toll twice, at half a heart, and only with Emergency Return on.
+- **When the owner dies with Emergency Return off, the TARDIS just closes its doors if they're open** (and still drops Cloak, so a keyless owner can't be locked out). With it on, nothing changes: three tolls, then the trip home. Switching the lever off mid-sequence cancels the trip and any death tolls still to come. All server-side.
+
 ## 1.0.38 — TARDIS Phone
 
 - **The TARDIS Phone**, a new control next to the sonic screwdriver slot: dial any other owned TARDIS on the server by owner name (shown as "&lt;name&gt;'s TARDIS"), ring it, and talk over a live voice relay - needs Simple Voice Chat installed, the same all-or-nothing way Cloak needs Immersive Portals; without it the control just says so instead of doing anything. Right-clicking a ringing phone opens a proper incoming-call screen naming whoever's actually dialing (not the TARDIS owner, if someone else is calling from their console) with Answer/Decline buttons, instead of answering on the spot the instant you clicked it; sneaking on it still declines instantly, no screen needed. The caller hears a looping ringback tone, the callee hears a looping ring both inside (anchored to the phone itself, so it fades and pans like any other sound as you walk away or around a corner) and just outside - but only while the TARDIS is actually materialized, not while it's away flying or mid-demat/remat. An unanswered call times out to "No answer" after 30 seconds.
