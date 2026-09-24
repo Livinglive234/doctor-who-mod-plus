@@ -4,6 +4,10 @@ Fork changes on top of DrGmes' Doctor Who Mod (Architectury multi-loader mod: `c
 
 Build: there is no Gradle wrapper. Use Gradle 8.14 with JDK 21, e.g. `gradle build`. Datagen is `gradle :fabric:runDatagen`; its output (`common/src/main/generated`) is tracked in git, so re-run it and commit the result whenever recipes, blocks or worldgen builders change.
 
+## 1.0.38.2 — TARDISes through the door with shaders
+
+- **Other TARDISes are visible again through your door when a shader pack is on.** Since 1.0.30, with shaders on, every TARDIS shell was hidden in every Immersive Portals view - a workaround for Iris breaking the portals' clipping and showing the shell through the doorway. It caught other people's TARDISes down the street along with your own. Now only shells right at the far end of the portal (within 4 blocks) are hidden under shaders, and your own is still hidden through its own door as before. Client-side only.
+
 ## 1.0.38.1 — Owner Watch
 
 - **The TARDIS now chimes when its owner is badly hurt, with or without Emergency Return on.** At a heart and a half or below it tolls the cloister bell, inside and out, up to ten times, and stops as soon as they heal past that; getting hurt again starts a fresh run. It used to toll twice, at half a heart, and only with Emergency Return on.
