@@ -17,7 +17,7 @@ import java.util.Objects;
  * TARDIS parked down the street) are still drawn.
  */
 public final class ImmersivePortalsShellCompat {
-    private static final double SHADER_HIDE_RADIUS = 4.0;
+    private static final double SHADER_HIDE_RADIUS = 1.5;
 
     private ImmersivePortalsShellCompat() {
     }

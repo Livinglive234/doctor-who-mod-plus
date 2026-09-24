@@ -2427,6 +2427,7 @@
   "message.dwm.sound.sonic_sunglasses.main": "Sonic Sunglasses sounds",
   "message.dwm.sound.tardis.control": "Control pressed",
   "message.dwm.sound.tardis.bell": "TARDIS Bell sounds",
+  "message.dwm.sound.tardis.cloister_bell": "Cloister Bell tolls",
   "message.dwm.sound.tardis.broken_flaring": "Damaged console sounds",
   "message.dwm.sound.tardis.doors_close": "Doors closed",
   "message.dwm.sound.tardis.doors_knock": "Knocking at the door",

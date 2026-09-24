@@ -40,7 +40,7 @@
     "sounds": ["dwm:tardis/bell"]
   },
   "tardis_cloister_bell": {
-    "subtitle": "message.dwm.sound.tardis.bell",
+    "subtitle": "message.dwm.sound.tardis.cloister_bell",
     "sounds": ["dwm:tardis/cloister_bell"]
   },
   "tardis_broken_flaring": {

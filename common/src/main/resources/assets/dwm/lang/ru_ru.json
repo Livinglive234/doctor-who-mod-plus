@@ -2427,6 +2427,7 @@
   "message.dwm.sound.sonic_sunglasses.main": "Звук звуковых очков",
   "message.dwm.sound.tardis.control": "Активирован элемент управления",
   "message.dwm.sound.tardis.bell": "Звук колокола ТАРДИС",
+  "message.dwm.sound.tardis.cloister_bell": "Звон Клойстерного колокола",
   "message.dwm.sound.tardis.broken_flaring": "Звук поврежденной консоли",
   "message.dwm.sound.tardis.doors_close": "Двери закрылись",
   "message.dwm.sound.tardis.doors_knock": "Стук в двери",
