@@ -4,6 +4,10 @@ Fork changes on top of DrGmes' Doctor Who Mod (Architectury multi-loader mod: `c
 
 Build: there is no Gradle wrapper. Use Gradle 8.14 with JDK 21, e.g. `gradle build`. Datagen is `gradle :fabric:runDatagen`; its output (`common/src/main/generated`) is tracked in git, so re-run it and commit the result whenever recipes, blocks or worldgen builders change.
 
+## 1.0.38.3 — ARS room portals after a restart
+
+- **The portals to ARS-generated rooms now come back after a server restart** instead of staying missing until a room was added or removed. The check that decides whether a TARDIS's room portals need rebuilding was asking whether any ARS slot was still unbuilt, rather than whether every built room had its portal - so after a restart emptied them, a TARDIS with every room built looked fine with none. It now compares the number of room portals against the number of built rooms, and rebuilds within a second of a player arriving.
+
 ## 1.0.38.2 — TARDISes through the door with shaders
 
 - **Other TARDISes are visible again through your door when a shader pack is on.** Since 1.0.30, with shaders on, every TARDIS shell was hidden in every Immersive Portals view - a workaround for Iris breaking the portals' clipping and showing the shell through the doorway. It caught other people's TARDISes down the street along with your own. Now only a shell right at the far end of the portal (within a block and a half) is hidden under shaders, and your own is still hidden through its own door as before. Client-side only.

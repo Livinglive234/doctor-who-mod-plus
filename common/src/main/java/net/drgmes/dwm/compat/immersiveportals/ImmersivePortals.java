@@ -91,6 +91,21 @@ public class ImmersivePortals {
             return roomsEntrances;
         }
 
+        private int countBuiltRoomsEntrances() {
+            ServerWorld tardisWorld = this.tardis.getWorld();
+            if (tardisWorld == null) return 0;
+
+            StructurePlacementData placeSettings = new StructurePlacementData();
+            List<StructureTemplate.StructureBlockInfo> tacBlockInfos = this.tardis.getConsoleRoom().getTemplate(tardisWorld).getInfosForBlock(BlockPos.ORIGIN, placeSettings, ModBlocks.TARDIS_ARS_CREATOR.getBlock());
+
+            int built = 0;
+            for (StructureTemplate.StructureBlockInfo tacBlockInfo : tacBlockInfos) {
+                if (tardisWorld.isAir(this.tardis.getConsoleRoom().getCenterPosition().add(tacBlockInfo.pos()))) built++;
+            }
+
+            return built;
+        }
+
         public void createEntrancePortals() {
             ServerWorld tardisWorld = this.tardis.getWorld();
             if (tardisWorld == null) return;
@@ -198,7 +213,11 @@ public class ImmersivePortals {
         }
 
         public boolean isRoomEntrancePortalsValid() {
-            if (this.portalsToRooms.isEmpty() && !this.getRoomsEntrances().isEmpty()) return false;
+            // One portal pair per built room (a slot whose ARS creator block is gone). The old check asked whether any
+            // slot was still unbuilt, which says nothing about whether the built ones have portals - so after a restart
+            // wiped this state, a TARDIS with every room built looked valid with none, and only adding or removing a room
+            // brought them back.
+            if (this.portalsToRooms.size() != this.countBuiltRoomsEntrances()) return false;
 
             for (Map.Entry<Portal, Portal> portalsToRoom : this.portalsToRooms) {
                 if (portalsToRoom.getKey() == null || portalsToRoom.getValue() == null) return false;
