@@ -1,11 +1,8 @@
 # gradle
 .gradle/
-gradle/
 build/
 out/
 classes/
-gradlew
-gradlew.bat
 
 # IDE
 .idea/
@@ -30,7 +27,6 @@ neoforge/run/
 !fabric/run/config/fabric_loader_dependencies.json
 
 # misc
-.github
 libs/
 remappedSrc/
 # Datagen output (common/src/main/generated) is tracked; only its hash cache is ignored
