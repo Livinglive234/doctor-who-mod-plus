@@ -4,6 +4,10 @@ Fork changes on top of DrGmes' Doctor Who Mod (Architectury multi-loader mod: `c
 
 Build: there is no Gradle wrapper. Use Gradle 8.14 with JDK 21, e.g. `gradle build`. Datagen is `gradle :fabric:runDatagen`; its output (`common/src/main/generated`) is tracked in git, so re-run it and commit the result whenever recipes, blocks or worldgen builders change.
 
+## 1.0.38.4 — Fewer rebuilt models
+
+- **TARDIS exteriors and interior doors no longer rebuild their 3D model every frame.** Each one baked a fresh model from scratch on every frame it was drawn, which is wasted work for anything in view and made Entity Model Features log "model attempted creation more than 64 times" and give up on the exterior model. They now build it once and reuse it; the door-open animation sets the doors both open and closed so a reused model can't stick open. Consoles and the Toyota spinner are unchanged - they animate by nudging parts relative to their resting pose, which a reused model would compound every frame. Client-side only.
+
 ## 1.0.38.3 — ARS room portals after a restart
 
 - **The portals to ARS-generated rooms now come back after a server restart** instead of staying missing until a room was added or removed. The check that decides whether a TARDIS's room portals need rebuilding was asking whether any ARS slot was still unbuilt, rather than whether every built room had its portal - so after a restart emptied them, a TARDIS with every room built looked fine with none. It now compares the number of room portals against the number of built rooms, and rebuilds within a second of a player arriving.

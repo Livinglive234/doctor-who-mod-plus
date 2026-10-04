@@ -12,6 +12,8 @@ public abstract class BaseTardisDoorsModel extends Model {
     private final ModelPart door_right;
 
     private final float doorAngle;
+    private final float doorLeftClosedYaw;
+    private final float doorRightClosedYaw;
 
     public BaseTardisDoorsModel(ModelPart root, float doorAngle) {
         super(RenderLayer::getEntityTranslucentCull);
@@ -21,6 +23,9 @@ public abstract class BaseTardisDoorsModel extends Model {
         this.base = root.getChild("base");
         this.door_left = root.getChild("door_left");
         this.door_right = root.getChild("door_right");
+
+        this.doorLeftClosedYaw = this.door_left.yaw;
+        this.doorRightClosedYaw = this.door_right.yaw;
     }
 
     public BaseTardisDoorsModel(ModelPart root) {
@@ -37,10 +42,10 @@ public abstract class BaseTardisDoorsModel extends Model {
         door_right.render(matrixStack, vertexConsumer, light, overlay, color);
     }
 
+    // Both ways, since the renderer now keeps one model across frames and tiles instead of baking a fresh one each time.
     public void setupAnim(BaseTardisDoorsBlockEntity tile) {
-        if (tile.getCachedState().get(BaseTardisDoorsBlock.OPEN)) {
-            this.door_left.yaw = -this.doorAngle;
-            this.door_right.yaw = this.doorAngle;
-        }
+        boolean isOpen = tile.getCachedState().get(BaseTardisDoorsBlock.OPEN);
+        this.door_left.yaw = isOpen ? -this.doorAngle : this.doorLeftClosedYaw;
+        this.door_right.yaw = isOpen ? this.doorAngle : this.doorRightClosedYaw;
     }
 }

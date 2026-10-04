@@ -23,6 +23,7 @@ public abstract class BaseTardisDoorsBlockRenderer<C extends BaseTardisDoorsBloc
     protected final BlockEntityRendererFactory.Context ctx;
     protected final EntityModelLayer modelLayer;
     protected final Function<ModelPart, BaseTardisDoorsModel> modelFactory;
+    private BaseTardisDoorsModel model;
 
     protected final float modelScale;
     protected final float modelYScale;
@@ -66,7 +67,8 @@ public abstract class BaseTardisDoorsBlockRenderer<C extends BaseTardisDoorsBloc
         boolean isOpen = tile.getCachedState().get(BaseTardisDoorsBlock.OPEN);
         float rotateDegrees = tile.getCachedState().get(BaseTardisDoorsBlock.FACING).asRotation();
 
-        BaseTardisDoorsModel model = this.modelFactory.apply(this.ctx.getLayerModelPart(this.modelLayer));
+        if (this.model == null) this.model = this.modelFactory.apply(this.ctx.getLayerModelPart(this.modelLayer));
+        BaseTardisDoorsModel model = this.model;
         RenderLayer modelLayer = model.getLayer(this.modelLayer.getId());
         model.setupAnim(tile);
 

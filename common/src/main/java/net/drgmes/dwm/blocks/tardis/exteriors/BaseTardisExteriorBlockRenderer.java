@@ -29,6 +29,7 @@ public abstract class BaseTardisExteriorBlockRenderer<C extends BaseTardisExteri
     protected final BlockEntityRendererFactory.Context ctx;
     protected final EntityModelLayer modelLayer;
     protected final Function<ModelPart, BaseTardisExteriorModel> modelFactory;
+    private BaseTardisExteriorModel model;
 
     protected final float modelScale;
     protected final float modelYScale;
@@ -69,7 +70,9 @@ public abstract class BaseTardisExteriorBlockRenderer<C extends BaseTardisExteri
         TardisExteriorState exteriorState = tile.getExteriorState();
         float alpha = this.getAlpha(tile, exteriorState);
 
-        BaseTardisExteriorModel model = this.modelFactory.apply(this.ctx.getLayerModelPart(this.modelLayer));
+        // Built once and reused: baking a model every frame made Entity Model Features give up on it after 64.
+        if (this.model == null) this.model = this.modelFactory.apply(this.ctx.getLayerModelPart(this.modelLayer));
+        BaseTardisExteriorModel model = this.model;
         RenderLayer renderLayer = model.getLayer(this.modelLayer.getId());
         model.setupAnim(tile);
 
