@@ -4,6 +4,10 @@ Fork changes on top of DrGmes' Doctor Who Mod (Architectury multi-loader mod: `c
 
 Build: there is no Gradle wrapper. Use Gradle 8.14 with JDK 21, e.g. `gradle build`. Datagen is `gradle :fabric:runDatagen`; its output (`common/src/main/generated`) is tracked in git, so re-run it and commit the result whenever recipes, blocks or worldgen builders change.
 
+## 1.0.39 — Exterior View
+
+- **New Exterior View on the console monitor (Immersive Portals only).** A button on the main monitor page opens a live third-person view of the TARDIS exterior, drawn as a flat picture so it doesn't shift as you move (unlike a portal). A / D orbit the camera, W / S tilt it; the camera pulls in if terrain is in the way. It needs the TARDIS to be landed. `/dwmcam` (client command) prints the camera's last orbit/tilt/distance so a fixed angle can be chosen. Client + server; other mods' shaders are untested beyond BSL.
+
 ## 1.0.38.4 — Fewer rebuilt models
 
 - **TARDIS exteriors and interior doors no longer rebuild their 3D model every frame.** Each one baked a fresh model from scratch on every frame it was drawn, which is wasted work for anything in view and made Entity Model Features log "model attempted creation more than 64 times" and give up on the exterior model. They now build it once and reuse it; the door-open animation sets the doors both open and closed so a reused model can't stick open. Consoles and the Toyota spinner are unchanged - they animate by nudging parts relative to their resting pose, which a reused model would compound every frame. Client-side only.
