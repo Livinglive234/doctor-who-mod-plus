@@ -2305,6 +2305,7 @@
   "message.dwm.tardis.compat.simple_voice_chat.not_installed": "§eSimple Voice Chat §cне установлен",
   "message.dwm.tardis.system.shields.not_active": "§eГенератор щитов §cне запущен",
 
+  "message.dwm.tardis.exterior_view.unavailable": "§cНет внешнего вида - ТАРДИС не материализована",
   "message.dwm.tardis.phone.calling": "§eВызов...",
   "message.dwm.tardis.phone.ringing": "§e%s §fвызывает",
   "message.dwm.tardis.phone.connected": "§aВызов подключен",
@@ -2455,6 +2456,9 @@
   "screen.dwm.monitor.action.console_rooms": "Консольные комнаты",
   "screen.dwm.monitor.action.waypoints": "Путевые точки",
   "screen.dwm.monitor.action.history": "История полетов",
+  "screen.dwm.monitor.action.exterior_view": "Вид снаружи",
+  "screen.dwm.monitor.exterior_view.title": "Вид снаружи",
+  "screen.dwm.monitor.exterior_view.hint": "A / D - вращение вокруг, W / S - наклон",
 
   "screen.dwm.monitor.external_shells.title": "Внешняя оболочка",
   "screen.dwm.monitor.external_shells.cancel": "Отмена",

@@ -2305,6 +2305,7 @@
   "message.dwm.tardis.compat.simple_voice_chat.not_installed": "§eSimple Voice Chat §cNot Installed",
   "message.dwm.tardis.system.shields.not_active": "§eShields Generator §cNot Active",
 
+  "message.dwm.tardis.exterior_view.unavailable": "§cNo exterior to look out of - the TARDIS isn't materialized",
   "message.dwm.tardis.phone.calling": "§eCalling...",
   "message.dwm.tardis.phone.ringing": "§e%s §fis calling",
   "message.dwm.tardis.phone.connected": "§aCall connected",
@@ -2458,6 +2459,9 @@
   "screen.dwm.monitor.action.console_rooms": "Console Rooms",
   "screen.dwm.monitor.action.waypoints": "Waypoints",
   "screen.dwm.monitor.action.history": "Flight History",
+  "screen.dwm.monitor.action.exterior_view": "Exterior View",
+  "screen.dwm.monitor.exterior_view.title": "Exterior View",
+  "screen.dwm.monitor.exterior_view.hint": "A / D to orbit, W / S to tilt",
 
   "screen.dwm.monitor.external_shells.title": "External Shell",
   "screen.dwm.monitor.external_shells.cancel": "Cancel",

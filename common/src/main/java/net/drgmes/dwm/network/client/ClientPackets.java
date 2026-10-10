@@ -19,7 +19,9 @@ import net.drgmes.dwm.blocks.tardis.misc.tardistoyotaspinner.TardisToyotaSpinner
 import net.drgmes.dwm.common.sonicdevice.SonicDevice;
 import net.drgmes.dwm.common.tardis.consolerooms.TardisConsoleRoomEntry;
 import net.drgmes.dwm.common.tardis.consolerooms.TardisConsoleRooms;
+import net.drgmes.dwm.compat.immersiveportals.ExteriorViewClient;
 import net.drgmes.dwm.enums.TardisTelepathicInterfaceDataType;
+import net.drgmes.dwm.setup.ModCompats;
 import net.drgmes.dwm.setup.ModSounds;
 import net.drgmes.dwm.utils.sounds.FadingSoundInstance;
 import net.fabricmc.api.EnvType;
@@ -144,6 +146,17 @@ public final class ClientPackets {
 
             if (player.getWorld().getBlockEntity(payload.blockPos()) instanceof BaseTardisConsoleUnitBlockEntity tardisConsoleUnitBlockEntity) {
                 MinecraftClient.getInstance().setScreen(new TardisConsoleUnitPhoneDialScreen(tardisConsoleUnitBlockEntity, payload.entries()));
+            }
+        });
+    }
+
+    public static void handleTardisExteriorViewOpen(TardisExteriorViewOpenPacket payload, NetworkManager.PacketContext context) {
+        context.queue(() -> {
+            if (!ModCompats.immersivePortals()) return;
+            ClientPlayerEntity player = (ClientPlayerEntity) context.getPlayer();
+
+            if (player.getWorld().getBlockEntity(payload.consolePos()) instanceof BaseTardisConsoleUnitBlockEntity tardisConsoleUnitBlockEntity) {
+                ExteriorViewClient.open(tardisConsoleUnitBlockEntity, payload.dimension(), payload.exteriorPos(), payload.facingId());
             }
         });
     }

@@ -4,7 +4,9 @@ import net.drgmes.dwm.DWM;
 import net.drgmes.dwm.blocks.tardis.consoleunits.BaseTardisConsoleUnitBlockEntity;
 import net.drgmes.dwm.common.tardis.exteriors.TardisExteriorEntry;
 import net.drgmes.dwm.common.tardis.exteriors.TardisExteriors;
+import net.drgmes.dwm.network.server.TardisExteriorViewPacket;
 import net.drgmes.dwm.setup.ModBlocks;
+import net.drgmes.dwm.setup.ModCompats;
 import net.drgmes.dwm.utils.helpers.RenderHelper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -48,6 +50,11 @@ public class TardisConsoleUnitMonitorConsoleMainScreen extends BaseTardisConsole
 
         WAYPOINTS(DWM.TEXTS.MONITOR_ACTION_WAYPOINTS, AccessLevel.NONE, new Vector2i(0, 0), (screen) -> Items.FILLED_MAP, (screen) -> {
             screen.client.setScreen(new TardisConsoleUnitMonitorWaypointsScreen(screen.tardisConsoleUnitBlockEntity, screen.tardisId, screen.tag, screen));
+        }),
+
+        // Open to anyone at the console. Needs Immersive Portals, the same way Cloak does: the button is greyed out without it.
+        EXTERIOR_VIEW(DWM.TEXTS.MONITOR_ACTION_EXTERIOR_VIEW, AccessLevel.NONE, new Vector2i(0, 0), (screen) -> Items.SPYGLASS, (screen) -> {
+            new TardisExteriorViewPacket(true).sendToServer();
         }),
 
         // Owner or key-holder: matches the history screen's own apply/clear/delete actions (TardisConsoleUnitMonitorHistory*Packet).
@@ -140,7 +147,7 @@ public class TardisConsoleUnitMonitorConsoleMainScreen extends BaseTardisConsole
             );
 
             button.setTooltip(Tooltip.of(action.title));
-            button.active = this.hasAccess(action.accessLevel);
+            button.active = this.hasAccess(action.accessLevel) && (action != EActions.EXTERIOR_VIEW || ModCompats.immersivePortals());
 
             buttons.put(action, button);
             this.addDrawableChild(button);

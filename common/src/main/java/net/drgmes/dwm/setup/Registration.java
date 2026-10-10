@@ -81,6 +81,7 @@ public class Registration {
 
     public static void setupClient() {
         ModRenderers.setup();
+        ModCommands.setupClient();
     }
 
     public static void setupServer() {

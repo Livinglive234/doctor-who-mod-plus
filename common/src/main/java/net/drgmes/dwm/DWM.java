@@ -238,6 +238,10 @@ public class DWM {
         public static final Text MONITOR_ACTION_CONSOLE_ROOMS = Text.translatable("screen.dwm.monitor.action.console_rooms");
         public static final Text MONITOR_ACTION_WAYPOINTS = Text.translatable("screen.dwm.monitor.action.waypoints");
         public static final Text MONITOR_ACTION_HISTORY = Text.translatable("screen.dwm.monitor.action.history");
+        public static final Text MONITOR_ACTION_EXTERIOR_VIEW = Text.translatable("screen.dwm.monitor.action.exterior_view");
+        public static final Text MONITOR_EXTERIOR_VIEW_TITLE = Text.translatable("screen.dwm.monitor.exterior_view.title");
+        public static final Text MONITOR_EXTERIOR_VIEW_HINT = Text.translatable("screen.dwm.monitor.exterior_view.hint");
+        public static final Text EXTERIOR_VIEW_UNAVAILABLE = Text.translatable("message.dwm.tardis.exterior_view.unavailable");
 
         public static final Text MONITOR_EXTERNAL_SHELLS_TITLE = Text.translatable("screen.dwm.monitor.external_shells.title");
         public static final Text MONITOR_EXTERNAL_SHELLS_CANCEL = Text.translatable("screen.dwm.monitor.external_shells.cancel");
