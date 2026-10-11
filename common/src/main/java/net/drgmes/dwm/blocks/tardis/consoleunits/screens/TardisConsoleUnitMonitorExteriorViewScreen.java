@@ -3,6 +3,7 @@ package net.drgmes.dwm.blocks.tardis.consoleunits.screens;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.architectury.event.events.client.ClientTickEvent;
 import net.drgmes.dwm.DWM;
+import net.drgmes.dwm.compat.immersiveportals.ExteriorViewDiagnostics;
 import net.drgmes.dwm.compat.immersiveportals.ExteriorViewState;
 import net.drgmes.dwm.blocks.tardis.consoleunits.BaseTardisConsoleUnitBlockEntity;
 import net.drgmes.dwm.network.server.TardisExteriorViewPacket;
@@ -95,13 +96,17 @@ public class TardisConsoleUnitMonitorExteriorViewScreen extends BaseTardisConsol
     protected void init() {
         super.init();
         ExteriorViewState.open = true;
-        if (this.framebuffer == null) this.framebuffer = new SimpleFramebuffer(2, 2, true, true);
+        if (this.framebuffer == null) {
+            this.framebuffer = new SimpleFramebuffer(2, 2, true, true);
+            ExteriorViewDiagnostics.opened(this.dimension.getValue().toString(), this.flyoverEntityId >= 0);
+        }
     }
 
     @Override
     public void removed() {
         super.removed();
         ExteriorViewState.open = false;
+        ExteriorViewDiagnostics.closed("removed handingOver=" + handingOver);
         if (handingOver) handingOver = false;
         else new TardisExteriorViewPacket(false).sendToServer();
 
@@ -152,6 +157,7 @@ public class TardisConsoleUnitMonitorExteriorViewScreen extends BaseTardisConsol
         Vector2i rightBottom = this.getRightBottomRenderPos(0, 0);
         this.requestFrame();
         this.drawFrame(context, leftTop, rightBottom);
+        ExteriorViewDiagnostics.afterDraw(this.framebuffer);
 
         context.drawCenteredTextWithShadow(this.textRenderer, DWM.TEXTS.MONITOR_EXTERIOR_VIEW_HINT, (leftTop.x + rightBottom.x) / 2, rightBottom.y - 11, 0xE0E0E0);
     }
@@ -175,6 +181,7 @@ public class TardisConsoleUnitMonitorExteriorViewScreen extends BaseTardisConsol
         if (this.lostSince < 0) this.lostSince = now;
         if (now - this.lostSince < FLYOVER_LOST_MS) return true;
 
+        ExteriorViewDiagnostics.closed("flyover lost");
         this.close();
         return false;
     }
@@ -220,13 +227,17 @@ public class TardisConsoleUnitMonitorExteriorViewScreen extends BaseTardisConsol
             .rotateX((float) Math.toRadians(CAMERA_PITCH))
             .rotateY((float) Math.toRadians(this.yaw + 180F));
 
+        Vec3d cameraPos = this.getCameraPos(world);
+        int renderDistance = Math.min(this.client.options.getClampedViewDistance(), MAX_RENDER_DISTANCE);
+        ExteriorViewDiagnostics.beforeSubmit(world, this.framebuffer, cameraPos, renderDistance);
+
         WorldRenderInfo info = new WorldRenderInfo.Builder()
             .setWorld(world)
-            .setCameraPos(this.getCameraPos(world))
+            .setCameraPos(cameraPos)
             .setCameraTransformation(cameraTransformation)
             .setOverwriteCameraTransformation(true)
             .setDescription(this.description)
-            .setRenderDistance(Math.min(this.client.options.getClampedViewDistance(), MAX_RENDER_DISTANCE))
+            .setRenderDistance(renderDistance)
             .setDoRenderHand(false)
             .setEnableViewBobbing(false)
             // The sky dome washes the whole picture out to a flat colour once the view has been open a moment (seen with
