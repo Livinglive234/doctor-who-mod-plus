@@ -7,6 +7,9 @@ package net.drgmes.dwm.compat.immersiveportals;
 public final class ExteriorViewState {
     public static volatile boolean open = false;
 
+    // Set while the view's own picture is being rendered (at the end of the game frame, by Immersive Portals).
+    public static volatile boolean rendering = false;
+
     private ExteriorViewState() {
     }
 }

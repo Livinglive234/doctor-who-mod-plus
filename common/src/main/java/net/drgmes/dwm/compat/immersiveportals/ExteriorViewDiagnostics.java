@@ -101,14 +101,12 @@ public final class ExteriorViewDiagnostics {
     /** Immersive Portals is about to render the exterior into the screen's framebuffer. */
     public static void exteriorPassStart() {
         inExteriorPass = true;
-        IrisStateIsolation.enter();
         snapshot("ext-start");
     }
 
     /** Immersive Portals has finished rendering the exterior into the framebuffer. */
     public static void exteriorPassEnd(Framebuffer fb) {
         inExteriorPass = false;
-        IrisStateIsolation.leave();
         snapshot("ext-end");
         if (deepThisFrame) samplePixels(fb);
     }

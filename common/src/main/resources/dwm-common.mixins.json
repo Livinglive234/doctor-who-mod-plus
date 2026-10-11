@@ -8,6 +8,7 @@
     "MixinGameRendererDiagnostics",
     "MixinGuiPortalRendering",
     "MixinMinecraftClient",
+    "MixinWorldRendererSky",
     "MixinXaeroGuiMap"
   ],
   "mixins": [
