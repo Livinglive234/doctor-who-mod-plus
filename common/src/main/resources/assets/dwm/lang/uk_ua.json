@@ -2305,7 +2305,7 @@
   "message.dwm.tardis.compat.simple_voice_chat.not_installed": "§eSimple Voice Chat §cне встановлено",
   "message.dwm.tardis.system.shields.not_active": "§eГенератор щитів §cне запущено",
 
-  "message.dwm.tardis.exterior_view.unavailable": "§cНемає зовнішнього вигляду - ТАРДІС не матеріалізована",
+  "message.dwm.tardis.exterior_view.unavailable": "§cНе вдалося зафіксувати зовнішній вигляд",
   "message.dwm.tardis.phone.calling": "§eВиклик...",
   "message.dwm.tardis.phone.ringing": "§e%s §fдзвонить",
   "message.dwm.tardis.phone.connected": "§aВиклик підключено",

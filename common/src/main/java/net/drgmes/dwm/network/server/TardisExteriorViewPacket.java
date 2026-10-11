@@ -7,6 +7,7 @@ import net.drgmes.dwm.common.tardis.systems.TardisSystemFlight;
 import net.drgmes.dwm.common.tardis.systems.TardisSystemMaterialization;
 import net.drgmes.dwm.entities.tardis.exteriors.TardisFlyoverEntity;
 import net.minecraft.util.math.Direction;
+import net.drgmes.dwm.compat.immersiveportals.ExteriorViewChunks;
 import net.drgmes.dwm.compat.immersiveportals.ExteriorViewCompat;
 import net.drgmes.dwm.network.IPacket;
 import net.drgmes.dwm.network.client.TardisExteriorViewOpenPacket;
@@ -54,7 +55,7 @@ public record TardisExteriorViewPacket(
                 if (!materializationSystem.isMaterialized() || materializationSystem.isInMaterializationProcess()) {
                     // In flight with the flyover on, the view follows the flying TARDIS instead.
                     TardisFlyoverEntity flyover = tardis.isFlyoverEnabled() ? tardis.getSystem(TardisSystemFlight.class).getFlyoverEntity() : null;
-                    if (flyover == null) {
+                    if (flyover == null || ExteriorViewChunks.check((ServerWorld) flyover.getWorld(), flyover.getChunkPos(), ExteriorViewCompat.RADIUS, tardis, true) != ExteriorViewChunks.Result.OK) {
                         player.sendMessage(DWM.TEXTS.EXTERIOR_VIEW_UNAVAILABLE, true);
                         return;
                     }

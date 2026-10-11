@@ -161,6 +161,13 @@ public final class ClientPackets {
         });
     }
 
+    public static void handleTardisExteriorViewClose(TardisExteriorViewClosePacket payload, NetworkManager.PacketContext context) {
+        context.queue(() -> {
+            if (!ModCompats.immersivePortals()) return;
+            ExteriorViewClient.close();
+        });
+    }
+
     public static void handleTardisPhoneIncomingCallOpen(TardisPhoneIncomingCallOpenPacket payload, NetworkManager.PacketContext context) {
         context.queue(() -> {
             ClientPlayerEntity player = (ClientPlayerEntity) context.getPlayer();

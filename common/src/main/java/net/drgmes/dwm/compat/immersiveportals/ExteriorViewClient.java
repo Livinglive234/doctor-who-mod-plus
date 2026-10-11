@@ -18,6 +18,11 @@ public final class ExteriorViewClient {
     private ExteriorViewClient() {
     }
 
+    public static void close() {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.currentScreen instanceof TardisConsoleUnitMonitorExteriorViewScreen) client.currentScreen.close();
+    }
+
     public static void open(BaseTardisConsoleUnitBlockEntity consoleUnit, Identifier dimension, BlockPos exteriorPos, int facingId, int flyoverEntityId) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.currentScreen instanceof TardisConsoleUnitMonitorExteriorViewScreen) TardisConsoleUnitMonitorExteriorViewScreen.handOver();

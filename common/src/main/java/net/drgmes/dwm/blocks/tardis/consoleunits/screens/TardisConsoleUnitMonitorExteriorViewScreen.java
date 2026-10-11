@@ -3,6 +3,7 @@ package net.drgmes.dwm.blocks.tardis.consoleunits.screens;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.architectury.event.events.client.ClientTickEvent;
 import net.drgmes.dwm.DWM;
+import net.drgmes.dwm.compat.immersiveportals.ExteriorViewState;
 import net.drgmes.dwm.blocks.tardis.consoleunits.BaseTardisConsoleUnitBlockEntity;
 import net.drgmes.dwm.network.server.TardisExteriorViewPacket;
 import net.fabricmc.api.EnvType;
@@ -93,12 +94,14 @@ public class TardisConsoleUnitMonitorExteriorViewScreen extends BaseTardisConsol
     @Override
     protected void init() {
         super.init();
+        ExteriorViewState.open = true;
         if (this.framebuffer == null) this.framebuffer = new SimpleFramebuffer(2, 2, true, true);
     }
 
     @Override
     public void removed() {
         super.removed();
+        ExteriorViewState.open = false;
         if (handingOver) handingOver = false;
         else new TardisExteriorViewPacket(false).sendToServer();
 
@@ -145,12 +148,12 @@ public class TardisConsoleUnitMonitorExteriorViewScreen extends BaseTardisConsol
         if (!this.followFlyover(this.client.getRenderTickCounter().getTickDelta(false))) return;
         this.pollCameraKeys();
 
-        Vector2i leftTop = this.getLeftTopRenderPos(SCREEN_MARGIN, 14);
-        Vector2i rightBottom = this.getRightBottomRenderPos(SCREEN_MARGIN, 14);
+        Vector2i leftTop = this.getLeftTopRenderPos(0, 0);
+        Vector2i rightBottom = this.getRightBottomRenderPos(0, 0);
         this.requestFrame();
         this.drawFrame(context, leftTop, rightBottom);
 
-        context.drawCenteredTextWithShadow(this.textRenderer, DWM.TEXTS.MONITOR_EXTERIOR_VIEW_HINT, (leftTop.x + rightBottom.x) / 2, rightBottom.y + 3, 0xA0A0A0);
+        context.drawCenteredTextWithShadow(this.textRenderer, DWM.TEXTS.MONITOR_EXTERIOR_VIEW_HINT, (leftTop.x + rightBottom.x) / 2, rightBottom.y - 11, 0xE0E0E0);
     }
 
     // With the TARDIS in flight the view follows its flyover, wherever that has got to. Returns false if the screen has
@@ -168,6 +171,7 @@ public class TardisConsoleUnitMonitorExteriorViewScreen extends BaseTardisConsol
         }
 
         long now = Util.getMeasuringTimeMs();
+
         if (this.lostSince < 0) this.lostSince = now;
         if (now - this.lostSince < FLYOVER_LOST_MS) return true;
 
@@ -234,20 +238,27 @@ public class TardisConsoleUnitMonitorExteriorViewScreen extends BaseTardisConsol
         GuiPortalRendering.submitNextFrameRendering(info, this.framebuffer);
     }
 
-    // The framebuffer has the window's proportions, so it is drawn as large as fits the screen without stretching.
+    // The framebuffer has the window's proportions, so it fills the whole area by cropping the picture's edges to the
+    // area's proportions (centred, so the TARDIS stays in the middle) instead of leaving bars around it.
     private void drawFrame(DrawContext context, Vector2i leftTop, Vector2i rightBottom) {
         Window window = this.client.getWindow();
         float aspect = (float) window.getFramebufferWidth() / Math.max(1, window.getFramebufferHeight());
 
-        float areaWidth = rightBottom.x - leftTop.x;
-        float areaHeight = rightBottom.y - leftTop.y;
-        float width = Math.min(areaWidth, areaHeight * aspect);
-        float height = width / aspect;
+        float x1 = leftTop.x;
+        float y1 = leftTop.y;
+        float x2 = rightBottom.x;
+        float y2 = rightBottom.y;
 
-        float x1 = leftTop.x + (areaWidth - width) / 2F;
-        float y1 = leftTop.y + (areaHeight - height) / 2F;
-        float x2 = x1 + width;
-        float y2 = y1 + height;
+        float areaAspect = (x2 - x1) / Math.max(1F, y2 - y1);
+        float uMin = 0F, uMax = 1F, vMin = 0F, vMax = 1F;
+        if (areaAspect > aspect) {
+            vMin = (1F - aspect / areaAspect) / 2F;
+            vMax = 1F - vMin;
+        }
+        else {
+            uMin = (1F - areaAspect / aspect) / 2F;
+            uMax = 1F - uMin;
+        }
 
         context.draw();
 
@@ -257,10 +268,10 @@ public class TardisConsoleUnitMonitorExteriorViewScreen extends BaseTardisConsol
         RenderSystem.setShaderTexture(0, this.framebuffer.getColorAttachment());
 
         BufferBuilder builder = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
-        builder.vertex(matrix, x1, y2, 0F).texture(0F, 0F);
-        builder.vertex(matrix, x2, y2, 0F).texture(1F, 0F);
-        builder.vertex(matrix, x2, y1, 0F).texture(1F, 1F);
-        builder.vertex(matrix, x1, y1, 0F).texture(0F, 1F);
+        builder.vertex(matrix, x1, y2, 0F).texture(uMin, vMin);
+        builder.vertex(matrix, x2, y2, 0F).texture(uMax, vMin);
+        builder.vertex(matrix, x2, y1, 0F).texture(uMax, vMax);
+        builder.vertex(matrix, x1, y1, 0F).texture(uMin, vMax);
         BufferRenderer.drawWithGlobalProgram(builder.end());
     }
 }

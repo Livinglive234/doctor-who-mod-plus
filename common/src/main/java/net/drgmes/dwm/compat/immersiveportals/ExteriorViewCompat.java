@@ -1,12 +1,15 @@
 package net.drgmes.dwm.compat.immersiveportals;
 
 import dev.architectury.event.events.common.TickEvent;
+import net.drgmes.dwm.DWM;
 import net.drgmes.dwm.common.tardis.TardisStateManager;
 import net.drgmes.dwm.common.tardis.systems.TardisSystemMaterialization;
 import net.drgmes.dwm.entities.tardis.exteriors.TardisFlyoverEntity;
+import net.drgmes.dwm.network.client.TardisExteriorViewClosePacket;
 import net.drgmes.dwm.network.client.TardisExteriorViewOpenPacket;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
@@ -132,6 +135,16 @@ public final class ExteriorViewCompat {
 
             ChunkPos now = entity.getChunkPos();
             if (Math.max(Math.abs(now.x - following.center.x), Math.abs(now.z - following.center.z)) < FOLLOW_SLACK_CHUNKS) continue;
+
+            // Moving the stream would load - and so generate - whatever isn't generated yet around the new spot.
+            ExteriorViewChunks.Result lock = ExteriorViewChunks.check((ServerWorld) entity.getWorld(), now, RADIUS, following.tardis, false);
+            if (lock == ExteriorViewChunks.Result.PENDING) continue;
+            if (lock == ExteriorViewChunks.Result.NO) {
+                stopViewing(player);
+                player.sendMessage(DWM.TEXTS.EXTERIOR_VIEW_UNAVAILABLE, true);
+                new TardisExteriorViewClosePacket().sendTo(player);
+                continue;
+            }
 
             ChunkLoader old = LOADERS.get(player);
             if (old != null) PortalAPI.removeChunkLoaderForPlayer(player, old);

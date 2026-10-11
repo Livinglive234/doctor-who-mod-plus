@@ -1,6 +1,7 @@
 package net.drgmes.dwm.utils.sounds;
 
 import net.drgmes.dwm.DWM;
+import net.drgmes.dwm.compat.immersiveportals.ExteriorViewState;
 import net.drgmes.dwm.entities.tardis.exteriors.TardisFlyoverEntity;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -62,7 +63,16 @@ public class FlyoverSoundInstance extends MovingSoundInstance {
         this.y = this.entity.getY();
         this.z = this.entity.getZ();
 
-        double distance = MinecraftClient.getInstance().gameRenderer.getCamera().getPos().distanceTo(this.entity.getPos());
+        // Silent while the exterior view is open and the flyover is in another world than the listener's: they are
+        // looking at it on a monitor, not standing near it, however close the camera there is (and the interior has
+        // its own flight sound). Anyone actually in its world still hears it.
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (ExteriorViewState.open && this.entity.getWorld() != client.world) {
+            this.volume = 0F;
+            return;
+        }
+
+        double distance = client.gameRenderer.getCamera().getPos().distanceTo(this.entity.getPos());
         float volume = this.maxVolume * MathHelper.clamp(1F - (float) (distance / this.range), 0F, 1F);
 
         if (this.duration > 0) volume *= MathHelper.clamp((float) (this.duration - this.age) / DWM.FLYOVER.SOUND_END_FADE, 0F, 1F);

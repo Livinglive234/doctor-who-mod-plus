@@ -2305,7 +2305,7 @@
   "message.dwm.tardis.compat.simple_voice_chat.not_installed": "§eSimple Voice Chat §cNot Installed",
   "message.dwm.tardis.system.shields.not_active": "§eShields Generator §cNot Active",
 
-  "message.dwm.tardis.exterior_view.unavailable": "§cNo exterior to look out of - the TARDIS isn't materialized",
+  "message.dwm.tardis.exterior_view.unavailable": "§cCouldn't lock onto exterior",
   "message.dwm.tardis.phone.calling": "§eCalling...",
   "message.dwm.tardis.phone.ringing": "§e%s §fis calling",
   "message.dwm.tardis.phone.connected": "§aCall connected",

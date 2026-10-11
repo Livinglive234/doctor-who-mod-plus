@@ -24,6 +24,7 @@ public class ModNetwork {
             registerS2CType(TardisConsoleUnitMonitorOpenPacket.PACKET_ID, TardisConsoleUnitMonitorOpenPacket.PACKET_CODEC);
             registerS2CType(TardisConsoleUnitMonitorPageUpdatePacket.PACKET_ID, TardisConsoleUnitMonitorPageUpdatePacket.PACKET_CODEC);
             registerS2CType(TardisExteriorViewOpenPacket.PACKET_ID, TardisExteriorViewOpenPacket.PACKET_CODEC);
+            registerS2CType(TardisExteriorViewClosePacket.PACKET_ID, TardisExteriorViewClosePacket.PACKET_CODEC);
             registerS2CType(TardisPhoneDialOpenPacket.PACKET_ID, TardisPhoneDialOpenPacket.PACKET_CODEC);
             registerS2CType(TardisPhoneIncomingCallOpenPacket.PACKET_ID, TardisPhoneIncomingCallOpenPacket.PACKET_CODEC);
             registerS2CType(TardisConsoleUnitSonicScrewdriverSlotUpdatePacket.PACKET_ID, TardisConsoleUnitSonicScrewdriverSlotUpdatePacket.PACKET_CODEC);
