@@ -198,6 +198,7 @@ public class TardisSystemFlight extends TardisBaseSystem {
             this.flyover.spawnDeparture(this.tick, this.takeoffWasInstant);
         });
 
+        if (materializationSystem.isMaterialized()) this.flyoverPlanner.loadTakeoffChunk();
         this.takeoffWasInstant = materializationSystem.isMaterialized() && this.flyoverPlanner.shouldTakeOffInstantly();
 
         if (!materializationSystem.isMaterialized()) {

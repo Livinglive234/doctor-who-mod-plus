@@ -5,8 +5,10 @@ import net.drgmes.dwm.common.tardis.TardisStateManager;
 import net.drgmes.dwm.common.tardis.systems.TardisSystemMaterialization;
 import net.drgmes.dwm.utils.helpers.WorldHelper;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ChunkTicketType;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.*;
@@ -25,6 +27,9 @@ public class TardisFlyoverPlanner {
     /** A fly-by: where along the line it is centred, and how far it reaches either side of that. */
     public record Flyby(UUID player, double along, double half) {
     }
+
+    // Keeps the exterior's chunk loaded from the moment a takeoff is judged until the flyover has spawned and holds it itself.
+    private static final ChunkTicketType<ChunkPos> TAKEOFF_TICKET = ChunkTicketType.create("dwm:takeoff", Comparator.comparingLong(ChunkPos::toLong), 100);
 
     private final TardisStateManager tardis;
 
@@ -90,6 +95,21 @@ public class TardisFlyoverPlanner {
     private int tripCap() {
         boolean longInterdimensional = this.isInterdimensional() && this.distance() > DWM.FLYOVER.FULL_ROUTE_MAX_DISTANCE;
         return longInterdimensional ? DWM.FLYOVER.TRIP_CAP_LONG_INTERDIMENSIONAL : DWM.FLYOVER.TRIP_CAP;
+    }
+
+    /**
+     * Loads the chunk the TARDIS is leaving from, so a takeoff can be judged. Nobody need be near a parked TARDIS, and
+     * an unloaded chunk can't be judged (it counts as covered), which left the takeoff as an ordinary demat with no flyover.
+     */
+    public void loadTakeoffChunk() {
+        if (!this.tardis.isFlyoverEnabled()) return;
+
+        ServerWorld world = this.tardis.getExteriorWorld();
+        if (world == null || hasCeiling(world)) return;
+
+        ChunkPos chunk = new ChunkPos(this.tardis.getCurrentExteriorPosition());
+        world.getChunkManager().addTicket(TAKEOFF_TICKET, chunk, 2, chunk);
+        world.getChunk(chunk.x, chunk.z); // loads it now rather than at the next chunk tick
     }
 
     // With open sky overhead the demat is instant and the flying copy takes over, the mirror of a slam landing.
