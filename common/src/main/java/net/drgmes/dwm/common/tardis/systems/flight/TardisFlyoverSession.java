@@ -53,6 +53,15 @@ public class TardisFlyoverSession {
         return this.plannedInstantLanding;
     }
 
+    /** The flyover that is the TARDIS's own trip right now, if any - what the exterior view follows. */
+    public TardisFlyoverEntity getFollowedEntity() {
+        for (TardisFlyoverEntity entity : this.entities) {
+            if (!entity.isRemoved() && !entity.isFlyby()) return entity;
+        }
+
+        return null;
+    }
+
     public void reset() {
         this.plannedInstantLanding = null;
         this.thudPlayed = false;

@@ -156,7 +156,7 @@ public final class ClientPackets {
             ClientPlayerEntity player = (ClientPlayerEntity) context.getPlayer();
 
             if (player.getWorld().getBlockEntity(payload.consolePos()) instanceof BaseTardisConsoleUnitBlockEntity tardisConsoleUnitBlockEntity) {
-                ExteriorViewClient.open(tardisConsoleUnitBlockEntity, payload.dimension(), payload.exteriorPos(), payload.facingId());
+                ExteriorViewClient.open(tardisConsoleUnitBlockEntity, payload.dimension(), payload.exteriorPos(), payload.facingId(), payload.flyoverEntityId());
             }
         });
     }

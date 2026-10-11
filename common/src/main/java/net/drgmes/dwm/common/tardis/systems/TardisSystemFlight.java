@@ -54,6 +54,10 @@ public class TardisSystemFlight extends TardisBaseSystem {
         this.flyover = new TardisFlyoverSession(tardis, this.flyoverPlanner);
     }
 
+    public net.drgmes.dwm.entities.tardis.exteriors.TardisFlyoverEntity getFlyoverEntity() {
+        return this.flyover.getFollowedEntity();
+    }
+
     @Override
     public boolean inProgress() {
         return this.step != EStep.NONE;

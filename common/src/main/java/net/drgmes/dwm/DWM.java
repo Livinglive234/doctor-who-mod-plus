@@ -72,6 +72,10 @@ public class DWM {
         public static final int CLOUD_LEVEL = 192;
         public static final int ASCENT_CLOUD_CLEARANCE = 64;
         public static final float TERRAIN_CLEARANCE = 24.0F;
+        public static final float GLIDE_LOOKAHEAD_STEP = 16.0F; // how far apart the terrain is read ahead of it
+        public static final int GLIDE_LOOKAHEAD_SAMPLES = 3;
+        public static final float GLIDE_RISE_RATE = 0.1F; // the share of the gap to its flying height it closes each tick: brisk climbing
+        public static final float GLIDE_SINK_RATE = 0.03F; // and slow sinking, so it doesn't bob over every tree
 
         // Long hops: fast, since most of the route is unwatched
         public static final float LONG_HOP_SPEED = 12.0F;

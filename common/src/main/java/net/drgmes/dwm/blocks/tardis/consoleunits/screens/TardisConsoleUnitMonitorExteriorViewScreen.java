@@ -20,6 +20,7 @@ import net.minecraft.block.ShapeContext;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.Entity;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Util;
 import net.minecraft.util.hit.BlockHitResult;
@@ -54,19 +55,23 @@ public class TardisConsoleUnitMonitorExteriorViewScreen extends BaseTardisConsol
     private static final float CAMERA_PITCH = 30F; // looking down on it
     private static final float KEY_DEGREES_PER_SECOND = 60F;
     private static final int MAX_RENDER_DISTANCE = 8;
+    private static final long FLYOVER_LOST_MS = 4000L;
 
     private final RegistryKey<World> dimension;
-    private final Vec3d target;
+    private Vec3d target;
+    private final int flyoverEntityId;
+    private long lostSince = -1;
     private final UUID description = UUID.randomUUID();
 
     private Framebuffer framebuffer;
     private float yaw;
     private long lastFrameTime = Util.getMeasuringTimeMs();
 
-    public TardisConsoleUnitMonitorExteriorViewScreen(BaseTardisConsoleUnitBlockEntity tardisConsoleUnitBlockEntity, RegistryKey<World> dimension, BlockPos exteriorPos, Direction facing) {
+    public TardisConsoleUnitMonitorExteriorViewScreen(BaseTardisConsoleUnitBlockEntity tardisConsoleUnitBlockEntity, RegistryKey<World> dimension, BlockPos exteriorPos, Direction facing, int flyoverEntityId) {
         super(DWM.TEXTS.MONITOR_EXTERIOR_VIEW_TITLE, tardisConsoleUnitBlockEntity);
 
         this.dimension = dimension;
+        this.flyoverEntityId = flyoverEntityId;
 
         // The middle of the two-block exterior, which the camera always looks at. It starts out in front of the doors,
         // looking back at the TARDIS, so the yaw is the way the doors face reversed.
@@ -94,7 +99,8 @@ public class TardisConsoleUnitMonitorExteriorViewScreen extends BaseTardisConsol
     @Override
     public void removed() {
         super.removed();
-        new TardisExteriorViewPacket(false).sendToServer();
+        if (handingOver) handingOver = false;
+        else new TardisExteriorViewPacket(false).sendToServer();
 
         // The last frame requested is rendered by Immersive Portals at the end of the game frame, after this screen
         // closes, and cannot be cancelled - so the framebuffer can only be freed once that has happened.
@@ -106,6 +112,14 @@ public class TardisConsoleUnitMonitorExteriorViewScreen extends BaseTardisConsol
                 ClientTickEvent.CLIENT_POST.register(client -> freeRetired());
             }
         }
+    }
+
+    // Set when a new exterior view is about to replace this one (the flight landed): the server has already started
+    // the new view's stream, which this one's "closed" message must not cancel.
+    private static boolean handingOver;
+
+    public static void handOver() {
+        handingOver = true;
     }
 
     private static final List<Retired> RETIRED = new ArrayList<>();
@@ -128,6 +142,7 @@ public class TardisConsoleUnitMonitorExteriorViewScreen extends BaseTardisConsol
         super.renderAdditional(context, mouseX, mouseY, delta);
         if (this.client == null || this.framebuffer == null) return;
 
+        if (!this.followFlyover(this.client.getRenderTickCounter().getTickDelta(false))) return;
         this.pollCameraKeys();
 
         Vector2i leftTop = this.getLeftTopRenderPos(SCREEN_MARGIN, 14);
@@ -136,6 +151,28 @@ public class TardisConsoleUnitMonitorExteriorViewScreen extends BaseTardisConsol
         this.drawFrame(context, leftTop, rightBottom);
 
         context.drawCenteredTextWithShadow(this.textRenderer, DWM.TEXTS.MONITOR_EXTERIOR_VIEW_HINT, (leftTop.x + rightBottom.x) / 2, rightBottom.y + 3, 0xA0A0A0);
+    }
+
+    // With the TARDIS in flight the view follows its flyover, wherever that has got to. Returns false if the screen has
+    // just closed because the flyover is gone (the flight is over); the entity can take a moment to arrive at first.
+    private boolean followFlyover(float delta) {
+        if (this.flyoverEntityId < 0) return true;
+
+        ClientWorld world = ClientWorldLoader.getWorld(this.dimension);
+        Entity flyover = world == null ? null : world.getEntityById(this.flyoverEntityId);
+
+        if (flyover != null && !flyover.isRemoved()) {
+            this.target = flyover.getLerpedPos(delta).add(0, 1.0, 0); // the middle of the model, which stands on its position
+            this.lostSince = -1;
+            return true;
+        }
+
+        long now = Util.getMeasuringTimeMs();
+        if (this.lostSince < 0) this.lostSince = now;
+        if (now - this.lostSince < FLYOVER_LOST_MS) return true;
+
+        this.close();
+        return false;
     }
 
     // A orbits the camera round to the left of the TARDIS, D to the right: the camera moves that way and turns to

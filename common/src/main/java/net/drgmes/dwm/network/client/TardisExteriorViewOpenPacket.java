@@ -13,7 +13,8 @@ public record TardisExteriorViewOpenPacket(
     BlockPos consolePos,
     Identifier dimension,
     BlockPos exteriorPos,
-    int facingId
+    int facingId,
+    int flyoverEntityId // -1 when the exterior is landed; otherwise the flyover entity the view follows
 ) implements IPacket {
     public static final Identifier ID = DWM.getIdentifier("tardis_exterior_view_open");
     public static final CustomPayload.Id<TardisExteriorViewOpenPacket> PACKET_ID = new CustomPayload.Id<>(ID);
@@ -23,6 +24,7 @@ public record TardisExteriorViewOpenPacket(
         Identifier.PACKET_CODEC, TardisExteriorViewOpenPacket::dimension,
         BlockPos.PACKET_CODEC, TardisExteriorViewOpenPacket::exteriorPos,
         PacketCodecs.VAR_INT, TardisExteriorViewOpenPacket::facingId,
+        PacketCodecs.INTEGER, TardisExteriorViewOpenPacket::flyoverEntityId,
         TardisExteriorViewOpenPacket::new
     );
 

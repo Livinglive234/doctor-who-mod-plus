@@ -133,6 +133,12 @@ public class TardisFlyoverEntity extends Entity {
     private float clientPrevSpin = 0;
     private boolean clientSpinInited = false;
 
+    // ---- client-side interpolation of the position ----
+    // A plain entity just jumps to each position the server sends, which shows as stepping at tick rate; this blends
+    // each one in over a few ticks the way boats and mobs do.
+    private int clientLerpSteps = 0;
+    private double clientLerpX, clientLerpY, clientLerpZ;
+
     public TardisFlyoverEntity(EntityType<?> type, World world) {
         super(type, world);
         this.noClip = true;
@@ -447,6 +453,25 @@ public class TardisFlyoverEntity extends Entity {
     }
 
     /** A slam that keeps resting on its spot after the flight ends, to overlap the exterior appearing. */
+    /** Fly-bys are a pass in front of a bystander, not the TARDIS's own trip - the exterior view doesn't follow them. */
+    @Override
+    public void updateTrackedPositionAndAngles(double x, double y, double z, float yaw, float pitch, int interpolationSteps) {
+        if (!this.getWorld().isClient || !this.clientSpinInited) {
+            super.updateTrackedPositionAndAngles(x, y, z, yaw, pitch, interpolationSteps); // spawn, or the server itself
+            return;
+        }
+
+        this.clientLerpX = x;
+        this.clientLerpY = y;
+        this.clientLerpZ = z;
+        this.clientLerpSteps = Math.max(1, interpolationSteps);
+        this.setRotation(yaw, pitch);
+    }
+
+    public boolean isFlyby() {
+        return this.kind == Kind.FLYBY;
+    }
+
     public boolean isLingeringSlam() {
         return this.arrival == Arrival.SLAM;
     }
@@ -460,6 +485,17 @@ public class TardisFlyoverEntity extends Entity {
         super.tick();
 
         if (this.getWorld().isClient) {
+            if (this.clientLerpSteps > 0) {
+                double step = 1D / this.clientLerpSteps;
+                this.setPosition(
+                    MathHelper.lerp(step, this.getX(), this.clientLerpX),
+                    MathHelper.lerp(step, this.getY(), this.clientLerpY),
+                    MathHelper.lerp(step, this.getZ(), this.clientLerpZ)
+                );
+
+                this.clientLerpSteps--;
+            }
+
             this.clientPrevSpin = this.clientSpinInited ? this.clientSpin : this.getSpinAngle();
             this.clientSpin = this.getSpinAngle();
             this.clientSpinInited = true;
@@ -641,10 +677,29 @@ public class TardisFlyoverEntity extends Entity {
     // Eases the altitude toward max(cruise altitude, terrain height + clearance) + extraClimb instead of snapping to
     // the sampled terrain height every tick, so it glides over hills. Unloaded terrain reads as the world's bottom,
     // which just falls back to cruiseY.
+    // The terrain under it is read a few steps ahead as well, so it starts to rise before a hill or a forest and
+    // doesn't bob over every tree; it climbs briskly and sinks slowly. (A few heightmap reads a tick, no more; an
+    // unloaded chunk reads as the bottom of the world, which never raises it.)
     private double glideAltitude(double x, double z, double extraClimb) {
-        int terrainY = this.getWorld().getTopY(Heightmap.Type.WORLD_SURFACE, MathHelper.floor(x), MathHelper.floor(z));
+        int terrainY = this.surfaceHeight(x, z);
+
+        double dx = x - this.getX();
+        double dz = z - this.getZ();
+        double length = Math.sqrt(dx * dx + dz * dz);
+        if (length > 0.05) {
+            for (int i = 1; i <= DWM.FLYOVER.GLIDE_LOOKAHEAD_SAMPLES; i++) {
+                double ahead = i * DWM.FLYOVER.GLIDE_LOOKAHEAD_STEP / length;
+                terrainY = Math.max(terrainY, this.surfaceHeight(x + dx * ahead, z + dz * ahead));
+            }
+        }
+
         double targetAltitude = Math.max(this.cruiseY, terrainY + DWM.FLYOVER.TERRAIN_CLEARANCE) + extraClimb;
-        return MathHelper.lerp(0.1F, this.getY(), targetAltitude);
+        float rate = targetAltitude > this.getY() ? DWM.FLYOVER.GLIDE_RISE_RATE : DWM.FLYOVER.GLIDE_SINK_RATE;
+        return MathHelper.lerp(rate, this.getY(), targetAltitude);
+    }
+
+    private int surfaceHeight(double x, double z) {
+        return this.getWorld().getTopY(Heightmap.Type.WORLD_SURFACE, MathHelper.floor(x), MathHelper.floor(z));
     }
 
     // Never written into a chunk, so a stale one can't survive an unload or restart (e.g. if it froze in a chunk that stopped ticking).

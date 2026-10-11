@@ -3,7 +3,10 @@ package net.drgmes.dwm.network.server;
 import dev.architectury.networking.NetworkManager;
 import net.drgmes.dwm.DWM;
 import net.drgmes.dwm.common.tardis.TardisStateManager;
+import net.drgmes.dwm.common.tardis.systems.TardisSystemFlight;
 import net.drgmes.dwm.common.tardis.systems.TardisSystemMaterialization;
+import net.drgmes.dwm.entities.tardis.exteriors.TardisFlyoverEntity;
+import net.minecraft.util.math.Direction;
 import net.drgmes.dwm.compat.immersiveportals.ExteriorViewCompat;
 import net.drgmes.dwm.network.IPacket;
 import net.drgmes.dwm.network.client.TardisExteriorViewOpenPacket;
@@ -49,7 +52,23 @@ public record TardisExteriorViewPacket(
             TardisStateManager.get(tardisWorld).ifPresent((tardis) -> {
                 TardisSystemMaterialization materializationSystem = tardis.getSystem(TardisSystemMaterialization.class);
                 if (!materializationSystem.isMaterialized() || materializationSystem.isInMaterializationProcess()) {
-                    player.sendMessage(DWM.TEXTS.EXTERIOR_VIEW_UNAVAILABLE, true);
+                    // In flight with the flyover on, the view follows the flying TARDIS instead.
+                    TardisFlyoverEntity flyover = tardis.isFlyoverEnabled() ? tardis.getSystem(TardisSystemFlight.class).getFlyoverEntity() : null;
+                    if (flyover == null) {
+                        player.sendMessage(DWM.TEXTS.EXTERIOR_VIEW_UNAVAILABLE, true);
+                        return;
+                    }
+
+                    ExteriorViewCompat.startFollowing(player, tardis, flyover);
+
+                    new TardisExteriorViewOpenPacket(
+                        tardis.getMainConsolePosition(),
+                        flyover.getWorld().getRegistryKey().getValue(),
+                        flyover.getBlockPos(),
+                        Direction.fromRotation(flyover.getYaw()).getId(),
+                        flyover.getId()
+                    ).sendTo(player);
+
                     return;
                 }
 
@@ -59,7 +78,8 @@ public record TardisExteriorViewPacket(
                     tardis.getMainConsolePosition(),
                     tardis.getCurrentExteriorDimension().getValue(),
                     tardis.getCurrentExteriorPosition(),
-                    tardis.getCurrentExteriorFacing().getId()
+                    tardis.getCurrentExteriorFacing().getId(),
+                    -1
                 ).sendTo(player);
             });
         });
