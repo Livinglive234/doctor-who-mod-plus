@@ -1,6 +1,7 @@
 package net.drgmes.dwm.compat.immersiveportals;
 
 import net.drgmes.dwm.blocks.tardis.consoleunits.BaseTardisConsoleUnitBlockEntity;
+import net.drgmes.dwm.blocks.tardis.consoleunits.screens.BaseTardisConsoleUnitMonitorScreen;
 import net.drgmes.dwm.blocks.tardis.consoleunits.screens.TardisConsoleUnitMonitorExteriorViewScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -18,9 +19,10 @@ public final class ExteriorViewClient {
     private ExteriorViewClient() {
     }
 
+    // Closes the exterior view, or - when the server refused to start one (no lock-on) - the monitor menu it was asked from.
     public static void close() {
         MinecraftClient client = MinecraftClient.getInstance();
-        if (client.currentScreen instanceof TardisConsoleUnitMonitorExteriorViewScreen) client.currentScreen.close();
+        if (client.currentScreen instanceof TardisConsoleUnitMonitorExteriorViewScreen || client.currentScreen instanceof BaseTardisConsoleUnitMonitorScreen) client.currentScreen.close();
     }
 
     public static void open(BaseTardisConsoleUnitBlockEntity consoleUnit, Identifier dimension, BlockPos exteriorPos, int facingId, int flyoverEntityId) {

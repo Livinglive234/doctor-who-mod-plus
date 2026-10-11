@@ -5,6 +5,8 @@
   "package": "net.drgmes.dwm.mixin",
   "refmap": "dwm.refmap.json",
   "client": [
+    "MixinGameRendererDiagnostics",
+    "MixinGuiPortalRendering",
     "MixinMinecraftClient",
     "MixinXaeroGuiMap"
   ],

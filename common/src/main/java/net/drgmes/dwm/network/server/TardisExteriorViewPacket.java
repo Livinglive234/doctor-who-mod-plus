@@ -10,6 +10,7 @@ import net.minecraft.util.math.Direction;
 import net.drgmes.dwm.compat.immersiveportals.ExteriorViewChunks;
 import net.drgmes.dwm.compat.immersiveportals.ExteriorViewCompat;
 import net.drgmes.dwm.network.IPacket;
+import net.drgmes.dwm.network.client.TardisExteriorViewClosePacket;
 import net.drgmes.dwm.network.client.TardisExteriorViewOpenPacket;
 import net.drgmes.dwm.setup.ModCompats;
 import net.drgmes.dwm.utils.helpers.TardisHelper;
@@ -57,6 +58,7 @@ public record TardisExteriorViewPacket(
                     TardisFlyoverEntity flyover = tardis.isFlyoverEnabled() ? tardis.getSystem(TardisSystemFlight.class).getFlyoverEntity() : null;
                     if (flyover == null || ExteriorViewChunks.check((ServerWorld) flyover.getWorld(), flyover.getChunkPos(), ExteriorViewCompat.RADIUS, tardis, true) != ExteriorViewChunks.Result.OK) {
                         player.sendMessage(DWM.TEXTS.EXTERIOR_VIEW_UNAVAILABLE, true);
+                        new TardisExteriorViewClosePacket().sendTo(player); // kicks the player out of the monitor menu they clicked from
                         return;
                     }
 
