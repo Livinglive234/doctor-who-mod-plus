@@ -1,7 +1,6 @@
 package net.drgmes.dwm.blocks.tardis.consoleunits.screens;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import dev.architectury.event.events.client.ClientTickEvent;
 import net.drgmes.dwm.DWM;
 import net.drgmes.dwm.compat.immersiveportals.ExteriorViewDiagnostics;
 import net.drgmes.dwm.compat.immersiveportals.ExteriorViewState;
@@ -40,8 +39,6 @@ import qouteall.imm_ptl.core.ClientWorldLoader;
 import qouteall.imm_ptl.core.render.GuiPortalRendering;
 import qouteall.imm_ptl.core.render.context_management.WorldRenderInfo;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -65,6 +62,9 @@ public class TardisConsoleUnitMonitorExteriorViewScreen extends BaseTardisConsol
     private long lostSince = -1;
     private final UUID description = UUID.randomUUID();
 
+    // One framebuffer for the whole session, never deleted: freeing it between opens crashed the driver with an Iris
+    // shaderpack on the next open.
+    private static Framebuffer sharedFramebuffer;
     private Framebuffer framebuffer;
     private float yaw;
     private long lastFrameTime = Util.getMeasuringTimeMs();
@@ -97,7 +97,8 @@ public class TardisConsoleUnitMonitorExteriorViewScreen extends BaseTardisConsol
         super.init();
         ExteriorViewState.open = true;
         if (this.framebuffer == null) {
-            this.framebuffer = new SimpleFramebuffer(2, 2, true, true);
+            if (sharedFramebuffer == null) sharedFramebuffer = new SimpleFramebuffer(2, 2, true, true);
+            this.framebuffer = sharedFramebuffer;
             ExteriorViewDiagnostics.opened(this.dimension.getValue().toString(), this.flyoverEntityId >= 0);
         }
     }
@@ -110,16 +111,9 @@ public class TardisConsoleUnitMonitorExteriorViewScreen extends BaseTardisConsol
         if (handingOver) handingOver = false;
         else new TardisExteriorViewPacket(false).sendToServer();
 
-        // The last frame requested is rendered by Immersive Portals at the end of the game frame, after this screen
-        // closes, and cannot be cancelled - so the framebuffer can only be freed once that has happened.
-        if (this.framebuffer != null) {
-            RETIRED.add(new Retired(this.framebuffer, Util.getMeasuringTimeMs()));
-            this.framebuffer = null;
-            if (!retirementHooked) {
-                retirementHooked = true;
-                ClientTickEvent.CLIENT_POST.register(client -> freeRetired());
-            }
-        }
+        // The last frame requested is still rendered by Immersive Portals after this screen closes, so the framebuffer is
+        // only let go of, never freed.
+        this.framebuffer = null;
     }
 
     // Set when a new exterior view is about to replace this one (the flight landed): the server has already started
@@ -128,21 +122,6 @@ public class TardisConsoleUnitMonitorExteriorViewScreen extends BaseTardisConsol
 
     public static void handOver() {
         handingOver = true;
-    }
-
-    private static final List<Retired> RETIRED = new ArrayList<>();
-    private static boolean retirementHooked;
-
-    private record Retired(Framebuffer framebuffer, long at) {
-    }
-
-    private static void freeRetired() {
-        long now = Util.getMeasuringTimeMs();
-        RETIRED.removeIf(r -> {
-            if (now - r.at() < 1000) return false;
-            r.framebuffer().delete();
-            return true;
-        });
     }
 
     @Override

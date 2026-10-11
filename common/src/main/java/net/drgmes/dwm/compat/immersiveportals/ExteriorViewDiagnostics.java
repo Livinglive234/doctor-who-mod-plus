@@ -21,6 +21,7 @@ public final class ExteriorViewDiagnostics {
 
     private static int frame;
     private static long lastLog;
+    private static boolean loggingThisFrame;
 
     private ExteriorViewDiagnostics() {
     }
@@ -43,7 +44,9 @@ public final class ExteriorViewDiagnostics {
 
     /** Called right before the frame is handed to Immersive Portals. */
     public static void beforeSubmit(Object world, Framebuffer fb, Object cameraPos, int renderDistance) {
-        if (!shouldLog()) return;
+        loggingThisFrame = shouldLog();
+        if (!loggingThisFrame) return;
+        lastLog = System.currentTimeMillis();
         log("frame " + frame + " submit world=" + (world == null ? "NULL" : "ok") + " camera=" + cameraPos
             + " renderDist=" + renderDistance + " fb=" + describe(fb) + " shaderPack=" + shaderPackInUse()
             + " boundFbo=" + GL11.glGetInteger(GL30.GL_FRAMEBUFFER_BINDING));
@@ -52,7 +55,7 @@ public final class ExteriorViewDiagnostics {
 
     /** Called after the picture has been drawn to the screen. */
     public static void afterDraw(Framebuffer fb) {
-        if (frame < VERBOSE_FRAMES || System.currentTimeMillis() - lastLog >= INTERVAL_MS) {
+        if (loggingThisFrame) {
             glError("afterDraw");
             if (fb != null) {
                 int previous = GL11.glGetInteger(GL30.GL_FRAMEBUFFER_BINDING);
@@ -63,7 +66,6 @@ public final class ExteriorViewDiagnostics {
             }
         }
         frame++;
-        if (frame >= VERBOSE_FRAMES) lastLog = System.currentTimeMillis();
     }
 
     private static boolean shouldLog() {
