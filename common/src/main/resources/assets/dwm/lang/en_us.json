@@ -2461,7 +2461,7 @@
   "screen.dwm.monitor.action.history": "Flight History",
   "screen.dwm.monitor.action.exterior_view": "Exterior View",
   "screen.dwm.monitor.exterior_view.title": "Exterior View",
-  "screen.dwm.monitor.exterior_view.hint": "A / D to orbit, W / S to tilt",
+  "screen.dwm.monitor.exterior_view.hint": "A / D to orbit",
 
   "screen.dwm.monitor.external_shells.title": "External Shell",
   "screen.dwm.monitor.external_shells.cancel": "Cancel",

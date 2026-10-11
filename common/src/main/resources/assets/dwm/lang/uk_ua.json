@@ -2458,7 +2458,7 @@
   "screen.dwm.monitor.action.history": "Історія польотів",
   "screen.dwm.monitor.action.exterior_view": "Вигляд зовні",
   "screen.dwm.monitor.exterior_view.title": "Вигляд зовні",
-  "screen.dwm.monitor.exterior_view.hint": "A / D - обертання навколо, W / S - нахил",
+  "screen.dwm.monitor.exterior_view.hint": "A / D - обертання навколо",
 
   "screen.dwm.monitor.external_shells.title": "Зовнішня оболонка",
   "screen.dwm.monitor.external_shells.cancel": "Скасувати",

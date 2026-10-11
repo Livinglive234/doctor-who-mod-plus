@@ -6,7 +6,7 @@ Build: there is no Gradle wrapper. Use Gradle 8.14 with JDK 21, e.g. `gradle bui
 
 ## 1.0.39 — Exterior View
 
-- **New Exterior View on the console monitor (Immersive Portals only).** A button on the main monitor page opens a live third-person view of the TARDIS exterior, drawn as a flat picture so it doesn't shift as you move (unlike a portal). A / D orbit the camera, W / S tilt it; the camera pulls in if terrain is in the way. It needs the TARDIS to be landed. `/dwmcam` (client command) prints the camera's last orbit/tilt/distance so a fixed angle can be chosen. Client + server; other mods' shaders are untested beyond BSL.
+- **New Exterior View on the console monitor (Immersive Portals only).** A button on the main monitor page opens a live third-person view of the TARDIS exterior, drawn as a flat picture so it doesn't shift as you move (unlike a portal). A / D orbit the camera, at a fixed downward tilt; the camera sits 8 blocks away and pulls in if terrain is in the way. It needs the TARDIS to be landed. The sky is not drawn in the view (it washed the whole picture out to a flat colour). Client + server; other mods' shaders are untested beyond BSL.
 
 ## 1.0.38.4 — Fewer rebuilt models
 

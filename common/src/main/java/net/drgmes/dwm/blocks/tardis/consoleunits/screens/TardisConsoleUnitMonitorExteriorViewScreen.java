@@ -4,7 +4,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import dev.architectury.event.events.client.ClientTickEvent;
 import net.drgmes.dwm.DWM;
 import net.drgmes.dwm.blocks.tardis.consoleunits.BaseTardisConsoleUnitBlockEntity;
-import net.drgmes.dwm.compat.immersiveportals.ExteriorViewCameraMemory;
 import net.drgmes.dwm.network.server.TardisExteriorViewPacket;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -44,17 +43,15 @@ import java.util.UUID;
 
 /**
  * A live third-person view of the TARDIS's exterior: a camera a fixed distance away that orbits around it with A and D
- * and tilts up and down with W and S. Immersive Portals renders the exterior's world (whatever dimension it is in) from that camera
+ * at a fixed tilt. Immersive Portals renders the exterior's world (whatever dimension it is in) from that camera
  * into a framebuffer, which is drawn here as a flat picture - unlike a portal, so it doesn't shift as the viewer moves.
  * The server streams the surrounding chunks to this player while the screen is open (see ExteriorViewCompat).
  */
 @Environment(EnvType.CLIENT)
 public class TardisConsoleUnitMonitorExteriorViewScreen extends BaseTardisConsoleUnitMonitorScreen {
-    private static final double CAMERA_DISTANCE = 6.0;
+    private static final double CAMERA_DISTANCE = 8.0;
     private static final double MIN_CAMERA_DISTANCE = 1.5;
-    private static final float DEFAULT_PITCH = 30F; // looking down on it
-    private static final float MIN_PITCH = -10F;
-    private static final float MAX_PITCH = 80F;
+    private static final float CAMERA_PITCH = 30F; // looking down on it
     private static final float KEY_DEGREES_PER_SECOND = 60F;
     private static final int MAX_RENDER_DISTANCE = 8;
 
@@ -62,11 +59,8 @@ public class TardisConsoleUnitMonitorExteriorViewScreen extends BaseTardisConsol
     private final Vec3d target;
     private final UUID description = UUID.randomUUID();
 
-    private final float doorsYaw;
-
     private Framebuffer framebuffer;
     private float yaw;
-    private float pitch = DEFAULT_PITCH;
     private long lastFrameTime = Util.getMeasuringTimeMs();
 
     public TardisConsoleUnitMonitorExteriorViewScreen(BaseTardisConsoleUnitBlockEntity tardisConsoleUnitBlockEntity, RegistryKey<World> dimension, BlockPos exteriorPos, Direction facing) {
@@ -78,7 +72,6 @@ public class TardisConsoleUnitMonitorExteriorViewScreen extends BaseTardisConsol
         // looking back at the TARDIS, so the yaw is the way the doors face reversed.
         this.target = Vec3d.ofCenter(exteriorPos).add(0, 0.5, 0);
         this.yaw = facing.getOpposite().asRotation();
-        this.doorsYaw = this.yaw;
     }
 
     @Override
@@ -102,11 +95,6 @@ public class TardisConsoleUnitMonitorExteriorViewScreen extends BaseTardisConsol
     public void removed() {
         super.removed();
         new TardisExteriorViewPacket(false).sendToServer();
-
-        ExteriorViewCameraMemory.used = true;
-        ExteriorViewCameraMemory.orbitFromDoors = MathHelper.wrapDegrees(this.yaw - this.doorsYaw);
-        ExteriorViewCameraMemory.pitch = this.pitch;
-        ExteriorViewCameraMemory.distance = CAMERA_DISTANCE;
 
         // The last frame requested is rendered by Immersive Portals at the end of the game frame, after this screen
         // closes, and cannot be cancelled - so the framebuffer can only be freed once that has happened.
@@ -151,7 +139,7 @@ public class TardisConsoleUnitMonitorExteriorViewScreen extends BaseTardisConsol
     }
 
     // A orbits the camera round to the left of the TARDIS, D to the right: the camera moves that way and turns to
-    // keep it centered, which is the yaw going up for left and down for right. W raises the camera, S lowers it.
+    // keep it centered, which is the yaw going up for left and down for right.
     private void pollCameraKeys() {
         long now = Util.getMeasuringTimeMs();
         float step = KEY_DEGREES_PER_SECOND * Math.min(now - this.lastFrameTime, 100L) / 1000F;
@@ -160,15 +148,13 @@ public class TardisConsoleUnitMonitorExteriorViewScreen extends BaseTardisConsol
         long handle = this.client.getWindow().getHandle();
         if (InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_A)) this.yaw = MathHelper.wrapDegrees(this.yaw + step);
         if (InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_D)) this.yaw = MathHelper.wrapDegrees(this.yaw - step);
-        if (InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_W)) this.pitch = MathHelper.clamp(this.pitch + step, MIN_PITCH, MAX_PITCH);
-        if (InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_S)) this.pitch = MathHelper.clamp(this.pitch - step, MIN_PITCH, MAX_PITCH);
     }
 
     // Straight back from the target along the view direction, but pulled in if terrain (a wall, a tree) is in the way,
     // so the camera is never inside a block looking at nothing.
     private Vec3d getCameraPos(ClientWorld world) {
         double yawRad = Math.toRadians(this.yaw);
-        double pitchRad = Math.toRadians(this.pitch);
+        double pitchRad = Math.toRadians(CAMERA_PITCH);
         Vec3d viewDirection = new Vec3d(-Math.sin(yawRad) * Math.cos(pitchRad), -Math.sin(pitchRad), Math.cos(yawRad) * Math.cos(pitchRad));
         Vec3d backward = viewDirection.negate();
 
@@ -190,7 +176,7 @@ public class TardisConsoleUnitMonitorExteriorViewScreen extends BaseTardisConsol
 
         // The view matrix of a camera at this yaw and pitch, the way the game itself builds it.
         Matrix4f cameraTransformation = new Matrix4f()
-            .rotateX((float) Math.toRadians(this.pitch))
+            .rotateX((float) Math.toRadians(CAMERA_PITCH))
             .rotateY((float) Math.toRadians(this.yaw + 180F));
 
         WorldRenderInfo info = new WorldRenderInfo.Builder()
@@ -202,7 +188,9 @@ public class TardisConsoleUnitMonitorExteriorViewScreen extends BaseTardisConsol
             .setRenderDistance(Math.min(this.client.options.getClampedViewDistance(), MAX_RENDER_DISTANCE))
             .setDoRenderHand(false)
             .setEnableViewBobbing(false)
-            .setDoRenderSky(true)
+            // The sky dome washes the whole picture out to a flat colour once the view has been open a moment (seen with
+            // Iris installed, shaders off); the framebuffer is cleared to the sky colour anyway, so it looks the same without.
+            .setDoRenderSky(false)
             .setHasFog(true)
             .build();
 

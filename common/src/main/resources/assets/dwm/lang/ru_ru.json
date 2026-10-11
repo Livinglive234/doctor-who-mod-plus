@@ -2458,7 +2458,7 @@
   "screen.dwm.monitor.action.history": "История полетов",
   "screen.dwm.monitor.action.exterior_view": "Вид снаружи",
   "screen.dwm.monitor.exterior_view.title": "Вид снаружи",
-  "screen.dwm.monitor.exterior_view.hint": "A / D - вращение вокруг, W / S - наклон",
+  "screen.dwm.monitor.exterior_view.hint": "A / D - вращение вокруг",
 
   "screen.dwm.monitor.external_shells.title": "Внешняя оболочка",
   "screen.dwm.monitor.external_shells.cancel": "Отмена",
