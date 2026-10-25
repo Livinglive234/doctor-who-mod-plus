@@ -4,9 +4,9 @@ Fork changes on top of DrGmes' Doctor Who Mod (Architectury multi-loader mod: `c
 
 Build: there is no Gradle wrapper. Use Gradle 8.14 with JDK 21, e.g. `gradle build`. Datagen is `gradle :fabric:runDatagen`; its output (`common/src/main/generated`) is tracked in git, so re-run it and commit the result whenever recipes, blocks or worldgen builders change.
 
-## 1.0.39.1 (in progress) — Deleting a TARDIS no longer crashes the next save
+## 1.0.39.1 — Deleting a TARDIS no longer crashes the next save
 
-- **Fixed a server crash a couple of minutes after a TARDIS was deleted.** Removing a dimension while the server runs (DimLib, bundled with Immersive Portals) leaves an empty slot in the dimension registry's id list so the other dimensions keep their numbers, but the game's save code walks that list with `streamEntries()` and doesn't expect an empty slot: the next autosave (or `/save-all`) threw a NullPointerException in the server tick loop. The list is now walked without the empty slots, which also leaves the deleted dimension out of the saved world settings. Not yet tested in game.
+- **Fixed a server crash a couple of minutes after a TARDIS was deleted.** Removing a dimension while the server runs (DimLib, bundled with Immersive Portals) leaves an empty slot in the dimension registry's id list so the other dimensions keep their numbers, but the game's save code walks that list with `streamEntries()` and doesn't expect an empty slot: the next autosave (or `/save-all`) threw a NullPointerException in the server tick loop. The list is now walked without the empty slots, which also leaves the deleted dimension out of the saved world settings.
 - **Added the Shobogan Engineer's zombie villager texture** (for now a copy of the villager's, at the path the game looks for).
 
 ## 1.0.39 — Exterior View
