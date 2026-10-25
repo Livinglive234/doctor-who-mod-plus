@@ -16,7 +16,8 @@
     "MixinEntity",
     "MixinLivingEntity",
     "MixinPortal",
-    "MixinServerTeleportationManager"
+    "MixinServerTeleportationManager",
+    "MixinSimpleRegistry"
   ],
   "injectors": {
     "defaultRequire": 1
