@@ -33,3 +33,6 @@ remappedSrc/
 common/src/main/generated/.cache/
 # Local copy of the upstream mod, kept for reference only
 original-mod/
+
+# Local notes on how we make a release (not for the repo)
+RELEASING.md
